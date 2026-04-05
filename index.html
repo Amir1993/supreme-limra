@@ -3,18 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0f2040">
-<title>Supreme Limra Society</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- PWA: Install as App on iPhone & Android -->
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="S. Limra">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f2040">
+<title>Supreme Limra Society</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -94,53 +102,64 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .login-lock{font-size:36px;text-align:center;margin-bottom:16px}
 .login-title{font-family:var(--serif);font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
 .login-hint{font-size:12px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:20px}
-.pin-input{width:100%;padding:14px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;color:#fff;font-size:22px;text-align:center;letter-spacing:8px;font-family:monospace;outline:none;-webkit-appearance:none}
+.pin-input{width:100%;padding:14px 16px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;color:#fff;font-size:16px;text-align:center;letter-spacing:3px;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none}
 .pin-input:focus{border-color:var(--g)}
-.pin-input::placeholder{letter-spacing:2px;font-size:13px;color:rgba(255,255,255,.3)}
+.pin-input::placeholder{letter-spacing:1px;font-size:14px;color:rgba(255,255,255,.3)}
 .login-err{color:#ff8080;font-size:12px;text-align:center;margin-top:8px;min-height:18px}
 /* ── Receipt preview ── */
-.rct-p{font-family:Arial,Helvetica,sans-serif;background:#fff;border:2px solid #111;font-size:11.5px}
-.rp-h{text-align:center;border-bottom:2px solid #111;padding:8px 10px 5px}
-.rp-h h2{font-size:20px;font-weight:900;letter-spacing:3px;text-transform:uppercase}
-.rp-h p{font-size:10px;margin-top:2px}
-.rp-m{border-bottom:1px solid #555;padding:8px 10px 5px}
-.rp-mi{display:flex;justify-content:space-between;gap:8px}
-.rp-ml{flex:1;font-size:11px;line-height:1.9}.rp-mr{text-align:right;font-size:11px;min-width:80px}
-.rp-mr .rno{font-size:15px;font-weight:800}
-.rp-fv{border-bottom:1px solid #000;display:inline-block;min-width:55px;font-weight:700;padding-bottom:1px}
-table.rp-t{width:100%;border-collapse:collapse}
-table.rp-t th{border:1px solid #000;padding:4px 5px;font-size:10px;font-weight:700;text-align:center}
-table.rp-t td{border:1px solid #000;padding:2.5px 5px;font-size:10.5px;height:16px;vertical-align:middle}
-table.rp-t td.sr{text-align:center;width:22px;color:#888}
-table.rp-t td.am{text-align:right;width:65px;font-weight:600}
-table.rp-t tr.tr td{font-weight:800;font-size:12px;border-top:2px solid #000;background:#f5f5f5}
-td.tlb{text-align:right;padding-right:8px}
-.rp-w{border-top:1px solid #bbb;padding:5px 10px;font-size:11px;display:flex;gap:5px;align-items:flex-end}
-.rp-wv{border-bottom:1px solid #000;flex:1;font-weight:700;padding-bottom:1px}
-.rp-sg{border-top:1px solid #bbb;padding:8px 14px 8px;display:flex;justify-content:space-between;font-size:10px;color:#555}
-.rp-sg>div{text-align:center}.rp-ln{border-top:1px solid #888;margin-bottom:3px;margin-top:20px;width:95px}
-/* ── Settings panel ── */
-.set-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #f0ebe0;cursor:pointer}
-.set-row:last-child{border-bottom:none}
-.set-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-right:12px}
-.set-info{flex:1}.set-title{font-size:13px;font-weight:600;color:var(--tx)}.set-sub{font-size:11px;color:var(--mu);margin-top:2px}
-/* ── Spin loader ── */
-@keyframes spin{to{transform:rotate(360deg)}}
-.spin{width:36px;height:36px;border:3px solid var(--g);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+.rct-p{font-family:Arial,Helvetica,sans-serif;background:#fff;border:2px solid #0f2040;font-size:11px;border-radius:4px;overflow:hidden;position:relative}
+      .rp-h{text-align:center;background:#0f2040;padding:10px 10px 6px}
+      .rp-h h2{font-size:19px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#fff}
+      .rp-h p{font-size:9.5px;margin-top:3px;color:#c9932a}
+      .rp-h .rp-tag{font-size:8px;color:rgba(201,147,42,.7);letter-spacing:1px;margin-top:2px}
+      .rp-gold-bar{height:3px;background:#c9932a;width:100%}
+      .rp-m{border-bottom:1px solid #e0d9cc;padding:8px 10px 5px;background:#fff}
+      .rp-mi{display:flex;justify-content:space-between;gap:8px}
+      .rp-ml{flex:1;font-size:10.5px;line-height:2}
+      .rp-mr{text-align:right;font-size:10.5px;min-width:70px}
+      .rp-mr .rno{font-size:16px;font-weight:900;color:#0f2040}
+      .rp-mr .rno-lbl,.rp-mr .rdate-lbl{font-size:9px;color:#999}
+      .rp-mr .rdate-lbl{margin-top:4px}
+      .rp-mr .rdate{font-weight:700;color:#0f2040;font-size:10.5px}
+      .rp-fv{border-bottom:1.5px solid #333;display:inline-block;min-width:55px;font-weight:700;padding-bottom:1px}
+      .rp-note{font-size:9px;color:#999;margin-top:2px}
+      table.rp-t{width:100%;border-collapse:collapse}
+      table.rp-t thead tr{background:#0f2040}
+      table.rp-t th{padding:5px;font-size:9.5px;font-weight:700;text-align:center;color:#fff;border:1px solid #1a3260}
+      table.rp-t td{border:1px solid #e0d9cc;padding:3px 5px;font-size:10px;height:15px;vertical-align:middle}
+      table.rp-t tr:nth-child(even) td{background:#faf7f0}
+      table.rp-t td.sr{text-align:center;width:20px;color:#bbb;font-size:9px}
+      table.rp-t td.am{text-align:right;width:60px;font-weight:700;color:#1a7f37}
+      table.rp-t tr.tr td{font-weight:900;font-size:11.5px;background:#0f2040;color:#fff;border-color:#0f2040}
+      table.rp-t tr.tr td.am{color:#c9932a!important}
+      td.tlb{text-align:right;padding-right:8px;color:#fff}
+      .rp-w{background:#faf7f0;border-top:1px solid #ddd;padding:6px 10px;font-size:10.5px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+      .rp-wv{font-weight:800;color:#0f2040}
+      .rp-mode{font-size:9.5px;color:#888;margin-left:auto}
+      .rp-footer{background:#faf7f0;border-top:2px solid #c9932a;padding:6px 10px 5px;text-align:center;font-size:9px;color:#888;font-style:italic}
+      .rp-paid-stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:52px;font-weight:900;color:rgba(26,127,55,0.10);letter-spacing:4px;pointer-events:none;z-index:1;white-space:nowrap;font-family:Arial,sans-serif}
+      .spin{width:36px;height:36px;border:3px solid var(--g);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
 </style>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:14px"><div class="spin"></div><p style="color:#c9932a;font-size:13px;font-family:serif">Loading…</p></div></div>
 <script>
-
 // ════════════════════════════════════════════════════
-// FIREBASE CONFIG
+// FIREBASE SETUP
+// 1. Go to console.firebase.google.com → Create project
+// 2. Add a Web App → copy config below
+// 3. Enable Authentication → Sign-in method → Email/Password
+// 4. Create ONE user (your email + any password = your app PIN)
+// 5. Enable Firestore Database → Start in production mode
+// 6. In Firestore rules, paste:
+//      rules_version = '2';
+//      service cloud.firestore {
+//        match /databases/{database}/documents {
+//          match /{document=**} {
+//            allow read, write: if request.auth != null;
+//          }
+//        }
+//      }
 // ════════════════════════════════════════════════════
 const FIREBASE_CFG = {
   apiKey:            "AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",
@@ -150,66 +169,30 @@ const FIREBASE_CFG = {
   messagingSenderId: "765570470191",
   appId:             "1:765570470191:web:fc13de371e46977eff91da"
 };
-const SOCIETY_EMAIL = "aamir2027@gmail.com";
+const SOCIETY_EMAIL = "aamir2027@gmail.com"; // ← your Gmail used in Firebase Auth
+// Your app PIN = the password you set for this email in Firebase Auth
+// Must be 6+ characters e.g.  limra2024  or  slimra@123
+
 const FB_READY = FIREBASE_CFG.apiKey && FIREBASE_CFG.apiKey.length > 5;
-let _fbApp=null,_fbAuth=null,_fbFS=null,_fbST=null;
+let   _fbApp=null, _fbAuth=null, _fbFS=null, _fbST=null;
 
 function initFirebase(){
-  if(!FB_READY||_fbApp)return;
-  try{
-    _fbApp=firebase.initializeApp(FIREBASE_CFG);
-    _fbAuth=firebase.auth();
-    _fbFS=firebase.firestore();
-    _fbST=firebase.storage();
-    _fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
-  }catch(e){console.log('Firebase init:',e);}
-}
-
-// ════════════════════════════════════════════════════
-// UNIFIED DB — Firebase + localStorage
-// ════════════════════════════════════════════════════
-const DB={
-  lget:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
-  lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
-  isAuth(){if(FB_READY&&_fbAuth)return!!_fbAuth.currentUser;return sessionStorage.getItem('slimra_auth')==='1';},
-  async loginUser(pin){
-    if(FB_READY){
-      try{
-        await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL,pin);
-        sessionStorage.setItem('slimra_auth','1');
-        return{ok:true};
-      }catch(e){
-        return{ok:false,msg:e.code==='auth/wrong-password'||e.code==='auth/invalid-login-credentials'?'Wrong password':'Login error: '+e.message};
-      }
-    }
-    if(pin===(localStorage.getItem('slimra_pin')||'1234')){sessionStorage.setItem('slimra_auth','1');return{ok:true,local:true};}
-    return{ok:false,msg:'Wrong PIN'};
-  },
-  logout(){sessionStorage.removeItem('slimra_auth');if(FB_READY&&_fbAuth)_fbAuth.signOut().catch(()=>{});},
-  getPin:()=>localStorage.getItem('slimra_pin')||'1234',
-  setPin:(v)=>localStorage.setItem('slimra_pin',v),
-  async load(){
-    if(FB_READY&&_fbFS&&this.isAuth()){
-      try{
-        const[fd,bd]=await Promise.all([_fbFS.collection('society').doc('flats').get(),_fbFS.collection('society').doc('bills').get()]);
-        const flats=fd.exists?fd.data().list:null;
-        const bills=bd.exists?bd.data().list:null;
-        if(flats)this.lset('slimra_flats_v3',flats);
-        if(bills)this.lset('slimra_bills_v2',bills);
-        return{flats:flats||this.lget('slimra_flats_v3')||JSON.parse(JSON.stringify(INIT_FLATS)),bills:bills||this.lget('slimra_bills_v2')||[],source:'firebase'};
-      }catch(e){console.log('Firebase load:',e);}
-    }
-    return{flats:this.lget('slimra_flats_v3')||JSON.parse(JSON.stringify(INIT_FLATS)),bills:this.lget('slimra_bills_v2')||[],source:'local'};
-  },
-  saveFlats(f){this.lset('slimra_flats_v3',f);if(FB_READY&&_fbFS&&this.isAuth())_fbFS.collection('society').doc('flats').set({list:f,updated:new Date().toISOString()}).catch(()=>{});},
-  saveBills(b){this.lset('slimra_bills_v2',b);if(FB_READY&&_fbFS&&this.isAuth())_fbFS.collection('society').doc('bills').set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
-  subscribeChanges(onF,onB){
-    if(!FB_READY||!_fbFS)return;
-    _fbFS.collection('society').doc('flats').onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset('slimra_flats_v3',d);onF(d);}});
-    _fbFS.collection('society').doc('bills').onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset('slimra_bills_v2',d);onB(d);}});
+  if(!FB_READY || _fbApp) return;
+  // Guard: Firebase CDN scripts must be loaded first
+  if(typeof firebase === 'undefined'){
+    console.log('Firebase SDK not loaded yet — will retry');
+    setTimeout(initFirebase, 800);
+    return;
   }
-};
-const LS=DB;
+  try{
+    _fbApp  = firebase.initializeApp(FIREBASE_CFG);
+    _fbAuth = firebase.auth();
+    _fbFS   = firebase.firestore();
+    _fbST   = firebase.storage();  // Storage for PDF uploads
+    _fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    console.log('Firebase ready ✓');
+  }catch(e){ console.log('Firebase init error:',e); }
+}
 
 // ════════════════════════════════════════════════════
 // CONSTANTS
@@ -276,7 +259,120 @@ const INIT_FLATS=[
 // ════════════════════════════════════════════════════
 // STORAGE & AUTH
 // ════════════════════════════════════════════════════
-// LS = DB (declared above)
+// ── Unified DB: Firebase + localStorage fallback ─────────────────────────
+const DB={
+  // ── localStorage helpers ──
+  lget:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
+  lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
+
+  // ── Auth ──
+  isAuth(){
+    if(FB_READY && _fbAuth) return !!_fbAuth.currentUser;
+    return sessionStorage.getItem('slimra_auth')==='1';
+  },
+  async loginUser(pin){
+    if(FB_READY && _fbAuth){
+      // Firebase is ready — authenticate with email + password
+      try{
+        await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, pin);
+        sessionStorage.setItem('slimra_auth','1');
+        return {ok:true};
+      }catch(e){
+        if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential')
+          return {ok:false, msg:'Wrong password. Use the password you set in Firebase.'};
+        if(e.code==='auth/user-not-found')
+          return {ok:false, msg:'User not found. Check Firebase Auth setup.'};
+        return {ok:false, msg:'Login error: '+e.message};
+      }
+    }
+    if(FB_READY && !_fbAuth){
+      // Firebase config set but SDK still loading — wait and retry once
+      await new Promise(r=>setTimeout(r,1200));
+      if(_fbAuth){
+        try{
+          await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, pin);
+          sessionStorage.setItem('slimra_auth','1');
+          return {ok:true};
+        }catch(e){
+          return {ok:false, msg:'Wrong password'};
+        }
+      }
+    }
+    // Local-only fallback (no Firebase config or SDK unavailable)
+    if(pin===(localStorage.getItem('slimra_pin')||'1234')){
+      sessionStorage.setItem('slimra_auth','1');
+      return {ok:true, local:true};
+    }
+    return {ok:false, msg:'Wrong PIN. Default is 1234'};
+  },
+  logout(){
+    sessionStorage.removeItem('slimra_auth');
+    if(FB_READY && _fbAuth) _fbAuth.signOut().catch(()=>{});
+  },
+
+  // ── PIN (local-only mode) ──
+  getPin:()=>localStorage.getItem('slimra_pin')||'1234',
+  setPin:(v)=>localStorage.setItem('slimra_pin',v),
+
+  // ── Load data (Firebase first, then localStorage cache) ──
+  async load(){
+    if(FB_READY && _fbFS && this.isAuth()){
+      try{
+        const [fd, bd] = await Promise.all([
+          _fbFS.collection('society').doc('flats').get(),
+          _fbFS.collection('society').doc('bills').get()
+        ]);
+        const flats = fd.exists ? fd.data().list : null;
+        const bills = bd.exists ? bd.data().list : null;
+        if(flats){ this.lset('slimra_flats_v3', flats); }
+        if(bills){ this.lset('slimra_bills_v2', bills); }
+        return {
+          flats: flats || this.lget('slimra_flats_v3') || JSON.parse(JSON.stringify(INIT_FLATS)),
+          bills: bills || this.lget('slimra_bills_v2') || [],
+          source: 'firebase'
+        };
+      }catch(e){
+        console.log('Firebase load failed, using cache:', e);
+      }
+    }
+    return {
+      flats: this.lget('slimra_flats_v3') || JSON.parse(JSON.stringify(INIT_FLATS)),
+      bills: this.lget('slimra_bills_v2') || [],
+      source: 'local'
+    };
+  },
+
+  // ── Save flats (localStorage immediately + Firebase in background) ──
+  saveFlats(flats){
+    this.lset('slimra_flats_v3', flats);
+    if(FB_READY && _fbFS && this.isAuth()){
+      _fbFS.collection('society').doc('flats')
+        .set({list:flats, updated:new Date().toISOString()})
+        .catch(e=>console.log('Flats sync failed:',e));
+    }
+  },
+  // ── Save bills ──
+  saveBills(bills){
+    this.lset('slimra_bills_v2', bills);
+    if(FB_READY && _fbFS && this.isAuth()){
+      _fbFS.collection('society').doc('bills')
+        .set({list:bills, updated:new Date().toISOString()})
+        .catch(e=>console.log('Bills sync failed:',e));
+    }
+  },
+  // ── Subscribe to real-time changes (called once after login) ──
+  subscribeChanges(onFlats, onBills){
+    if(!FB_READY || !_fbFS) return;
+    _fbFS.collection('society').doc('flats').onSnapshot(snap=>{
+      if(snap.exists){const d=snap.data().list;this.lset('slimra_flats_v3',d);onFlats(d);}
+    });
+    _fbFS.collection('society').doc('bills').onSnapshot(snap=>{
+      if(snap.exists){const d=snap.data().list;this.lset('slimra_bills_v2',d);onBills(d);}
+    });
+  }
+};
+// Alias for backward compatibility
+const LS = DB;
 
 // ════════════════════════════════════════════════════
 // GLOBAL STATE
@@ -291,11 +387,25 @@ const S={
   _waIdx:0,_waBills:[],_waDone:[],
 };
 
-function loadData(){
-  const f=LS.get('slimra_flats_v3');
-  S.flats=(f&&f.length>0)?f:JSON.parse(JSON.stringify(INIT_FLATS));
-  if(!f||!f.length)LS.set('slimra_flats_v3',S.flats);
-  S.bills=LS.get('slimra_bills_v2',[]); 
+async function loadData(){
+  initFirebase();
+  const {flats,bills,source}=await DB.load();
+  S.flats=flats; S.bills=bills; S._syncSource=source;
+
+  // If Firebase is active but returned empty data, push local data up
+  // This syncs first-time data from old local-only app to Firebase
+  if(source==='firebase' && FB_READY){
+    const fbHadFlats = flats && flats.length > 0;
+    if(!fbHadFlats && S.flats.length > 0){
+      console.log('Uploading local data to Firebase for first sync…');
+      DB.saveFlats(S.flats);
+      DB.saveBills(S.bills);
+    }
+    DB.subscribeChanges(
+      f=>{if(f&&f.length>0){S.flats=f;}if(typeof render==='function')render();},
+      b=>{S.bills=b||[];if(typeof render==='function')render();}
+    );
+  }
 }
 function saveFlats(){DB.saveFlats(S.flats);}
 function saveBills(){DB.saveBills(S.bills);}
@@ -327,111 +437,388 @@ function flatOf(bill){return S.flats.find(f=>f.id===bill.flatId)||{};}
 // ════════════════════════════════════════════════════
 // GENERATE RECEIPT PDF using jsPDF
 // ════════════════════════════════════════════════════
-function buildReceiptPDF(bill, flat) {
+// ════════════════════════════════════════════════════
+// YEAR-END STATEMENT PDF
+// ════════════════════════════════════════════════════
+function generateYearEndStatement(flat, bills, year){
   if(!window.jspdf) return null;
-  const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({orientation:'p', unit:'mm', format:[148,210]});
-  const W=148, L=10, R=138, CW=128;
-  let y = 10;
-
-  // Outer border
-  doc.setLineWidth(0.6); doc.setDrawColor(30,30,30); doc.rect(L,y,CW,188);
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  const W=210, mx=15, rw=180;
+  let y=15;
 
   // Header
-  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(15,15,15);
-  doc.text('SUPREME LIMRA', W/2, y+11, {align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(80,80,80);
-  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048', W/2, y+17, {align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(40,40,40); doc.setCharSpace(1.5);
-  doc.text('MAINTENANCE RECEIPT', W/2, y+23, {align:'center'}); doc.setCharSpace(0);
-  y+=26; doc.setLineWidth(0.4); doc.setDrawColor(180,180,180); doc.line(L,y,R,y);
+  doc.setFillColor(15,32,64);
+  doc.rect(mx,y,rw,28,'F');
+  doc.setFillColor(201,147,42);
+  doc.rect(mx,y+28,rw,1.5,'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(22);
+  doc.setTextColor(255,255,255);
+  doc.text('SUPREME LIMRA SOCIETY',W/2,y+11,{align:'center'});
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(201,147,42);
+  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+19,{align:'center'});
+  doc.setFontSize(8.5);
+  doc.setTextColor(180,160,100);
+  doc.text('ANNUAL MAINTENANCE STATEMENT — '+year,W/2,y+25,{align:'center'});
+  y+=34;
 
-  // Meta
-  y+=5;
-  const bx=R-32, bw=30;
-  doc.setFillColor(248,248,248); doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
-  doc.rect(bx,y-1,bw,16); doc.rect(bx,y+17,bw,13);
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(130,130,130);
-  doc.text('No.',bx+bw/2,y+4,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(15,15,15);
-  doc.text(String(bill.receiptNo||''),bx+bw/2,y+13,{align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(130,130,130);
-  doc.text('Date',bx+bw/2,y+22,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(15,15,15);
-  doc.text(bill.paidDate||'',bx+bw/2,y+29,{align:'center'});
-
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(100,100,100);
-  doc.text('Received from Mr./Mrs./Ms.',L+3,y+4);
-  const nw=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(10,10,10);
-  doc.text(flat.ownerName||'',L+3+nw,y+4);
-  doc.setLineWidth(0.3); doc.setDrawColor(160,160,160); doc.line(L+3+nw,y+5.5,bx-3,y+5.5);
-
-  y+=11;
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(100,100,100);
-  doc.text('Flat / Garage / Shop No. :',L+3,y+4);
-  const fw=doc.getTextWidth('Flat / Garage / Shop No. :  ');
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(10,10,10);
-  doc.text(flat.flatNo||'',L+3+fw,y+4);
-  doc.setLineWidth(0.3); doc.setDrawColor(160,160,160); doc.line(L+3+fw,y+5.5,bx-3,y+5.5);
-
-  y+=10;
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(150,150,150);
-  doc.text('On account of the particulars stated below',L+3,y+2);
-  y+=5; doc.setLineWidth(0.4); doc.setDrawColor(180,180,180); doc.line(L,y,R,y);
+  // Flat info box
+  doc.setFillColor(242,237,227);
+  doc.rect(mx,y,rw,18,'F');
+  doc.setDrawColor(201,147,42);
+  doc.setLineWidth(0.5);
+  doc.rect(mx,y,rw,18);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.setTextColor(15,32,64);
+  doc.text('Flat No. '+flat.flatNo+' — '+flat.ownerName,mx+6,y+8);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(80,80,80);
+  doc.text(flat.floor+' Floor   |   Monthly Maintenance: Rs.'+flat.maintenance+'/-   |   Type: '+(flat.maintenance===2000?'2BHK':'1BHK'),mx+6,y+14);
+  y+=24;
 
   // Table
-  const srW=11, amW=28, ptW=CW-srW-amW, hH=8, rH=7;
-  doc.setFillColor(35,35,35); doc.rect(L,y,CW,hH,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
-  doc.text('Sr',L+srW/2,y+5.5,{align:'center'});
-  doc.text('Particulars',L+srW+ptW/2,y+5.5,{align:'center'});
-  doc.text('Amount',L+srW+ptW+amW/2,y+5.5,{align:'center'});
-  y+=hH;
+  const colW=[30,80,35,35]; // Month, Status, Amount, Receipt
+  const headers=['Month','Status','Amount','Receipt No.'];
+  
+  // Header row
+  doc.setFillColor(15,32,64);
+  doc.rect(mx,y,rw,9,'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.setTextColor(255,255,255);
+  let cx=mx;
+  headers.forEach((h,i)=>{
+    doc.text(h,cx+colW[i]/2,y+6.5,{align:'center'});
+    cx+=colW[i];
+  });
+  y+=9;
 
-  const month=MS[bill.month-1]+'-'+String(bill.year).slice(-2);
-  const ROWS=[{sr:1,l:'Maintenance Charges',x:month,a:bill.amount},{sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},{sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},{sr:14,l:''},{sr:15,l:''}];
-  doc.setLineWidth(0.2);
-  ROWS.forEach((row,i)=>{
-    doc.setFillColor(...(i%2===0?[255,255,255]:[249,249,249]));
-    doc.rect(L,y,CW,rH,'F'); doc.setDrawColor(215,215,215);
-    doc.rect(L,y,srW,rH); doc.rect(L+srW,y,ptW,rH); doc.rect(L+srW+ptW,y,amW,rH);
-    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(190,190,190);
-    doc.text(String(row.sr),L+srW/2,y+5,{align:'center'});
-    if(row.l){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(30,30,30);doc.text(row.l,L+srW+2.5,y+5);}
-    if(row.x){const lx=doc.getTextWidth(row.l)+L+srW+2.5+2;doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(20,20,20);doc.text(row.x,lx,y+5);}
-    if(row.a){doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(20,100,40);doc.text(row.a+'/-',L+srW+ptW+amW-2,y+5,{align:'right'});}
-    y+=rH;
+  let totalPaid=0, totalPending=0;
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  
+  months.forEach((month,mi)=>{
+    const bill=bills.find(b=>b.flatId===flat.id&&b.month===mi+1&&b.year===year);
+    const paid=bill&&bill.status==='paid';
+    const rowH=9;
+
+    // Alternating row
+    if(mi%2===0){ doc.setFillColor(252,250,246); doc.rect(mx,y,rw,rowH,'F'); }
+    
+    doc.setDrawColor(220,215,205);
+    doc.setLineWidth(0.2);
+    cx=mx;
+    colW.forEach(w=>{ doc.rect(cx,y,w,rowH); cx+=w; });
+
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    doc.setTextColor(30,30,30);
+    doc.text(month+' '+year, mx+colW[0]/2, y+6, {align:'center'});
+
+    if(!bill){
+      doc.setTextColor(150,150,150);
+      doc.text('Not Generated', mx+colW[0]+colW[1]/2, y+6, {align:'center'});
+      doc.setTextColor(150,150,150);
+      doc.text('—', mx+colW[0]+colW[1]+colW[2]/2, y+6, {align:'center'});
+      doc.text('—', mx+colW[0]+colW[1]+colW[2]+colW[3]/2, y+6, {align:'center'});
+    } else if(paid){
+      doc.setTextColor(26,127,55);
+      doc.setFont('helvetica','bold');
+      doc.text('PAID', mx+colW[0]+colW[1]/2, y+6, {align:'center'});
+      doc.setFont('helvetica','normal');
+      doc.setTextColor(26,127,55);
+      doc.text('Rs.'+bill.amount+'/-', mx+colW[0]+colW[1]+colW[2]/2, y+6, {align:'center'});
+      doc.setTextColor(80,80,80);
+      doc.text('#'+bill.receiptNo, mx+colW[0]+colW[1]+colW[2]+colW[3]/2, y+6, {align:'center'});
+      totalPaid+=bill.amount;
+    } else {
+      doc.setFillColor(255,245,245);
+      doc.rect(mx,y,rw,rowH,'F');
+      cx=mx; colW.forEach(w=>{ doc.rect(cx,y,w,rowH); cx+=w; });
+      doc.setTextColor(192,57,43);
+      doc.setFont('helvetica','bold');
+      doc.text('PENDING', mx+colW[0]+colW[1]/2, y+6, {align:'center'});
+      doc.setFont('helvetica','normal');
+      doc.text('Rs.'+bill.amount+'/-', mx+colW[0]+colW[1]+colW[2]/2, y+6, {align:'center'});
+      doc.setTextColor(150,150,150);
+      doc.text('—', mx+colW[0]+colW[1]+colW[2]+colW[3]/2, y+6, {align:'center'});
+      totalPending+=bill.amount;
+    }
+    y+=rowH;
   });
 
-  doc.setFillColor(35,35,35); doc.rect(L,y,CW,9,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
-  doc.text('Total',L+srW+ptW-2,y+6.5,{align:'right'});
-  doc.setTextColor(210,210,210); doc.setFontSize(11);
-  doc.text(bill.amount+'/-',L+srW+ptW+amW-2,y+6.5,{align:'right'}); y+=11;
-
-  doc.setFillColor(252,252,252); doc.rect(L,y,CW,9,'F');
-  doc.setDrawColor(210,210,210); doc.setLineWidth(0.3); doc.rect(L,y,CW,9);
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(100,100,100);
-  doc.text('Rs. in words:',L+3,y+6);
-  doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
-  doc.text(numToWords(bill.amount),L+3+doc.getTextWidth('Rs. in words:  '),y+6);
-  if(bill.paymentMode){doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(130,130,130);doc.text('Mode: '+bill.paymentMode,R-3,y+6,{align:'right'});}
-  y+=11;
-
-  // Subtle PAID watermark
-  doc.saveGraphicsState();
-  doc.setGState(new doc.GState({opacity:0.06}));
-  doc.setFont('helvetica','bold'); doc.setFontSize(60); doc.setTextColor(0,140,50);
-  doc.text('PAID',W/2,115,{align:'center',angle:40});
-  doc.restoreGraphicsState();
+  // Summary row
+  y+=2;
+  doc.setFillColor(15,32,64);
+  doc.rect(mx,y,rw,12,'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(255,255,255);
+  doc.text('Total Paid: Rs.'+totalPaid+'/-',mx+10,y+8);
+  if(totalPending>0){
+    doc.setTextColor(255,180,80);
+    doc.text('Pending: Rs.'+totalPending+'/-',W/2,y+8,{align:'center'});
+  } else {
+    doc.setTextColor(100,255,150);
+    doc.text('All dues cleared ✓',W/2,y+8,{align:'center'});
+  }
+  doc.setTextColor(201,147,42);
+  doc.text('Year: '+year,mx+rw-10,y+8,{align:'right'});
+  y+=18;
 
   // Footer
-  doc.setLineWidth(0.3); doc.setDrawColor(200,200,200); doc.line(L,y,R,y); y+=5;
-  doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(170,170,170);
+  doc.setFillColor(201,147,42);
+  doc.rect(mx,y,rw,0.6,'F');
+  y+=5;
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(8);
+  doc.setTextColor(120,100,60);
+  doc.text('Computer Generated Statement — Supreme Limra Society Management — '+year,W/2,y,{align:'center'});
+
+  return doc;
+}
+
+function buildReceiptPDF(bill, flat) {
+  if(!window.jspdf){return null;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'p',unit:'mm',format:[148,210]});
+  const W=148, mx=6, rw=136;
+  let y=6;
+
+  // ── Outer border ───────────────────────────────────────────
+  doc.setLineWidth(0.8);
+  doc.setDrawColor(15,32,64);
+  doc.rect(mx,y,rw,196);
+
+  // ── Navy Header ────────────────────────────────────────────
+  doc.setFillColor(15,32,64); // navy
+  doc.rect(mx,y,rw,24,'F');
+
+  // Gold accent line
+  doc.setFillColor(201,147,42); // gold
+  doc.rect(mx,y+24,rw,1.5,'F');
+
+  // Society name
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.setTextColor(255,255,255);
+  doc.text('SUPREME LIMRA',W/2,y+11,{align:'center'});
+
+  // Address in gold
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(201,147,42);
+  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+18,{align:'center'});
+
+  // MAINTENANCE RECEIPT label
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(180,130,30);
+  doc.text('MAINTENANCE RECEIPT',W/2,y+22,{align:'center'});
+
+  y += 27;
+  doc.setTextColor(0,0,0);
+
+  // ── Meta: Name / Flat / No / Date ──────────────────────────
+  const R = mx+rw;
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(80,80,80);
+  doc.text('Received from Mr./Mrs./Ms.',mx+3,y+6);
+  const lw1=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(0,0,0);
+  doc.setFontSize(10);
+  doc.text(flat.ownerName||'',mx+3+lw1,y+6);
+  doc.setLineWidth(0.3);
+  doc.setDrawColor(180,180,180);
+  doc.line(mx+3+lw1,y+7,R-30,y+7);
+
+  // ── RIGHT COLUMN: ALL backgrounds first, then ALL text (prevents overlap)
+  const bx=R-29, bw=28;
+  // No. box background
+  doc.setFillColor(242,237,227);
+  doc.rect(bx,y,bw,16,'F');
+  doc.setDrawColor(200,190,175);doc.setLineWidth(0.3);
+  doc.rect(bx,y,bw,16);
+  // Date box background (starts at y+18 — below No. box)
+  doc.setFillColor(242,237,227);
+  doc.rect(bx,y+18,bw,13,'F');
+  doc.setDrawColor(200,190,175);
+  doc.rect(bx,y+18,bw,13);
+  // No. text drawn AFTER both backgrounds
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(100,100,100);
+  doc.text('No.',bx+bw/2,y+5,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(15,32,64);
+  doc.text(String(bill.receiptNo||''),bx+bw/2,y+13,{align:'center'});
+  // Date text
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(100,100,100);
+  doc.text('Date',bx+bw/2,y+23,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(15,32,64);
+  doc.text(bill.paidDate||'',bx+bw/2,y+29.5,{align:'center'});
+
+  // ── LEFT COLUMN: Name field
+  y+=8;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,80,80);
+  doc.text('Flat / Garage / Shop No. :',mx+3,y+5);
+  const fw2=doc.getTextWidth('Flat / Garage / Shop No. : ');
+  doc.setFont('helvetica','bold');doc.setTextColor(0,0,0);doc.setFontSize(10);
+  doc.text(flat.flatNo||'',mx+3+fw2,y+5);
+  doc.setLineWidth(0.3);doc.setDrawColor(180,180,180);
+  doc.line(mx+3+fw2,y+6,bx-2,y+6);
+
+  y+=10;
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(80,80,80);
+  doc.text('Received from Mr./Mrs./Ms.',mx+3,y+5);
+  const fw1=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
+  doc.setFont('helvetica','bold');doc.setTextColor(0,0,0);doc.setFontSize(10);
+  doc.text(flat.ownerName||'',mx+3+fw1,y+5);
+  doc.setLineWidth(0.3);doc.setDrawColor(180,180,180);
+  doc.line(mx+3+fw1,y+7,bx-2,y+7);
+
+  y+=10;
+    doc.text('On account of the particulars stated below',mx+3,y+3);
+
+  y+=7;
+  // Gold divider
+  doc.setFillColor(201,147,42);
+  doc.rect(mx,y,rw,0.8,'F');
+  y+=1.5;
+
+  // ── Table Header ───────────────────────────────────────────
+  const srW=11, amtW=28, ptW=rw-srW-amtW;
+  const hdrH=8, rowH=7;
+
+  doc.setFillColor(15,32,64);
+  doc.rect(mx,y,rw,hdrH,'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(255,255,255);
+  doc.text('Sr',mx+srW/2,y+5.5,{align:'center'});
+  doc.text('Particulars',mx+srW+ptW/2,y+5.5,{align:'center'});
+  doc.text('Amount',mx+srW+ptW+amtW/2,y+5.5,{align:'center'});
+
+  y+=hdrH;
+  doc.setTextColor(0,0,0);
+  doc.setLineWidth(0.2);
+
+  const itemM = MS[bill.month-1]+'-'+String(bill.year).slice(-2);
+  const ROWS=[
+    {sr:1,l:'Maintenance Charges',x:itemM,a:bill.amount},
+    {sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},
+    {sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},
+    {sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},
+    {sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},
+    {sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},
+    {sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},
+    {sr:14,l:''},{sr:15,l:''},
+  ];
+
+  ROWS.forEach((row,i)=>{
+    // Alternating row bg
+    if(i%2===0){ doc.setFillColor(252,250,246); doc.rect(mx,y,rw,rowH,'F'); }
+    doc.setDrawColor(220,215,205);
+    doc.rect(mx,y,srW,rowH);
+    doc.rect(mx+srW,y,ptW,rowH);
+    doc.rect(mx+srW+ptW,y,amtW,rowH);
+
+    doc.setTextColor(150,150,150);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8);
+    doc.text(String(row.sr),mx+srW/2,y+5,{align:'center'});
+
+    doc.setTextColor(30,30,30);
+    if(row.l){
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8.5);
+      doc.text(row.l,mx+srW+2,y+5);
+    }
+    if(row.x){
+      const lx=row.l?doc.getTextWidth(row.l)+2:2;
+      doc.setFont('helvetica','bold');
+      doc.setTextColor(15,32,64);
+      doc.setFontSize(8.5);
+      doc.text(row.x,mx+srW+lx+2,y+5);
+      doc.setTextColor(30,30,30);
+    }
+    if(row.a){
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9);
+      doc.setTextColor(26,127,55);
+      doc.text(row.a+'/-',mx+srW+ptW+amtW-2,y+5,{align:'right'});
+      doc.setTextColor(30,30,30);
+    }
+    y+=rowH;
+  });
+
+  // ── Total row ───────────────────────────────────────────────
+  doc.setFillColor(15,32,64);
+  doc.rect(mx,y,rw,9,'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(255,255,255);
+  doc.text('Total',mx+srW+ptW-2,y+6.5,{align:'right'});
+  doc.setTextColor(201,147,42);
+  doc.setFontSize(11);
+  doc.text(bill.amount+'/-',mx+srW+ptW+amtW-2,y+6.5,{align:'right'});
+  y+=11;
+
+  // ── Rs in words ─────────────────────────────────────────────
+  doc.setFillColor(252,250,246);
+  doc.rect(mx,y,rw,9,'F');
+  doc.setDrawColor(220,215,205);
+  doc.rect(mx,y,rw,9);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(80,80,80);
+  doc.text('Rs. in words: ',mx+3,y+6);
+  const wlw=doc.getTextWidth('Rs. in words: ');
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(0,0,0);
+  doc.text(numToWords(bill.amount),mx+3+wlw,y+6);
+  y+=11;
+
+  // ── Payment Mode ────────────────────────────────────────────
+  if(bill.paymentMode){
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(80,80,80);
+    doc.text('Payment Mode: ',mx+3,y);
+    const pmw=doc.getTextWidth('Payment Mode: ');
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(0,0,0);
+    doc.text(bill.paymentMode,mx+3+pmw,y);
+    y+=6;
+  }
+
+  // ── Computer Generated footer ────────────────────────────────
+  doc.setFillColor(201,147,42);
+  doc.rect(mx,y,rw,0.6,'F');
+  y+=4;
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(7.5);
+  doc.setTextColor(120,100,60);
   doc.text('This is a computer generated receipt. No signature required.',W/2,y,{align:'center'});
-  y+=4; doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(200,200,200);
-  doc.text('Supreme Limra Society Management  |  '+new Date().getFullYear(),W/2,y,{align:'center'});
+  y+=4;
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(7);
+  doc.setTextColor(150,150,150);
+  doc.text('Supreme Limra Society Management — '+new Date().getFullYear(),W/2,y,{align:'center'});
+
+  // ── PAID diagonal stamp ──────────────────────────────────────
+  doc.saveGraphicsState();
+  doc.setGState(new doc.GState({opacity:0.12}));
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(52);
+  doc.setTextColor(26,127,55);
+  // Rotate text 45 degrees around center of page
+  doc.text('PAID',W/2,110,{align:'center',angle:45});
+  doc.restoreGraphicsState();
+
   return doc;
 }
 
@@ -439,6 +826,50 @@ function buildReceiptPDF(bill, flat) {
 // SMART WHATSAPP SHARE — PDF + Text via native share sheet
 // Falls back to wa.me link if Web Share API unavailable
 // ════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════
+// UPLOAD PDF TO FIREBASE STORAGE → GET SHARE LINK
+// ════════════════════════════════════════════════════
+async function uploadReceiptAndGetLink(bill, flat){
+  if(!FB_READY || !_fbST){
+    console.log('Firebase Storage not available');
+    return null;
+  }
+  try{
+    const loaded = await ensureJsPDF();
+    if(!loaded) return null;
+
+    const doc = buildReceiptPDF(bill, flat);
+    if(!doc) return null;
+
+    const blob = doc.output('blob');
+    const fname = 'receipts/Receipt_'+bill.receiptNo
+                  +'_Flat'+flat.flatNo.replace(/\//g,'_')
+                  +'_'+Date.now()+'.pdf';
+
+    const ref = _fbST.ref(fname);
+
+    // 8 second timeout — if Storage hangs, give up gracefully
+    const uploadPromise = ref.put(blob, {contentType:'application/pdf'});
+    const timeoutPromise = new Promise((_,reject)=>
+      setTimeout(()=>reject(new Error('Upload timeout')), 8000)
+    );
+
+    await Promise.race([uploadPromise, timeoutPromise]);
+    const url = await ref.getDownloadURL();
+    return url;
+
+  }catch(e){
+    console.log('Upload error:', e.code||'', e.message||e);
+    if(e.code==='storage/unauthorized'){
+      showToast('Set Firebase Storage Rules to enable PDF links','err');
+    } else if(e.message==='Upload timeout'){
+      console.log('Upload timed out — sending text-only WA');
+    }
+    return null;
+  }
+}
+
 // Dynamically load jsPDF if not yet available
 function ensureJsPDF(){
   return new Promise(resolve=>{
@@ -451,71 +882,7 @@ function ensureJsPDF(){
   });
 }
 
-async function shareReceiptOnWA(bill, flat) {
-  const text = waRcpt(flat, bill);
-  showToast('Preparing receipt image…','wa');
-
-  // ── Capture receipt preview as PNG image ──────────────────────────────
-  // The .rct-p element is currently visible in the receipt modal
-  const receiptEl = document.querySelector('.rct-p');
-
-  if(receiptEl && typeof html2canvas === 'function'){
-    try{
-      // Capture the receipt HTML element as a high-quality PNG
-      const canvas = await html2canvas(receiptEl,{
-        scale:2,                     // 2x for crisp quality
-        useCORS:true,
-        backgroundColor:'#ffffff',
-        logging:false,
-        removeContainer:true
-      });
-
-      // Convert canvas to PNG blob
-      const blob = await new Promise(r=>canvas.toBlob(r,'image/png',0.97));
-      const imgDataUrl = canvas.toDataURL('image/png',0.97);
-      const imgFile = new File([blob],'Receipt_'+bill.receiptNo+'_Flat_'+flat.flatNo+'.png',{type:'image/png'});
-
-      // ── Try 1: Web Share API with image file (1-tap on HTTPS / some local setups)
-      if(navigator.canShare && navigator.canShare({files:[imgFile]})){
-        try{
-          await navigator.share({files:[imgFile],title:'Receipt #'+bill.receiptNo,text});
-          return; // SUCCESS — share sheet opened with image
-        }catch(e){
-          if(e.name==='AbortError')return; // user cancelled share sheet
-        }
-      }
-
-      // ── Try 2: Also try PDF alongside (belt & suspenders on HTTPS)
-      const pdfLoaded = await ensureJsPDF();
-      if(pdfLoaded){
-        const doc = buildReceiptPDF(bill,flat);
-        if(doc){
-          const pdfBlob = doc.output('blob');
-          const pdfFile = new File([pdfBlob],'Receipt_'+bill.receiptNo+'.pdf',{type:'application/pdf'});
-          if(navigator.canShare && navigator.canShare({files:[pdfFile]})){
-            try{
-              await navigator.share({files:[pdfFile],title:'Receipt #'+bill.receiptNo,text});
-              return;
-            }catch(e){if(e.name==='AbortError')return;}
-          }
-        }
-      }
-
-      // ── Fallback: Show image in modal — user long-presses to save then shares
-      if(S._lastImgUrl) try{URL.revokeObjectURL(S._lastImgUrl);}catch(err){}
-      S._lastImgUrl = URL.createObjectURL(blob);
-      S.modal = {type:'imgGuide', data:{bill,flat,imgDataUrl,text}};
-      render();
-      return;
-
-    }catch(err){
-      console.log('html2canvas error:',err);
-    }
-  }
-
-  // ── Ultimate fallback: text-only WhatsApp ─────────────────────────────
-  if(flat.mobile) openWA(flat.mobile, text);
-}
+// shareReceiptOnWA removed — wa-rcpt calls openWA directly
 
 async function sendBillOnWA(bill, flat) {
   const text = waMsg(flat, bill);
@@ -531,26 +898,71 @@ async function sendBillOnWA(bill, flat) {
 // ════════════════════════════════════════════════════
 // PDF GENERATION (Blob URL — works in ALL browsers)
 // ════════════════════════════════════════════════════
-// printPDF defined above
+function printPDF(bill, flat){
+  // Use jsPDF colored receipt (same as what gets uploaded to Firebase)
+  ensureJsPDF().then(loaded=>{
+    if(!loaded){ showToast('PDF library not loaded — check internet','err'); return; }
+    const doc = buildReceiptPDF(bill, flat);
+    if(!doc){ showToast('Could not generate PDF','err'); return; }
+
+    // On mobile: save/download the PDF
+    // On desktop: open in new tab for printing
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    if(isMobile){
+      // Save as file — user can then open & print from Files app
+      doc.save('Receipt_'+bill.receiptNo+'_Flat'+flat.flatNo.replace('/','_')+'.pdf');
+      showToast('PDF saved to Downloads ✓','ok');
+    } else {
+      // Open in new browser tab for desktop printing
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+      if(win){
+        setTimeout(()=>{ try{URL.revokeObjectURL(url);}catch(e){} }, 60000);
+      } else {
+        // Popup blocked — fallback to download
+        doc.save('Receipt_'+bill.receiptNo+'_Flat'+flat.flatNo.replace('/','_')+'.pdf');
+        showToast('PDF downloaded — open to print','ok');
+      }
+    }
+  });
+}
 
 // ════════════════════════════════════════════════════
 // WHATSAPP
 // ════════════════════════════════════════════════════
 function waMsg(flat,bill){return`🏢 *SUPREME LIMRA SOCIETY*\n${ADDR_A}\n\nAssalamu Alaikum / Namaskar,\nDear *${flat.ownerName}*,\n\nYour monthly maintenance bill is ready. Kindly pay at earliest.\n\n━━━━━━━━━━━━━━━━━━\n🏠 Flat No.  : *${flat.flatNo}*\n📅 Month     : *${MO[bill.month-1]} ${bill.year}*\n💰 Amount Due: *₹${bill.amount.toLocaleString('en-IN')}/-*\n━━━━━━━━━━━━━━━━━━\n\n✅ *Payment Accepted Via:*\n• Cash (society office)\n• UPI / GPay / PhonePe\n• NEFT / IMPS\n\n_For PDF receipt, contact Secretary._\n_For queries contact Society Secretary._\n\n🙏 Thank you,\n_Supreme Limra Society Management_`;}
-function waRcpt(flat,bill){return`✅ *PAYMENT RECEIVED*\n🏢 *SUPREME LIMRA SOCIETY*\n\nDear *${flat.ownerName}*,\n\nWe confirm receipt of your maintenance payment.\n\n━━━━━━━━━━━━━━━━━━\n🧾 Receipt No.: *#${bill.receiptNo}*\n🏠 Flat No.   : *${flat.flatNo}*\n📅 Month      : *${MO[bill.month-1]} ${bill.year}*\n💰 Amount Paid: *₹${bill.amount.toLocaleString('en-IN')}/-*\n📆 Date       : *${bill.paidDate}*\n💳 Mode       : *${bill.paymentMode}*\n━━━━━━━━━━━━━━━━━━\n\nThank you for timely payment! 🙏\n\n_Supreme Limra Society Management_`;}
-function goToWA(mobile,msg){
-  const n=mobile.replace(/\D/g,'');
-  window.location.href='https://wa.me/'+(n.startsWith('91')?n:'91'+n)+'?text='+encodeURIComponent(msg);
+function waRcptWithLink(flat, bill, link){
+  // Keep short — long URLs break on iOS WhatsApp
+  return 'PAYMENT RECEIVED - Supreme Limra Society\n\n'
+    +'Dear '+flat.ownerName+',\n'
+    +'Receipt #'+bill.receiptNo+' | Flat '+flat.flatNo+'\n'
+    +'Month: '+MO[bill.month-1]+' '+bill.year+'\n'
+    +'Amount: Rs.'+bill.amount+'/-  | '+bill.paidDate+'\n'
+    +'Mode: '+bill.paymentMode+'\n\n'
+    +'Download PDF Receipt:\n'+link+'\n\n'
+    +'Thank you! - Supreme Limra Society';
 }
-function openWA(mobile,msg){
-  const n=mobile.replace(/\D/g,'');
-  const url='https://wa.me/'+(n.startsWith('91')?n:'91'+n)+'?text='+encodeURIComponent(msg);
-  const a=document.createElement('a');
-  a.href=url;a.target='_blank';a.rel='noopener noreferrer';
-  a.style.display='none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{try{document.body.removeChild(a);}catch(e){}},1000);
+function waRcpt(flat,bill){return`✅ *PAYMENT RECEIVED*\n🏢 *SUPREME LIMRA SOCIETY*\n\nDear *${flat.ownerName}*,\n\nWe confirm receipt of your maintenance payment.\n\n━━━━━━━━━━━━━━━━━━\n🧾 Receipt No.: *#${bill.receiptNo}*\n🏠 Flat No.   : *${flat.flatNo}*\n📅 Month      : *${MO[bill.month-1]} ${bill.year}*\n💰 Amount Paid: *₹${bill.amount.toLocaleString('en-IN')}/-*\n📆 Date       : *${bill.paidDate}*\n💳 Mode       : *${bill.paymentMode}*\n━━━━━━━━━━━━━━━━━━\n\nThank you for timely payment! 🙏\n\n_Supreme Limra Society Management_`;}
+
+// ════════════════════════════════════════════════════
+// Direct WhatsApp to specific contact
+// window.location.href = wa.me URL:
+//   - Opens WhatsApp directly to that contact's chat
+//   - Message pre-filled, user just taps Send
+//   - Cannot be blocked (page navigation, not popup)
+// ════════════════════════════════════════════════════
+function goToWA(mobile, msg){
+  const n = mobile.replace(/\D/g,'');
+  const phone = n.startsWith('91') ? n : '91'+n;
+  window.location.href = 'https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+}
+
+function openWA(mobile, msg){
+  const n = mobile.replace(/\D/g,'');
+  const phone = n.startsWith('91') ? n : '91'+n;
+  const url = 'https://wa.me/'+phone+'?text='+encodeURIComponent(msg);
+  window.open(url, '_blank');
 }
 
 // ════════════════════════════════════════════════════
@@ -591,11 +1003,11 @@ function renderLogin(){
   <div class="login-card">
     <div class="login-lock">🔐</div>
     <div class="login-title">Society Management</div>
-    <div class="login-hint">Enter your PIN to continue</div>
+    <div class="login-hint" id="login-hint">Enter your password to continue</div>
     <input id="pin-input" type="password" class="pin-input" maxlength="30" placeholder="Enter password" autocomplete="current-password">
     <div id="pin-err" class="login-err"></div>
     <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="login">Unlock App 🔓</button>
-    <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)">Default PIN: 1234</p>
+    <p id="pin-note" style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)">If Firebase not set up: default PIN is 1234</p>
   </div>
 </div>`;
 }
@@ -621,7 +1033,10 @@ function renderApp(){
   const toast=S.toast?`<div class="toast t${S.toast.type}">${esc(S.toast.msg)}</div>`:'';
   return`<div class="app">
   <div class="hdr">
-    <div class="hbdg">Society Management</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="hbdg">Society Management · v3.0</div>
+      <div id="sync-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)">💾 Local only</div>
+    </div>
     <div class="hdr-row">
       <div><h1>Supreme Limra Society</h1><p>${ADDR_A}</p></div>
       <div class="hdr-icons">
@@ -731,17 +1146,23 @@ ${def.length?`<div class="crd"><div class="stt">🔴 Outstanding Dues</div>${def
 function renderSettings(){
   return`<div class="stt">Settings</div>
 <div class="crd">
-  <div class="set-row" data-action="change-pin"><div class="set-icon" style="background:#eef2ff">🔑</div><div class="set-info"><div class="set-title">Change PIN</div><div class="set-sub">Update your login PIN</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="year-end-stmt"><div class="set-icon" style="background:#e6f4ea">📊</div><div class="set-info"><div class="set-title">Year-End Statement</div><div class="set-sub">Generate annual PDF for all flats</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="force-refresh"><div class="set-icon" style="background:#fff3e0">🔄</div><div class="set-info"><div class="set-title">Force Refresh App</div><div class="set-sub">Clear cache & load latest version</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="change-pin"><div class="set-icon" style="background:#eef2ff">🔑</div><div class="set-info"><div class="set-title">Change Password</div><div class="set-sub">Update your login password</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="export-data"><div class="set-icon" style="background:#e6f4ea">📦</div><div class="set-info"><div class="set-title">Export / Backup Data</div><div class="set-sub">Download all data as JSON file</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="import-trigger"><div class="set-icon" style="background:#fff3e0">📥</div><div class="set-info"><div class="set-title">Import / Restore Data</div><div class="set-sub">Restore from a backup JSON file</div></div><span style="color:var(--mu)">›</span></div>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
 </div>
-<div class="crd" style="background:linear-gradient(135deg,#0f2040,#1a3260);padding:16px">
-  <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px">About</div>
+<div class="crd" style="background:linear-gradient(135deg,#0f2040,#1a3260);padding:16px" id="sync-status-card">
+  <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px">Sync Status</div>
   <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:#fff">Supreme Limra Society</div>
   <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${ADDR_A}</div>
-  <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:10px">47 Flats · Version 2.0</div>
+  <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+    <span style="width:10px;height:10px;border-radius:50%;background:SYNC_DOT_COLOR;flex-shrink:0;display:inline-block"></span>
+    <span style="font-size:11px;color:rgba(255,255,255,.7)">SYNC_STATUS_TEXT</span>
+  </div>
 </div>
+${renderFirebaseSetupCard()}
 <div class="crd">
   <button class="btn brd" style="width:100%;padding:12px" data-action="logout">🔒 Logout</button>
 </div>`;
@@ -761,6 +1182,8 @@ function renderModal(){
   else if(m.type==='changePin') body=renderChangePin();
   else if(m.type==='pdfGuide') body=renderPdfGuide(m.data);
   else if(m.type==='imgGuide') body=renderImgGuide(m.data);
+  else if(m.type==='waReady') body=renderWaReady(m.data);
+  else if(m.type==='yearEnd') body=renderYearEnd(m.data);
   return`<div class="mbox" id="modal-box"><div class="mdrag"></div>${body}</div>`;
 }
 
@@ -809,22 +1232,95 @@ function renderPayment(bill){
 
 function renderReceipt(bill){
   const f=flatOf(bill);
-  const items=[{sr:1,l:'Maintenance Charges',x:MS[bill.month-1]+'-'+String(bill.year).slice(-2),a:bill.amount},{sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},{sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},{sr:14,l:''},{sr:15,l:''}];
-  const trs=items.map(i=>`<tr><td class="sr">${i.sr}</td><td>${esc(i.l||'')}${i.x?'&nbsp;&nbsp;<strong>'+i.x+'</strong>':''}</td><td class="am">${i.a?i.a+'/-':''}</td></tr>`).join('');
-  return`<div class="mttl">🧾 Payment Receipt</div>
-<div class="rct-p">
-  <div class="rp-h"><h2>SUPREME LIMRA</h2><p>${ADDR_P}</p></div>
-  <div class="rp-m"><div class="rp-mi"><div class="rp-ml"><div>Received from Mr./Mrs./Ms. <span class="rp-fv">${esc(f.ownerName)}</span></div><div>Flat/Garage/Shop No.: <span class="rp-fv">${esc(f.flatNo)}</span></div><div style="font-size:10px;color:#555;margin-top:3px">On account of the particulars stated below</div></div><div class="rp-mr"><div style="font-size:10px;color:#555">No.</div><div class="rno">${bill.receiptNo}</div><div style="font-size:10px;color:#555;margin-top:6px">Date:</div><div style="font-weight:700">${bill.paidDate}</div></div></div></div>
-  <table class="rp-t"><thead><tr><th style="width:22px">Sr</th><th>Particulars</th><th style="width:65px;text-align:right">Amount</th></tr></thead><tbody>${trs}<tr class="tr"><td class="sr"></td><td class="tlb">Total</td><td class="am">${bill.amount}/-</td></tr></tbody></table>
-  <div class="rp-w"><span>Rs.in word</span><span class="rp-wv">${numToWords(bill.amount)}</span></div>
-  <div class="rp-sg"><div><div class="rp-ln"></div>Name &amp; Signature</div><div><div class="rp-ln" style="margin-left:auto"></div>Hon. Secretary / Treasurer</div></div>
+  const items=[
+    {sr:1,l:'Maintenance Charges',x:MS[bill.month-1]+'-'+String(bill.year).slice(-2),a:bill.amount},
+    {sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},
+    {sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},
+    {sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},
+    {sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},
+    {sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},
+    {sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},
+    {sr:14,l:''},{sr:15,l:''}
+  ];
+  const trs=items.map(i=>`
+    <tr>
+      <td class="sr">${i.sr}</td>
+      <td style="font-size:10px">${esc(i.l||'')}${i.x?`&nbsp;<strong style="color:#0f2040">${i.x}</strong>`:''}</td>
+      <td class="am">${i.a?i.a+'/-':''}</td>
+    </tr>`).join('');
+  return`<div class="mttl" style="font-size:18px">🧾 Payment Receipt</div>
+<div class="rct-p" id="receipt-capture">
+  <div class="rp-paid-stamp">PAID</div>
+  <!-- Navy Header -->
+  <div class="rp-h">
+    <h2>SUPREME LIMRA</h2>
+    <p>${ADDR_P}</p>
+    <div class="rp-tag">MAINTENANCE RECEIPT</div>
+  </div>
+  <div class="rp-gold-bar"></div>
+  <!-- Meta -->
+  <div class="rp-m">
+    <div class="rp-mi">
+      <div class="rp-ml">
+        <div>Received from Mr./Mrs./Ms. <span class="rp-fv">${esc(f.ownerName)}</span></div>
+        <div style="margin-top:2px">Flat/Garage/Shop No.: <span class="rp-fv">${esc(f.flatNo)}</span></div>
+        <div class="rp-note">On account of the particulars stated below</div>
+      </div>
+      <div class="rp-mr">
+        <div class="rno-lbl">No.</div>
+        <div class="rno">${bill.receiptNo}</div>
+        <div class="rdate-lbl">Date</div>
+        <div class="rdate">${bill.paidDate}</div>
+      </div>
+    </div>
+  </div>
+  <!-- Table -->
+  <table class="rp-t">
+    <thead><tr>
+      <th style="width:20px">Sr</th>
+      <th>Particulars</th>
+      <th style="width:60px;text-align:right">Amount</th>
+    </tr></thead>
+    <tbody>
+      ${trs}
+      <tr class="tr">
+        <td class="sr"></td>
+        <td class="tlb" style="font-weight:800">Total</td>
+        <td class="am" style="color:#c9932a">${bill.amount}/-</td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Words + Mode -->
+  <div class="rp-w">
+    <span style="color:#888;font-size:9.5px">Rs. in words:</span>
+    <span class="rp-wv">${numToWords(bill.amount)}</span>
+    ${bill.paymentMode?`<span class="rp-mode">${bill.paymentMode}</span>`:''}
+  </div>
+  <!-- Footer -->
+  <div class="rp-footer">
+    Computer Generated Receipt — No Signature Required<br>
+    <span style="font-size:8px;color:#bbb">Supreme Limra Society Management · ${new Date().getFullYear()}</span>
+  </div>
 </div>
+<!-- Action buttons -->
 <div style="display:flex;gap:8px;margin-top:14px">
   <button class="btn bo" style="flex:1" data-action="close-modal">Close</button>
-  ${f.mobile?`<button class="btn bwa" style="flex:1;font-size:12px" data-action="wa-rcpt" data-id="${bill.id}">📎 Send via WhatsApp</button>`:''}
-  <button class="btn bpdf" style="flex:1" data-action="print-pdf" data-id="${bill.id}">PDF / Print 🖨️</button>
+  <button class="btn bpdf" style="flex:1;font-size:12px" data-action="print-pdf" data-id="${bill.id}">PDF 🖨️</button>
+  ${f.mobile?`<button class="btn" id="wa-send-btn"
+    style="flex:1;font-size:13px;font-weight:700;border:none;cursor:pointer;border-radius:10px;padding:10px;background:${S._pdfUploading?'#aaa':'#25d366'};color:#fff;transition:background .3s"
+    data-action="wa-rcpt" data-id="${bill.id}"
+    ${S._pdfUploading?'disabled':''}>
+    ${S._pdfUploading ? '⏳ Uploading...' : S._pdfUrl ? 'WhatsApp + PDF 💬' : 'WhatsApp 💬'}
+  </button>`:''}
 </div>
-<div style="background:#e8faf0;border:1px solid #b2dfca;border-radius:10px;padding:8px 12px;margin-top:10px;font-size:11px;color:#075e54">📎 <strong>Send via WhatsApp</strong>: Captures receipt as image → 1-tap share if online, or long-press image to save then share from Photos.</div>`;
+${f.mobile?`<div style="display:flex;gap:8px;margin-top:8px">
+  <button class="btn" style="flex:1;background:#e8faf0;color:#075e54;border:1.5px solid #b2dfca;font-size:11px;padding:9px 6px" data-action="copy-pdf-link-now" data-id="${bill.id}">
+    📋 Copy PDF Link
+  </button>
+</div>
+<div id="pdf-status-hint" style="margin-top:8px;background:#e8faf0;border-radius:8px;padding:8px 10px;font-size:11px;color:#075e54;text-align:center;line-height:1.6">
+  💬 WhatsApp opens directly to owner's chat
+</div>`:''}`;
 }
 
 function renderWAFlow(data){
@@ -920,82 +1416,170 @@ function renderPdfGuide(data){
 <button class="btn bo" style="width:100%" data-action="close-modal">Close</button>`;
 }
 
+function renderFirebaseSetupCard(){
+  if(FB_READY) return `<div class="crd" style="border:2px solid #b2dfca;background:#e8faf0;padding:14px">
+  <div style="font-size:13px;font-weight:700;color:#075e54;margin-bottom:8px">✅ Firebase Connected</div>
+  <div style="font-size:11.5px;color:#1a5c40;line-height:1.8">
+    <strong>For WhatsApp PDF links to work</strong>, make sure these Firebase Storage rules are set:<br>
+    <div style="background:#fff;border-radius:8px;padding:8px 10px;margin-top:8px;font-family:monospace;font-size:10px;color:#333;line-height:1.6">
+      rules_version = '2';<br>
+      service firebase.storage {<br>
+      &nbsp;&nbsp;match /b/{bucket}/o {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;match /receipts/{f} {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read: if true;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow write: if request.auth != null;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+      &nbsp;&nbsp;}<br>
+      }
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:#555">
+      Firebase Console → Build → Storage → Rules → paste above → Publish
+    </div>
+  </div>
+</div>`;
+  return `<div class="crd" style="border:2px solid #f0c96a;background:#fff8ea">
+  <div style="font-size:13px;font-weight:700;color:#8a5500;margin-bottom:8px">☁️ Enable Cloud Sync (Optional)</div>
+  <div style="font-size:11.5px;color:#7a5010;line-height:1.8;margin-bottom:10px">
+    Set up Firebase (free) to sync data across all devices.<br>
+    <strong>1.</strong> Go to console.firebase.google.com<br>
+    <strong>2.</strong> Create project → Add Web App → copy config<br>
+    <strong>3.</strong> Enable Authentication (Email/Password) → create 1 user<br>
+    <strong>4.</strong> Enable Firestore Database (production mode)<br>
+    <strong>5.</strong> Paste config in FIREBASE_CFG in index.html<br>
+    <strong>6.</strong> Re-upload to GitHub → sync works on all devices ✓
+  </div>
+</div>`;
+}
+
+function renderYearEnd(data){
+  const {year}=data||{};
+  const yrs=[...new Set([...S.bills.map(b=>b.year),new Date().getFullYear()])].sort((a,b)=>b-a);
+  const selY=year||yrs[0]||new Date().getFullYear();
+  return`<div class="mttl">📊 Year-End Statements</div>
+<div class="ib">Generate a full annual PDF for every flat showing all 12 months paid/pending. Perfect for AGM records.</div>
+<div class="ig">
+  <label class="il">Select Year</label>
+  <select class="inp" id="ye-year">${yrs.map(y=>`<option value="${y}" ${y===selY?'selected':''}>${y}</option>`).join('')}</select>
+</div>
+<div style="background:#e6f4ea;border:1.5px solid #b2dfca;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#075e54">
+  <strong>${S.flats.length} flats</strong> — generates ${S.flats.length} separate PDFs (one per flat).<br>
+  Each PDF downloads automatically, named by flat number.
+</div>
+<div style="display:flex;gap:10px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
+  <button class="btn bn" style="flex:1.5" data-action="do-year-end">Generate All PDFs 📊</button>
+</div>`;
+}
+
+function renderWaReady(data){
+  const {bill, flat, hasPdf, waUrl} = data;
+  // waUrl is the ACTUAL wa.me URL with full message
+  // Plain <a href> — simplest thing that always works
+  return `<div style="text-align:center;padding:8px 0 14px">
+    <div style="font-size:44px;margin-bottom:8px">${hasPdf ? '📄' : '💬'}</div>
+    <div style="font-family:var(--serif);font-size:22px;font-weight:700;color:var(--tx);margin-bottom:4px">
+      ${hasPdf ? 'Receipt Ready!' : 'Message Ready!'}
+    </div>
+    <div style="font-size:12px;color:var(--mu)">
+      ${hasPdf ? 'PDF uploaded ✓ — link included in message' : 'Receipt details ready to send'}
+    </div>
+  </div>
+
+  <div style="background:#f5f0e8;border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+    <div style="background:#25d366;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">💬</div>
+    <div>
+      <div style="font-weight:700;font-size:14px;color:var(--tx)">${flat.ownerName}</div>
+      <div style="font-size:12px;color:var(--mu)">Flat ${flat.flatNo} · ${flat.mobile}</div>
+    </div>
+  </div>
+
+  <!-- Plain <a href> with actual URL — no JavaScript, cannot fail -->
+  <a href="${waUrl}"
+     style="display:flex;align-items:center;justify-content:center;gap:10px;background:#25d366;color:#fff;padding:16px;border-radius:14px;text-decoration:none;font-weight:700;font-size:17px;margin-bottom:12px;-webkit-tap-highlight-color:rgba(0,0,0,.1)">
+    <span style="font-size:22px">💬</span>
+    Open WhatsApp & Send
+  </a>
+
+  <button class="btn bo" style="width:100%;padding:12px" data-action="close-modal">Close</button>`;
+}
+
 function renderChangePin(){
-  return`<div class="mttl">🔑 Change PIN</div>
-<div class="ig"><label class="il">Current PIN</label><input class="inp" id="pin-old" type="tel" maxlength="6" placeholder="Current PIN" inputmode="numeric" autocomplete="off"></div>
-<div class="ig"><label class="il">New PIN</label><input class="inp" id="pin-new" type="tel" maxlength="6" placeholder="New PIN (4-6 digits)" inputmode="numeric" autocomplete="off"></div>
-<div class="ig"><label class="il">Confirm New PIN</label><input class="inp" id="pin-cfm" type="tel" maxlength="6" placeholder="Repeat new PIN" inputmode="numeric" autocomplete="off"></div>
+  return`<div class="mttl">🔑 Change Password</div>
+<div class="ig"><label class="il">Current Password</label><input class="inp" id="pin-old" type="password" placeholder="Current password" autocomplete="current-password"></div>
+<div class="ig"><label class="il">New Password</label><input class="inp" id="pin-new" type="password" placeholder="New password (6+ chars)" autocomplete="new-password"></div>
+<div class="ig"><label class="il">Confirm New Password</label><input class="inp" id="pin-cfm" type="password" placeholder="Confirm new password" autocomplete="new-password"></div>
 <div id="pin-change-err" style="color:var(--re);font-size:12px;min-height:18px;margin-bottom:10px"></div>
-<div style="display:flex;gap:10px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bn" style="flex:1" data-action="do-change-pin">Update PIN</button></div>`;
+<div style="display:flex;gap:10px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bn" style="flex:1" data-action="do-change-pin">Update Password</button></div>`;
 }
 
 // ════════════════════════════════════════════════════
 // MAIN RENDER
 // ════════════════════════════════════════════════════
+function updateLoginHint(){
+  const hint=document.getElementById('login-hint');
+  const note=document.getElementById('pin-note');
+  if(!hint) return;
+  if(FB_READY && typeof firebase!=='undefined' && _fbAuth){
+    hint.textContent='Enter your Firebase password';
+    if(note) note.textContent='Password set in Firebase Auth console';
+  } else if(FB_READY){
+    hint.textContent='Connecting to cloud… please wait';
+    if(note) note.style.display='none';
+  } else {
+    hint.textContent='Enter your PIN to continue';
+    if(note) note.textContent='Default PIN: 1234';
+  }
+}
+function updateLoginHint(){
+  const el=document.getElementById('login-hint');
+  if(!el)return;
+  el.textContent=FB_READY?'Use your Firebase password':'Default PIN: 1234';
+}
 function updateReceiptHint(){
   const el=document.getElementById('pdf-status-hint');
   const btn=document.getElementById('wa-send-btn');
   if(el){
-    if(S._pdfUploading){el.style.background='#fff8ea';el.textContent='Preparing PDF link...';}
-    else if(S._pdfUrl){el.style.background='#e8faf0';el.textContent='PDF ready — tap WhatsApp + PDF to include download link';}
-    else{el.style.background='#f5f5f5';el.textContent='Tap a WhatsApp button to send receipt';}
+    if(S._pdfUploading){
+      el.style.background='#fff8ea';el.style.borderColor='#ffd082';el.style.color='#8a5500';
+      el.textContent='⏳ Preparing PDF link… (tap WhatsApp anytime, PDF link will be added if ready)';
+    } else if(S._pdfUrl){
+      el.style.background='#e8faf0';el.style.borderColor='#b2dfca';el.style.color='#075e54';
+      el.textContent='✅ PDF ready — tap WhatsApp to send with download link';
+    } else {
+      el.style.background='#f0f8ff';el.style.borderColor='#c8e0ff';el.style.color='#555';
+      el.textContent='💬 Tap WhatsApp to send receipt message';
+    }
+  }
+  if(btn){
+    btn.disabled=false;
+    btn.style.background='#25d366';
+    btn.textContent=S._pdfUrl?'WhatsApp + PDF 💬':'WhatsApp 💬';
   }
 }
-function ensureJsPDF(){
-  return new Promise(resolve=>{
-    if(window.jspdf){resolve(true);return;}
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    s.onload=()=>resolve(true);s.onerror=()=>resolve(false);
-    document.head.appendChild(s);
-  });
-}
-async function uploadReceiptAndGetLink(bill,flat){
-  if(!FB_READY||!_fbST)return null;
-  try{
-    const loaded=await ensureJsPDF();if(!loaded)return null;
-    const doc=buildReceiptPDF(bill,flat);if(!doc)return null;
-    const blob=doc.output('blob');
-    const fname='receipts/Receipt_'+bill.receiptNo+'_Flat'+flat.flatNo.replace(/\//g,'_')+'_'+Date.now()+'.pdf';
-    const ref=_fbST.ref(fname);
-    const up=ref.put(blob,{contentType:'application/pdf'});
-    const tout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),8000));
-    await Promise.race([up,tout]);
-    return await ref.getDownloadURL();
-  }catch(e){console.log('Upload:',e.message);return null;}
-}
-function printPDF(bill,flat){
-  ensureJsPDF().then(ok=>{
-    if(!ok){showToast('PDF library not loaded','err');return;}
-    const doc=buildReceiptPDF(bill,flat);if(!doc)return;
-    if(/iPhone|iPad|Android/i.test(navigator.userAgent)){
-      doc.save('Receipt_'+bill.receiptNo+'_Flat'+flat.flatNo.replace('/','_')+'.pdf');
-      showToast('PDF saved to Downloads ✓');
-    }else{
-      const blob=doc.output('blob');
-      const url=URL.createObjectURL(blob);
-      window.open(url,'_blank');
-      setTimeout(()=>URL.revokeObjectURL(url),60000);
+function updateSyncBadge(){
+  const badge=document.getElementById('sync-badge');
+  if(badge){
+    if(FB_READY){
+      badge.style.background='rgba(37,211,102,.2)';
+      badge.style.color='#5dff9a';
+      badge.textContent='☁️ Synced';
+    } else {
+      badge.style.background='rgba(255,255,255,.08)';
+      badge.style.color='rgba(255,255,255,.45)';
+      badge.textContent='💾 Local only';
     }
-  });
+  }
+  // Update status card dots/text if visible
+  const card=document.getElementById('sync-status-card');
+  if(card){
+    const dot=card.querySelector('span');
+    const txt=card.querySelectorAll('span')[1];
+    if(dot) dot.style.background=FB_READY?'#5dff9a':'#ffd082';
+    if(txt) txt.textContent=FB_READY?'Cloud sync active — data shared across all devices':'Local only — data saved on this device only';
+  }
 }
-function waRcptWithLink(flat,bill,link){
-  return 'PAYMENT RECEIVED - Supreme Limra Society\n\n'
-    +'Dear '+flat.ownerName+',\n'
-    +'Receipt #'+bill.receiptNo+' | Flat '+flat.flatNo+'\n'
-    +'Month: '+MO[bill.month-1]+' '+bill.year+'\n'
-    +'Amount: Rs.'+bill.amount+'/-  | '+bill.paidDate+'\n'
-    +'Mode: '+bill.paymentMode+'\n\n'
-    +'Download PDF Receipt:\n'+link+'\n\n'
-    +'Thank you! - Supreme Limra Society';
-}
-function goToWA(mobile,msg){
-  const n=mobile.replace(/\D/g,'');
-  window.location.href='https://wa.me/'+(n.startsWith('91')?n:'91'+n)+'?text='+encodeURIComponent(msg);
-}
-
 function render(){
-  document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
+  document.getElementById('root').innerHTML=DB.isAuth()?renderApp():renderLogin();updateSyncBadge();updateLoginHint();updateReceiptHint();updateLoginHint();
 }
 
 // ════════════════════════════════════════════════════
@@ -1014,16 +1598,17 @@ document.addEventListener('click',function(e){
     const loginBtn=document.querySelector('[data-action="login"]');
     if(loginBtn){loginBtn.textContent='Checking…';loginBtn.disabled=true;}
     DB.loginUser(pin).then(result=>{
-      if(result.ok){loadData().then(()=>render());}
-      else{
+      if(result.ok){
+        loadData().then(()=>render());
+      } else {
         const err=document.getElementById('pin-err');
-        if(err){err.textContent=result.msg||'Wrong password';setTimeout(()=>{err.textContent='';},2500);}
+        if(err){err.textContent=result.msg||'Wrong PIN';setTimeout(()=>{err.textContent='';},2500);}
         if(loginBtn){loginBtn.textContent='Unlock App 🔓';loginBtn.disabled=false;}
       }
     });
     return;
   }
-  if(a==='logout'){if(confirm('Logout from the app?')){LS.logout();render();} return;}
+  if(a==='logout'){if(confirm('Logout from the app?')){DB.logout();S.tab='dashboard';S.modal=null;render();} return;}
   if(a==='tab'){S.tab=el.dataset.tab;S.modal=null;render();return;}
   if(a==='close-modal'){S.modal=null;render();return;}
   
@@ -1069,37 +1654,91 @@ document.addEventListener('click',function(e){
     const lastRcpt=S.bills.reduce((mx,b)=>Math.max(mx,+(b.receiptNo||0)),0);
     const updated={...b,status:'paid',amount:amt,paidDate:new Date(date).toLocaleDateString('en-IN'),paymentMode:mode,receiptNo:String(lastRcpt+1).padStart(4,'0')};
     S.bills=S.bills.map(x=>x.id===id?updated:x);saveBills();
-    showToast('Payment recorded ✓');S.modal={type:'receipt',data:updated};render();return;
+    showToast('Payment recorded ✓');
+    S.modal={type:'receipt',data:updated};
+    S._pdfUrl=null;S._pdfUploading=true;
+    render();
+    // Background upload starts immediately after payment
+    if(FB_READY && _fbST){
+      uploadReceiptAndGetLink(updated, flatOf(updated))
+        .then(url=>{ S._pdfUrl=url; S._pdfUploading=false; })
+        .catch(()=>{ S._pdfUploading=false; });
+    } else { S._pdfUploading=false; }
+    return;
   }
   if(a==='open-receipt'){
     const b=S.bills.find(x=>x.id===id);
     if(b){
-      S.modal={type:'receipt',data:b};S._pdfUrl=null;S._pdfUploading=true;render();
-      if(FB_READY&&_fbST){
-        uploadReceiptAndGetLink(b,flatOf(b))
-          .then(url=>{S._pdfUrl=url;S._pdfUploading=false;updateReceiptHint();})
-          .catch(()=>{S._pdfUploading=false;updateReceiptHint();});
-      } else {S._pdfUploading=false;}
+      S.modal={type:'receipt',data:b};
+      S._pdfUrl=null; // reset
+      S._pdfUploading=true;
+      render();
+      // Start upload in background — by the time user taps WA, it's ready
+      if(FB_READY && _fbST){
+        uploadReceiptAndGetLink(b, flatOf(b))
+          .then(url=>{ S._pdfUrl=url; S._pdfUploading=false; updateReceiptHint(); })
+          .catch(e=>{ console.log('BG upload error:',e); S._pdfUploading=false; updateReceiptHint(); });
+      } else {
+        S._pdfUploading=false;
+      }
     }
     return;
   }
   if(a==='print-pdf'){const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){printPDF(b,flatOf(b));showToast('Opening PDF…','pdf');}return;}
   
   // WhatsApp
-  if(a==='wa-bill'){const b=S.bills.find(x=>x.id===id);if(b){const f=flatOf(b);showToast('Opening WhatsApp…','wa');sendBillOnWA(b,f);}return;}
+  if(a==='wa-bill'){
+    const b = S.bills.find(x=>x.id===id);
+    if(b){
+      const f = flatOf(b);
+      // Direct to contact's chat — user just taps Send
+      goToWA(f.mobile, waMsg(f, b));
+      showToast('Opening WhatsApp…','wa');
+    }
+    return;
+  }
   if(a==='wa-open-now'){const b=S.bills.find(x=>x.id===id)||S.modal?.data?.bill;if(b){const f=flatOf(b);S.modal=null;render();setTimeout(()=>{openWA(f.mobile,waRcpt(f,b));},300);}return;}
-  if(a==='wa-rcpt'){const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){const f=flatOf(b);shareReceiptOnWA(b,f);}return;}
-  if(a==='bulk-wa'){
-    const pend=S.bills.filter(b=>b.month===S.bf.month&&b.year===S.bf.year&&b.status==='pending'&&flatOf(b).mobile);
-    if(!pend.length){showToast('No pending bills with mobile numbers','err');return;}
-    S.modal={type:'waFlow',data:{bills:pend,step:'send',idx:0,done:[]}};render();return;
+  if(a==='wa-rcpt'){
+    const b = S.bills.find(x=>x.id===id) || S.modal?.data;
+    if(!b){ return; }
+    const f = flatOf(b);
+    const msg = S._pdfUrl ? waRcptWithLink(f,b,S._pdfUrl) : waRcpt(f,b);
+
+    // Try Web Share API with PDF file (requires user to pick WhatsApp from sheet)
+    // PDF is generated synchronously — no async before share() call
+    if(window.jspdf && typeof navigator.share==='function'){
+      try{
+        const doc = buildReceiptPDF(b, f);
+        if(doc){
+          const blob = doc.output('blob');
+          const file = new File([blob],
+            'Receipt_'+b.receiptNo+'_Flat'+f.flatNo.replace(/\//g,'_')+'.pdf',
+            {type:'application/pdf'}
+          );
+          if(navigator.canShare && navigator.canShare({files:[file]})){
+            navigator.share({
+              files:[file],
+              title:'Receipt #'+b.receiptNo+' — Supreme Limra Society',
+              text: msg
+            }).then(()=>{ showToast('Receipt shared with PDF ✓','wa'); })
+             .catch(err=>{ if(err.name!=='AbortError') goToWA(f.mobile,msg); });
+            return;
+          }
+        }
+      }catch(err){ console.log('Share error:',err); }
+    }
+
+    // Fallback: direct to contact (text only)
+    goToWA(f.mobile, msg);
+    showToast('Opening WhatsApp…','wa');
+    return;
   }
   if(a==='wa-start'){if(S.modal?.data){S.modal.data.step='send';S.modal.data.idx=0;S.modal.data.done=[];}render();return;}
   if(a==='wa-next'){
     const d=S.modal?.data;if(!d)return;
     if(d.idx>=d.bills.length)return;
     const bill=d.bills[d.idx];const f=flatOf(bill);
-    sendBillOnWA(bill,f);
+    goToWA(f.mobile, waMsg(f, bill));
     d.done=[...d.done,bill.id];d.idx++;
     render();return;
   }
@@ -1112,9 +1751,104 @@ document.addEventListener('click',function(e){
     const cfm=document.getElementById('pin-cfm')?.value;
     const err=document.getElementById('pin-change-err');
     if(old!==LS.getPin()){if(err)err.textContent='Current PIN is wrong.';return;}
-    if(!nw||nw.length<4){if(err)err.textContent='New PIN must be at least 4 digits.';return;}
+    if(!nw||nw.length<6){if(err)err.textContent='New password must be at least 6 characters.';return;}
     if(nw!==cfm){if(err)err.textContent='PINs do not match.';return;}
-    LS.setPin(nw);showToast('PIN changed successfully ✓');S.modal=null;render();return;
+    DB.setPin(nw);
+    if(FB_READY && _fbAuth && _fbAuth.currentUser){
+      _fbAuth.currentUser.updatePassword(nw)
+        .catch(e=>console.log('Firebase password update:',e));
+    }
+    showToast('PIN changed successfully ✓');S.modal=null;render();return;
+  }
+  // open-wa deprecated — using plain <a href> now
+  if(a==='wa-direct'){
+    const b=S.bills.find(x=>x.id===id)||S.modal?.data;
+    if(b){
+      const f=flatOf(b);
+      const msg=S._pdfUrl?waRcptWithLink(f,b,S._pdfUrl):waRcpt(f,b);
+      goToWA(f.mobile, msg);
+      showToast('Opening WhatsApp directly…','wa');
+    }
+    return;
+  }
+  if(a==='copy-pdf-link-now'){
+    const b=S.bills.find(x=>x.id===id)||S.modal?.data;
+    if(!b){return;}
+    const f=flatOf(b);
+    showToast('Uploading PDF…','wa');
+    uploadReceiptAndGetLink(b,f).then(link=>{
+      if(!link){showToast('Upload failed — check Firebase Storage rules','err');return;}
+      // Copy to clipboard
+      const txt='Download your receipt: '+link;
+      navigator.clipboard.writeText(link)
+        .then(()=>showToast('PDF link copied! Paste in WhatsApp ✓','wa'))
+        .catch(()=>{
+          // iOS fallback
+          const ta=document.createElement('textarea');
+          ta.value=link;ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
+          document.body.appendChild(ta);ta.focus();ta.select();
+          try{document.execCommand('copy');}catch(e){}
+          document.body.removeChild(ta);
+          showToast('PDF link copied! Paste in WhatsApp ✓','wa');
+        });
+    });
+    return;
+  }
+  if(a==='copy-pdf-link'){
+    const link=el.dataset.link;
+    if(link){
+      navigator.clipboard.writeText(link)
+        .then(()=>showToast('PDF link copied! Paste in WhatsApp ✓','wa'))
+        .catch(()=>{
+          // Fallback for iOS
+          const ta=document.createElement('textarea');
+          ta.value=link; ta.style.position='fixed'; ta.style.opacity='0';
+          document.body.appendChild(ta); ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('PDF link copied! Paste in WhatsApp ✓','wa');
+        });
+    }
+    return;
+  }
+  if(a==='force-refresh'){
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(regs=>{
+        Promise.all(regs.map(r=>r.unregister())).then(()=>{
+          // Clear all caches
+          caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>{
+            showToast('Cache cleared! Reloading…','ok');
+            setTimeout(()=>window.location.reload(true),800);
+          });
+        });
+      });
+    } else {
+      window.location.reload(true);
+    }
+    return;
+  }
+  if(a==='year-end-stmt'){S.modal={type:'yearEnd',data:{}};render();return;}
+  if(a==='do-year-end'){
+    const yr=+(document.getElementById('ye-year')?.value||new Date().getFullYear());
+    S.modal=null;render();
+    showToast('Generating statements…','ok');
+    ensureJsPDF().then(loaded=>{
+      if(!loaded){showToast('PDF library not loaded','err');return;}
+      let count=0;
+      S.flats.forEach((flat,i)=>{
+        setTimeout(()=>{
+          try{
+            const doc=generateYearEndStatement(flat,S.bills,yr);
+            if(doc){
+              doc.save('Statement_'+yr+'_Flat'+flat.flatNo.replace('/','_')+'.pdf');
+              count++;
+              if(count===S.flats.length) showToast('All '+count+' statements generated ✓');
+            }
+          }catch(e){console.log('Statement error:',e);}
+        },i*600); // stagger downloads 600ms apart
+      });
+    });
+    return;
   }
   if(a==='export-data'){exportData();return;}
   if(a==='import-trigger'){document.getElementById('import-file')?.click();return;}
@@ -1134,28 +1868,62 @@ document.addEventListener('keydown',function(e){
 // INIT
 // ════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async function(){
-  render(); // show login immediately
-  initFirebase();
+  render(); // Show login screen immediately
+
+  // Init Firebase — wait for CDN scripts
   setTimeout(async function(){
-    if(FB_READY&&_fbAuth){
-      await new Promise(resolve=>{const u=_fbAuth.onAuthStateChanged(user=>{u();resolve(user);});});
+    initFirebase();
+
+    // Wait for Firebase Auth to restore session (critical after page refresh)
+    // Without this, currentUser is null for ~500ms and app renders empty
+    if(FB_READY && _fbAuth){
+      await new Promise(resolve=>{
+        const unsub = _fbAuth.onAuthStateChanged(user=>{
+          unsub();
+          resolve(user);
+        });
+      });
     }
-    if(DB.isAuth()){await loadData();render();}
-  },300);
-  // Register as PWA if supported
-  if('serviceWorker' in navigator){
-    // Optional: could add SW for offline
-  }
+
+    updateLoginHint();
+
+    if(DB.isAuth()){
+      await loadData();
+      render();
+    } else {
+      render(); // show login with updated hint
+    }
+  }, 300);
 });
 </script>
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',async()=>{
+  window.addEventListener('load', async () => {
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js');
+      const reg = await navigator.serviceWorker.register('./sw.js');
+      // Check for updates every time page loads
       reg.update();
-    }catch(e){console.log('SW:',e);}
+      // When new SW is waiting, force it to activate immediately
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+            // New version available — reload page automatically
+            console.log('[SW] New version detected, reloading...');
+            window.location.reload();
+          }
+        });
+      });
+    }catch(e){
+      console.log('SW registration failed:', e);
+    }
+  });
+  // Also reload if SW controller changes (new SW took over)
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    console.log('[SW] Controller changed, reloading...');
+    // Small delay to avoid reload loop
+    setTimeout(() => window.location.reload(), 300);
   });
 }
 </script>
