@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="S. Limra">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f2040">
+<title>Supreme Limra Society</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0f2040;height:100%}
+:root{--n:#0f2040;--n2:#1a3260;--g:#c9932a;--tx:#1a2744;--mu:#7a8099;--bg:#f2ede3;--gr:#1a7f37;--re:#c0392b;--wa:#25d366;--serif:'Cormorant Garamond',serif;--sans:'DM Sans',sans-serif}
+body{font-family:var(--sans)}
+/* ── App Shell ── */
+#root{min-height:100vh}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:76px;position:relative}
+/* ── Header ── */
+.hdr{background:linear-gradient(135deg,var(--n),var(--n2));padding:14px 18px 16px;position:relative;overflow:hidden}
+.hdr::after{content:'';position:absolute;right:-20px;top:-20px;width:100px;height:100px;border:2px solid rgba(201,147,42,.15);border-radius:50%}
+.hdr::before{content:'';position:absolute;right:10px;top:10px;width:60px;height:60px;border:2px solid rgba(201,147,42,.1);border-radius:50%}
+.hbdg{display:inline-block;background:var(--g);color:#fff;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-bottom:8px}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-start}
+.hdr h1{font-family:var(--serif);font-size:21px;font-weight:700;color:#fff;line-height:1.2}
+.hdr p{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px}
+.hdr-icons{display:flex;gap:8px;flex-shrink:0;padding-top:2px}
+.icon-btn{background:rgba(255,255,255,.12);border:none;width:34px;height:34px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff}
+/* ── Tab Bar ── */
+.tbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid #e8e2d4;display:flex;z-index:100;box-shadow:0 -4px 20px rgba(15,32,64,.08)}
+.tb{flex:1;padding:9px 0 11px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:#aaa49a;font-family:var(--sans);font-size:10px;font-weight:500;transition:color .2s}
+.tb.on{color:var(--n)}.tb.on svg{stroke:var(--g)}.tb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
+/* ── Content ── */
+.con{padding:14px 14px 4px}
+/* ── Cards ── */
+.crd{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(15,32,64,.06)}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sc{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 1px 6px rgba(15,32,64,.06)}
+.sl{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--mu);margin-bottom:6px}
+.sv{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--tx);line-height:1}
+.stt{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--tx);margin-bottom:10px}
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:10px 18px;border-radius:10px;font-family:var(--sans);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .18s;white-space:nowrap;text-decoration:none}
+.btn:active{transform:scale(.97);opacity:.9}.btn:disabled{opacity:.45;cursor:not-allowed}
+.bn{background:var(--n);color:#fff}.bg{background:var(--g);color:#fff}
+.bo{background:transparent;color:var(--n);border:1.5px solid var(--n)}
+.bwa{background:var(--wa);color:#fff}.bge{background:#e6f4ea;color:var(--gr)}
+.brd{background:#fee2e2;color:var(--re)}.bpdf{background:#e53935;color:#fff}
+.bsm{padding:6px 10px;font-size:11px;border-radius:8px}
+/* ── List ── */
+.li{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid #f0ebe0}
+.li:last-child{border-bottom:none;padding-bottom:0}
+.fb{background:var(--n);color:#fff;font-family:var(--serif);font-weight:700;font-size:12px;min-width:46px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0 4px;text-align:center;line-height:1.2}
+.ii{flex:1;margin-left:12px}.iname{font-size:13px;font-weight:600;color:var(--tx)}.isub{font-size:11px;color:var(--mu);margin-top:2px}
+/* ── Form ── */
+.ig{margin-bottom:14px}
+.il{font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:#5a5046;margin-bottom:6px;display:block}
+.inp{width:100%;padding:10px 12px;border:1.5px solid #e4ddd0;border-radius:10px;font-family:var(--sans);font-size:16px;color:var(--tx);background:#faf7f0;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.inp:focus{border-color:var(--g)}
+select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;appearance:none}
+/* ── Modal ── */
+.mov{position:fixed;inset:0;background:rgba(15,32,64,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
+.mbox{background:#fff;border-radius:22px 22px 0 0;width:100%;max-width:430px;padding:22px 18px 32px;max-height:92vh;overflow-y:auto}
+.mttl{font-family:var(--serif);font-size:21px;font-weight:700;color:var(--tx);margin-bottom:18px}
+.mdrag{width:36px;height:4px;background:#ddd;border-radius:4px;margin:0 auto 16px}
+/* ── Toast ── */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:500;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:sd .3s ease;max-width:90vw;text-align:center}
+.tok{background:var(--n)}.terr{background:var(--re)}.twa{background:#075e54}.tpdf{background:#e53935}
+@keyframes sd{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+/* ── Misc ── */
+.pb{background:#e8e2d4;border-radius:4px;height:7px;overflow:hidden;margin-top:5px}
+.pf{height:100%;border-radius:4px;background:var(--n);transition:width .5s}
+.emp{text-align:center;padding:32px 16px}.emp-icon{font-size:38px;opacity:.4;margin-bottom:10px}.emp p{font-size:13px;color:var(--mu)}
+.ib{background:#fff8ea;border:1px solid #f0c96a;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5a10;margin-bottom:14px}
+.b2{background:#f0e8ff;color:#5b21b6;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.5px;margin-left:5px;vertical-align:middle}
+.wa-banner{background:linear-gradient(135deg,#075e54,#128c7e);border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wa-banner p{color:#fff;font-size:12px;font-weight:500;line-height:1.5}
+.sep{border:none;border-top:1px solid #eee;margin:14px 0}
+/* ── Login ── */
+.login-wrap{min-height:100vh;background:linear-gradient(160deg,var(--n) 0%,var(--n2) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;position:relative;overflow:hidden}
+.login-wrap::before{content:'';position:absolute;width:300px;height:300px;border:2px solid rgba(201,147,42,.08);border-radius:50%;top:-100px;right:-100px}
+.login-wrap::after{content:'';position:absolute;width:200px;height:200px;border:2px solid rgba(201,147,42,.05);border-radius:50%;bottom:-80px;left:-80px}
+.login-logo{font-family:var(--serif);font-size:32px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
+.login-sub{font-size:11px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:40px}
+.login-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px 24px;width:100%;max-width:320px;backdrop-filter:blur(10px)}
+.login-lock{font-size:36px;text-align:center;margin-bottom:16px}
+.login-title{font-family:var(--serif);font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
+.login-hint{font-size:12px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:20px}
+.pin-input{width:100%;padding:14px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;color:#fff;font-size:22px;text-align:center;letter-spacing:8px;font-family:monospace;outline:none;-webkit-appearance:none}
+.pin-input:focus{border-color:var(--g)}
+.pin-input::placeholder{letter-spacing:2px;font-size:13px;color:rgba(255,255,255,.3)}
+.login-err{color:#ff8080;font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+/* ── Receipt preview ── */
+.rct-p{font-family:Arial,Helvetica,sans-serif;background:#fff;border:2px solid #111;font-size:11.5px}
+.rp-h{text-align:center;border-bottom:2px solid #111;padding:8px 10px 5px}
+.rp-h h2{font-size:20px;font-weight:900;letter-spacing:3px;text-transform:uppercase}
+.rp-h p{font-size:10px;margin-top:2px}
+.rp-m{border-bottom:1px solid #555;padding:8px 10px 5px}
+.rp-mi{display:flex;justify-content:space-between;gap:8px}
+.rp-ml{flex:1;font-size:11px;line-height:1.9}.rp-mr{text-align:right;font-size:11px;min-width:80px}
+.rp-mr .rno{font-size:15px;font-weight:800}
+.rp-fv{border-bottom:1px solid #000;display:inline-block;min-width:55px;font-weight:700;padding-bottom:1px}
+table.rp-t{width:100%;border-collapse:collapse}
+table.rp-t th{border:1px solid #000;padding:4px 5px;font-size:10px;font-weight:700;text-align:center}
+table.rp-t td{border:1px solid #000;padding:2.5px 5px;font-size:10.5px;height:16px;vertical-align:middle}
+table.rp-t td.sr{text-align:center;width:22px;color:#888}
+table.rp-t td.am{text-align:right;width:65px;font-weight:600}
+table.rp-t tr.tr td{font-weight:800;font-size:12px;border-top:2px solid #000;background:#f5f5f5}
+td.tlb{text-align:right;padding-right:8px}
+.rp-w{border-top:1px solid #bbb;padding:5px 10px;font-size:11px;display:flex;gap:5px;align-items:flex-end}
+.rp-wv{border-bottom:1px solid #000;flex:1;font-weight:700;padding-bottom:1px}
+.rp-sg{border-top:1px solid #bbb;padding:8px 14px 8px;display:flex;justify-content:space-between;font-size:10px;color:#555}
+.rp-sg>div{text-align:center}.rp-ln{border-top:1px solid #888;margin-bottom:3px;margin-top:20px;width:95px}
+/* ── Settings panel ── */
+.set-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #f0ebe0;cursor:pointer}
+.set-row:last-child{border-bottom:none}
+.set-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-right:12px}
+.set-info{flex:1}.set-title{font-size:13px;font-weight:600;color:var(--tx)}.set-sub{font-size:11px;color:var(--mu);margin-top:2px}
+/* ── Spin loader ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:36px;height:36px;border:3px solid var(--g);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+</style>
+</head>
+<body>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:14px"><div class="spin"></div><p style="color:#c9932a;font-size:13px;font-family:serif">Loading…</p></div></div>
+<script>
+const FIREBASE_CFG={apiKey:"AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",authDomain:"supreme-limra.firebaseapp.com",projectId:"supreme-limra",storageBucket:"supreme-limra.firebasestorage.app",messagingSenderId:"765570470191",appId:"1:765570470191:web:fc13de371e46977eff91da"};
+const SOCIETY_EMAIL="aamir2027@gmail.com";
+const FB_READY=FIREBASE_CFG.apiKey&&FIREBASE_CFG.apiKey.length>5;
+let _fbApp=null,_fbAuth=null,_fbFS=null,_fbST=null;
+function initFirebase(){if(!FB_READY||_fbApp)return;if(typeof firebase==="undefined"){setTimeout(initFirebase,800);return;}try{_fbApp=firebase.initializeApp(FIREBASE_CFG);_fbAuth=firebase.auth();_fbFS=firebase.firestore();_fbST=firebase.storage();_fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){console.log("FB:",e);}}
+const DB={
+  lget:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
+  lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
+  isAuth(){if(FB_READY&&_fbAuth)return!!_fbAuth.currentUser;return sessionStorage.getItem("slimra_auth")==="1";},
+  async loginUser(pin){
+    if(FB_READY&&_fbAuth){try{await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL,pin);sessionStorage.setItem("slimra_auth","1");return{ok:true};}catch(e){return{ok:false,msg:e.code==="auth/wrong-password"||e.code==="auth/invalid-login-credentials"?"Wrong password":"Error: "+e.message};}}
+    if(pin===(localStorage.getItem("slimra_pin")||"1234")){sessionStorage.setItem("slimra_auth","1");return{ok:true,local:true};}
+    return{ok:false,msg:"Wrong PIN"};
+  },
+  logout(){sessionStorage.removeItem("slimra_auth");if(FB_READY&&_fbAuth)_fbAuth.signOut().catch(()=>{});},
+  getPin:()=>localStorage.getItem("slimra_pin")||"1234",
+  setPin:(v)=>localStorage.setItem("slimra_pin",v),
+  async load(){if(FB_READY&&_fbFS&&this.isAuth()){try{const[fd,bd]=await Promise.all([_fbFS.collection("society").doc("flats").get(),_fbFS.collection("society").doc("bills").get()]);const flats=fd.exists?fd.data().list:null;const bills=bd.exists?bd.data().list:null;if(flats)this.lset("slimra_flats_v3",flats);if(bills)this.lset("slimra_bills_v2",bills);return{flats:flats||this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:bills||this.lget("slimra_bills_v2")||[],source:"firebase"};}catch(e){console.log("FB load:",e);}}
+    return{flats:this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:this.lget("slimra_bills_v2")||[],source:"local"};
+  },
+  saveFlats(f){this.lset("slimra_flats_v3",f);if(FB_READY&&_fbFS&&this.isAuth())_fbFS.collection("society").doc("flats").set({list:f,updated:new Date().toISOString()}).catch(()=>{});},
+  saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS&&this.isAuth())_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
+  subscribeChanges(onF,onB){if(!FB_READY||!_fbFS)return;_fbFS.collection("society").doc("flats").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);onF(d);}});_fbFS.collection("society").doc("bills").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);onB(d);}}); }
+};
+const LS=DB;
+
+// ════════════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════════════
+const MO=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const ADDR_P='Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048';
+const ADDR_A='Sr. No. 15/16, Inam Nagar, Kondhwa Khurd, Pune – 411048';
+const now=new Date();
+
+// ════════════════════════════════════════════════════
+// INITIAL FLATS DATA
+// ════════════════════════════════════════════════════
+const INIT_FLATS=[
+  {id:'g1',flatNo:'G1',ownerName:'Malik R. Shaikh',mobile:'9890011001',floor:'Ground',maintenance:1000},
+  {id:'g2',flatNo:'G2',ownerName:'Sarfaraz A.L. Shaikh',mobile:'9890011002',floor:'Ground',maintenance:1000},
+  {id:'f101',flatNo:'101',ownerName:'Furqan A. Shaikh',mobile:'9890011101',floor:'1st',maintenance:1000},
+  {id:'f102',flatNo:'102',ownerName:'Yasmeen M. Khodil',mobile:'9890011102',floor:'1st',maintenance:1000},
+  {id:'f103',flatNo:'103',ownerName:'Faiyaz I. Bagban',mobile:'9890011103',floor:'1st',maintenance:1000},
+  {id:'f104',flatNo:'104',ownerName:'Rashid A. Shaikh',mobile:'9890011104',floor:'1st',maintenance:1000},
+  {id:'f105',flatNo:'105',ownerName:'Naaznin A. Hashmi',mobile:'9890011105',floor:'1st',maintenance:1000},
+  {id:'f106',flatNo:'106',ownerName:'Sarfaraz I. Shaikh',mobile:'9890011106',floor:'1st',maintenance:1000},
+  {id:'f107',flatNo:'107',ownerName:'Saifulla I. Shaikh',mobile:'9890011107',floor:'1st',maintenance:1000},
+  {id:'f108',flatNo:'108',ownerName:'Shehnaz B. Siddiqui',mobile:'9890011108',floor:'1st',maintenance:1000},
+  {id:'f201',flatNo:'201',ownerName:'Fayyaj R. Patel',mobile:'9890011201',floor:'2nd',maintenance:1000},
+  {id:'f202',flatNo:'202',ownerName:'Inayatullah B. Siddiqui',mobile:'9890011202',floor:'2nd',maintenance:1000},
+  {id:'f203',flatNo:'203',ownerName:'Sayed Taherali',mobile:'9890011203',floor:'2nd',maintenance:1000},
+  {id:'f204',flatNo:'204',ownerName:'Shafaque Zafar Shaikh',mobile:'9890011204',floor:'2nd',maintenance:1000},
+  {id:'f205',flatNo:'205',ownerName:'Jamir B. Shaikh',mobile:'9890011205',floor:'2nd',maintenance:1000},
+  {id:'f206',flatNo:'206',ownerName:'Abdul S. Shaikh',mobile:'9890011206',floor:'2nd',maintenance:1000},
+  {id:'f207',flatNo:'207',ownerName:'Ibrahim Shaikh',mobile:'9890011207',floor:'2nd',maintenance:1000},
+  {id:'f208',flatNo:'208',ownerName:'Zaib N. Inamdar',mobile:'9890011208',floor:'2nd',maintenance:1000},
+  {id:'f301',flatNo:'301',ownerName:'Asiya N. Inamdaar',mobile:'9890011301',floor:'3rd',maintenance:1000},
+  {id:'f302',flatNo:'302',ownerName:'Naaz Hamid Sk.',mobile:'9890011302',floor:'3rd',maintenance:1000},
+  {id:'f303',flatNo:'303',ownerName:'Bismillah A. Siddiqui',mobile:'9890011303',floor:'3rd',maintenance:1000},
+  {id:'f304',flatNo:'304',ownerName:'Feroz Y. Shaikh',mobile:'9890011304',floor:'3rd',maintenance:1000},
+  {id:'f305',flatNo:'305',ownerName:'Mehboob B. Shaikh',mobile:'9890011305',floor:'3rd',maintenance:1000},
+  {id:'f306',flatNo:'306',ownerName:'Ayaz K. Ansari',mobile:'9890011306',floor:'3rd',maintenance:1000},
+  {id:'f307',flatNo:'307',ownerName:'Rafique M. Bukhari',mobile:'9890011307',floor:'3rd',maintenance:1000},
+  {id:'f308',flatNo:'308',ownerName:'Yasmeen Abdul',mobile:'9890011308',floor:'3rd',maintenance:1000},
+  {id:'f401',flatNo:'401',ownerName:'Anwar G. Shaikh',mobile:'9890011401',floor:'4th',maintenance:1000},
+  {id:'f402',flatNo:'402',ownerName:'Javed R. Shaikh',mobile:'9890011402',floor:'4th',maintenance:1000},
+  {id:'f403',flatNo:'403',ownerName:'Sameer I. Shaikh',mobile:'9890011403',floor:'4th',maintenance:1000},
+  {id:'f404',flatNo:'404',ownerName:'Chand R. Sayyed',mobile:'9890011404',floor:'4th',maintenance:1000},
+  {id:'f405',flatNo:'405',ownerName:'Mohammad Anwar Bagwan',mobile:'9890011405',floor:'4th',maintenance:1000},
+  {id:'f406',flatNo:'406',ownerName:'Wasim M. Husaini',mobile:'9890011406',floor:'4th',maintenance:1000},
+  {id:'f407',flatNo:'407',ownerName:'Ammar R. Shaikh',mobile:'9890011407',floor:'4th',maintenance:1000},
+  {id:'f408',flatNo:'408',ownerName:'Shaquib A. Shaikh',mobile:'9890011408',floor:'4th',maintenance:1000},
+  {id:'f501',flatNo:'501',ownerName:'Avez M. Shaikh',mobile:'9890011501',floor:'5th',maintenance:1000},
+  {id:'f502',flatNo:'502',ownerName:'Javed Shaikh',mobile:'9890011502',floor:'5th',maintenance:1000},
+  {id:'f503',flatNo:'503/504',ownerName:'Sameer B. Khan',mobile:'9890011503',floor:'5th',maintenance:2000},
+  {id:'f505',flatNo:'505',ownerName:'Jishan S. Shaikh',mobile:'9890011505',floor:'5th',maintenance:1000},
+  {id:'f506',flatNo:'506',ownerName:'Shohab S. Shaikh',mobile:'9890011506',floor:'5th',maintenance:1000},
+  {id:'f507',flatNo:'507',ownerName:'Shaibaaz Shaikh',mobile:'9890011507',floor:'5th',maintenance:1000},
+  {id:'f508',flatNo:'508',ownerName:'Wasim M. Attar',mobile:'9890011508',floor:'5th',maintenance:1000},
+  {id:'f601',flatNo:'601',ownerName:'Awaiz S. Ansari',mobile:'9890011601',floor:'6th',maintenance:1000},
+  {id:'f602',flatNo:'602',ownerName:'Md. Mustafa A.',mobile:'9890011602',floor:'6th',maintenance:1000},
+  {id:'f603',flatNo:'603',ownerName:'Shadab F. Qureshi',mobile:'9890011603',floor:'6th',maintenance:1000},
+  {id:'f604',flatNo:'604',ownerName:'Ab. Rahim B.',mobile:'9890011604',floor:'6th',maintenance:1000},
+  {id:'f605',flatNo:'605/606',ownerName:'Nazir B. Shaikh',mobile:'9890011605',floor:'6th',maintenance:2000},
+  {id:'f607',flatNo:'607/608',ownerName:'Manzoor Y. Shaikh',mobile:'9890011607',floor:'6th',maintenance:2000},
+];
+
+// ════════════════════════════════════════════════════
+// STORAGE & AUTH
+// ════════════════════════════════════════════════════
+// LS = DB (defined above)
+
+// ════════════════════════════════════════════════════
+// GLOBAL STATE
+// ════════════════════════════════════════════════════
+const S={
+  tab:'dashboard',
+  modal:null,
+  flats:[],bills:[],
+  bf:{month:now.getMonth()+1,year:now.getFullYear(),status:'all'},
+  fq:'',ry:now.getFullYear(),
+  toast:null,_toastT:null,
+  _waIdx:0,_waBills:[],_waDone:[],
+};
+
+function loadData(){
+  const f=LS.get('slimra_flats_v3');
+  S.flats=(f&&f.length>0)?f:JSON.parse(JSON.stringify(INIT_FLATS));
+  if(!f||!f.length)LS.set('slimra_flats_v3',S.flats);
+  S.bills=LS.get('slimra_bills_v2',[]); 
+}
+function saveFlats(){DB.saveFlats(S.flats);}
+function saveBills(){DB.saveBills(S.bills);}
+
+// ════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════
+const uid=()=>Math.random().toString(36).slice(2,10);
+const fmt=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n||0);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function numToWords(n){
+  if(!n)return'Zero Only';
+  const o=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const t=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function c(x){if(x<20)return o[x];if(x<100)return t[Math.floor(x/10)]+(x%10?' '+o[x%10]:'');if(x<1000)return o[Math.floor(x/100)]+' Hundred'+(x%100?' '+c(x%100):'');if(x<100000)return c(Math.floor(x/1000))+' Thousand'+(x%1000?' '+c(x%1000):'');if(x<10000000)return c(Math.floor(x/100000))+' Lakh'+(x%100000?' '+c(x%100000):'');return c(Math.floor(x/10000000))+' Crore'+(x%10000000?' '+c(x%10000000):'');}
+  return c(n)+' Only';
+}
+
+function showToast(msg,type='ok'){
+  clearTimeout(S._toastT);
+  S.toast={msg,type};render();
+  S._toastT=setTimeout(()=>{S.toast=null;render();},2800);
+}
+
+function flatOf(bill){return S.flats.find(f=>f.id===bill.flatId)||{};}
+
+
+// ════════════════════════════════════════════════════
+// GENERATE RECEIPT PDF using jsPDF
+// ════════════════════════════════════════════════════
+function buildReceiptPDF(bill, flat) {
+  if(!window.jspdf)return null;
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'p',unit:'mm',format:[148,210]});
+  const W=148,mx=6,rw=136;let y=6;
+  doc.setLineWidth(0.8);doc.setDrawColor(15,32,64);doc.rect(mx,y,rw,196);
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,24,'F');
+  doc.setFillColor(201,147,42);doc.rect(mx,y+24,rw,1.5,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(20);doc.setTextColor(255,255,255);
+  doc.text('SUPREME LIMRA',W/2,y+11,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(201,147,42);
+  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+18,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(180,130,30);
+  doc.text('MAINTENANCE RECEIPT',W/2,y+22,{align:'center'});
+  y+=27;
+  const R=mx+rw,bx=R-29,bw=28;
+  doc.setFillColor(242,237,227);doc.setDrawColor(200,190,175);doc.setLineWidth(0.3);
+  doc.rect(bx,y,bw,16,'F');doc.rect(bx,y,bw,16);
+  doc.rect(bx,y+18,bw,13,'F');doc.rect(bx,y+18,bw,13);
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(100,100,100);
+  doc.text('No.',bx+bw/2,y+5,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(15,32,64);
+  doc.text(String(bill.receiptNo||''),bx+bw/2,y+13,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(100,100,100);
+  doc.text('Date',bx+bw/2,y+23,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(15,32,64);
+  doc.text(bill.paidDate||'',bx+bw/2,y+29.5,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,80,80);
+  doc.text('Received from Mr./Mrs./Ms.',mx+3,y+6);
+  const lw1=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,0,0);
+  doc.text(flat.ownerName||'',mx+3+lw1,y+6);
+  doc.setLineWidth(0.3);doc.setDrawColor(180,180,180);doc.line(mx+3+lw1,y+7,bx-2,y+7);
+  y+=10;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,80,80);
+  doc.text('Flat / Garage / Shop No. :',mx+3,y+5);
+  const fw2=doc.getTextWidth('Flat / Garage / Shop No. : ');
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,0,0);
+  doc.text(flat.flatNo||'',mx+3+fw2,y+5);
+  doc.setLineWidth(0.3);doc.setDrawColor(180,180,180);doc.line(mx+3+fw2,y+6,bx-2,y+6);
+  y+=10;
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150,150,150);
+  doc.text('On account of the particulars stated below',mx+3,y+3);
+  y+=7;
+  doc.setFillColor(201,147,42);doc.rect(mx,y,rw,0.8,'F');y+=1.5;
+  const srW=11,amtW=28,ptW=rw-srW-amtW,hdrH=8,rowH=7;
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,hdrH,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
+  doc.text('Sr',mx+srW/2,y+5.5,{align:'center'});doc.text('Particulars',mx+srW+ptW/2,y+5.5,{align:'center'});doc.text('Amount',mx+srW+ptW+amtW/2,y+5.5,{align:'center'});
+  y+=hdrH;doc.setLineWidth(0.2);
+  const itemM=MS[bill.month-1]+'-'+String(bill.year).slice(-2);
+  [{sr:1,l:'Maintenance Charges',x:itemM,a:bill.amount},{sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},{sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},{sr:14,l:''},{sr:15,l:''}].forEach((row,i)=>{
+    if(i%2===0){doc.setFillColor(252,250,246);doc.rect(mx,y,rw,rowH,'F');}
+    doc.setDrawColor(220,215,205);doc.rect(mx,y,srW,rowH);doc.rect(mx+srW,y,ptW,rowH);doc.rect(mx+srW+ptW,y,amtW,rowH);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150,150,150);doc.text(String(row.sr),mx+srW/2,y+5,{align:'center'});
+    if(row.l){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(30,30,30);doc.text(row.l,mx+srW+2,y+5);}
+    if(row.x){const lx=row.l?doc.getTextWidth(row.l)+2:2;doc.setFont('helvetica','bold');doc.setTextColor(15,32,64);doc.setFontSize(8.5);doc.text(row.x,mx+srW+lx+2,y+5);doc.setTextColor(30,30,30);}
+    if(row.a){doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(26,127,55);doc.text(row.a+'/-',mx+srW+ptW+amtW-2,y+5,{align:'right'});}
+    y+=rowH;
+  });
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,9,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(255,255,255);doc.text('Total',mx+srW+ptW-2,y+6.5,{align:'right'});
+  doc.setTextColor(201,147,42);doc.setFontSize(11);doc.text(bill.amount+'/-',mx+srW+ptW+amtW-2,y+6.5,{align:'right'});y+=11;
+  doc.setFillColor(252,250,246);doc.rect(mx,y,rw,9,'F');doc.setDrawColor(220,215,205);doc.rect(mx,y,rw,9);
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(80,80,80);doc.text('Rs. in words: ',mx+3,y+6);
+  const wlw=doc.getTextWidth('Rs. in words: ');
+  doc.setFont('helvetica','bold');doc.setTextColor(0,0,0);doc.text(numToWords(bill.amount),mx+3+wlw,y+6);
+  if(bill.paymentMode){doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(120,120,120);doc.text('Mode: '+bill.paymentMode,R-3,y+6,{align:'right'});}
+  y+=11;
+  doc.setFillColor(201,147,42);doc.rect(mx,y,rw,0.6,'F');y+=4;
+  doc.setFont('helvetica','italic');doc.setFontSize(7.5);doc.setTextColor(120,100,60);
+  doc.text('This is a computer generated receipt. No signature required.',W/2,y,{align:'center'});
+  y+=4;doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(150,150,150);
+  doc.text('Supreme Limra Society Management - '+new Date().getFullYear(),W/2,y,{align:'center'});
+  doc.saveGraphicsState();doc.setGState(new doc.GState({opacity:0.10}));
+  doc.setFont('helvetica','bold');doc.setFontSize(52);doc.setTextColor(26,127,55);
+  doc.text('PAID',W/2,110,{align:'center',angle:45});doc.restoreGraphicsState();
+  return doc;
+}
+
+// ════════════════════════════════════════════════════
+// SMART WHATSAPP SHARE — PDF + Text via native share sheet
+// Falls back to wa.me link if Web Share API unavailable
+// ════════════════════════════════════════════════════
+// Dynamically load jsPDF if not yet available
+function ensureJsPDF(){
+  return new Promise(resolve=>{
+    if(window.jspdf){resolve(true);return;}
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=()=>resolve(true);
+    s.onerror=()=>resolve(false);
+    document.head.appendChild(s);
+  });
+}
+
+async function shareReceiptOnWA(bill, flat) {
+  const text = waRcpt(flat, bill);
+  showToast('Preparing receipt image…','wa');
+
+  // ── Capture receipt preview as PNG image ──────────────────────────────
+  // The .rct-p element is currently visible in the receipt modal
+  const receiptEl = document.querySelector('.rct-p');
+
+  if(receiptEl && typeof html2canvas === 'function'){
+    try{
+      // Capture the receipt HTML element as a high-quality PNG
+      const canvas = await html2canvas(receiptEl,{
+        scale:2,                     // 2x for crisp quality
+        useCORS:true,
+        backgroundColor:'#ffffff',
+        logging:false,
+        removeContainer:true
+      });
+
+      // Convert canvas to PNG blob
+      const blob = await new Promise(r=>canvas.toBlob(r,'image/png',0.97));
+      const imgDataUrl = canvas.toDataURL('image/png',0.97);
+      const imgFile = new File([blob],'Receipt_'+bill.receiptNo+'_Flat_'+flat.flatNo+'.png',{type:'image/png'});
+
+      // ── Try 1: Web Share API with image file (1-tap on HTTPS / some local setups)
+      if(navigator.canShare && navigator.canShare({files:[imgFile]})){
+        try{
+          await navigator.share({files:[imgFile],title:'Receipt #'+bill.receiptNo,text});
+          return; // SUCCESS — share sheet opened with image
+        }catch(e){
+          if(e.name==='AbortError')return; // user cancelled share sheet
+        }
+      }
+
+      // ── Try 2: Also try PDF alongside (belt & suspenders on HTTPS)
+      const pdfLoaded = await ensureJsPDF();
+      if(pdfLoaded){
+        const doc = buildReceiptPDF(bill,flat);
+        if(doc){
+          const pdfBlob = doc.output('blob');
+          const pdfFile = new File([pdfBlob],'Receipt_'+bill.receiptNo+'.pdf',{type:'application/pdf'});
+          if(navigator.canShare && navigator.canShare({files:[pdfFile]})){
+            try{
+              await navigator.share({files:[pdfFile],title:'Receipt #'+bill.receiptNo,text});
+              return;
+            }catch(e){if(e.name==='AbortError')return;}
+          }
+        }
+      }
+
+      // ── Fallback: Show image in modal — user long-presses to save then shares
+      if(S._lastImgUrl) try{URL.revokeObjectURL(S._lastImgUrl);}catch(err){}
+      S._lastImgUrl = URL.createObjectURL(blob);
+      S.modal = {type:'imgGuide', data:{bill,flat,imgDataUrl,text}};
+      render();
+      return;
+
+    }catch(err){
+      console.log('html2canvas error:',err);
+    }
+  }
+
+  // ── Ultimate fallback: text-only WhatsApp ─────────────────────────────
+  if(flat.mobile) openWA(flat.mobile, text);
+}
+
+async function sendBillOnWA(bill, flat) {
+  const text = waMsg(flat, bill);
+  if(typeof navigator.share==='function'){
+    try{
+      await navigator.share({title:'Supreme Limra – Maintenance Bill',text});
+      return;
+    }catch(e){if(e.name==='AbortError')return;}
+  }
+  if(flat.mobile) openWA(flat.mobile, text);
+}
+
+// ════════════════════════════════════════════════════
+// PDF GENERATION (Blob URL — works in ALL browsers)
+// ════════════════════════════════════════════════════
+// printPDF defined above
+
+
+// ════════════════════════════════════════════════════
+// WHATSAPP
+// ════════════════════════════════════════════════════
+function waMsg(flat,bill){return`🏢 *SUPREME LIMRA SOCIETY*\n${ADDR_A}\n\nAssalamu Alaikum / Namaskar,\nDear *${flat.ownerName}*,\n\nYour monthly maintenance bill is ready. Kindly pay at earliest.\n\n━━━━━━━━━━━━━━━━━━\n🏠 Flat No.  : *${flat.flatNo}*\n📅 Month     : *${MO[bill.month-1]} ${bill.year}*\n💰 Amount Due: *₹${bill.amount.toLocaleString('en-IN')}/-*\n━━━━━━━━━━━━━━━━━━\n\n✅ *Payment Accepted Via:*\n• Cash (society office)\n• UPI / GPay / PhonePe\n• NEFT / IMPS\n\n_For PDF receipt, contact Secretary._\n_For queries contact Society Secretary._\n\n🙏 Thank you,\n_Supreme Limra Society Management_`;}
+function waRcpt(flat,bill){return`✅ *PAYMENT RECEIVED*\n🏢 *SUPREME LIMRA SOCIETY*\n\nDear *${flat.ownerName}*,\n\nWe confirm receipt of your maintenance payment.\n\n━━━━━━━━━━━━━━━━━━\n🧾 Receipt No.: *#${bill.receiptNo}*\n🏠 Flat No.   : *${flat.flatNo}*\n📅 Month      : *${MO[bill.month-1]} ${bill.year}*\n💰 Amount Paid: *₹${bill.amount.toLocaleString('en-IN')}/-*\n📆 Date       : *${bill.paidDate}*\n💳 Mode       : *${bill.paymentMode}*\n━━━━━━━━━━━━━━━━━━\n\nThank you for timely payment! 🙏\n\n_Supreme Limra Society Management_`;}
+function openWA(mobile,msg){
+  const n=mobile.replace(/\D/g,'');
+  const url='https://wa.me/'+(n.startsWith('91')?n:'91'+n)+'?text='+encodeURIComponent(msg);
+  const a=document.createElement('a');
+  a.href=url;a.target='_blank';a.rel='noopener noreferrer';
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{try{document.body.removeChild(a);}catch(e){}},1000);
+}
+
+// ════════════════════════════════════════════════════
+// DATA EXPORT / IMPORT
+// ════════════════════════════════════════════════════
+function exportData(){
+  const data={flats:S.flats,bills:S.bills,exportDate:new Date().toISOString(),version:'1.0'};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='SupremeLimra_Backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);
+  showToast('Backup exported successfully ✓');
+}
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.flats||!data.bills)throw new Error('Invalid backup file');
+      if(!confirm('This will REPLACE all current data with backup. Are you sure?'))return;
+      S.flats=data.flats;S.bills=data.bills;
+      saveFlats();saveBills();
+      showToast('Data restored successfully ✓');
+      S.modal=null;render();
+    }catch(err){showToast('Invalid backup file!','err');}
+  };
+  reader.readAsText(file);
+}
+
+// ════════════════════════════════════════════════════
+// RENDER — LOGIN
+// ════════════════════════════════════════════════════
+function renderLogin(){
+  return`<div class="login-wrap">
+  <div class="login-logo">Supreme Limra</div>
+  <div class="login-sub">${ADDR_A}</div>
+  <div class="login-card">
+    <div class="login-lock">🔐</div>
+    <div class="login-title">Society Management</div>
+    <div class="login-hint">Enter your PIN to continue</div>
+    <input id="pin-input" type="password" class="pin-input" maxlength="30" placeholder="Enter password" autocomplete="off">
+    <div id="pin-err" class="login-err"></div>
+    <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="login">Unlock App 🔓</button>
+    <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)">Default PIN: 1234</p>
+  </div>
+</div>`;
+}
+
+// ════════════════════════════════════════════════════
+// RENDER — MAIN APP SHELL
+// ════════════════════════════════════════════════════
+function renderApp(){
+  const tabs=[
+    {id:'dashboard',l:'Home',ic:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'},
+    {id:'flats',l:'Flats',ic:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>'},
+    {id:'bills',l:'Bills',ic:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'},
+    {id:'reports',l:'Reports',ic:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>'},
+  ];
+  const tbar=tabs.map(t=>`<button class="tb ${S.tab===t.id?'on':''}" data-action="tab" data-tab="${t.id}"><svg viewBox="0 0 24 24">${t.ic}</svg>${t.l}</button>`).join('');
+  let content='';
+  if(S.tab==='dashboard')content=renderDashboard();
+  else if(S.tab==='flats')content=renderFlats();
+  else if(S.tab==='bills')content=renderBills();
+  else if(S.tab==='reports')content=renderReports();
+  else if(S.tab==='settings')content=renderSettings();
+  const modal=S.modal?`<div class="mov" id="modal-ov">${renderModal()}</div>`:'';
+  const toast=S.toast?`<div class="toast t${S.toast.type}">${esc(S.toast.msg)}</div>`:'';
+  return`<div class="app">
+  <div class="hdr">
+    <div class="hbdg">Society Management</div><div id="sync-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)">Local only</div>
+    <div class="hdr-row">
+      <div><h1>Supreme Limra Society</h1><p>${ADDR_A}</p></div>
+      <div class="hdr-icons">
+        <button class="icon-btn" data-action="tab" data-tab="settings" title="Settings">⚙️</button>
+        <button class="icon-btn" data-action="logout" title="Logout">🔒</button>
+      </div>
+    </div>
+  </div>
+  <div class="con">${content}</div>
+  <div class="tbar">${tbar}</div>
+</div>${modal}${toast}`;
+}
+
+// ════════════════════════════════════════════════════
+// RENDER — DASHBOARD
+// ════════════════════════════════════════════════════
+function renderDashboard(){
+  const collected=S.bills.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
+  const pending=S.bills.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
+  const pendC=S.bills.filter(b=>b.status==='pending').length;
+  const recent=[...S.bills].filter(b=>b.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate)).slice(0,5);
+  const pendTop=S.bills.filter(b=>b.status==='pending').slice(0,5);
+  const pRows=pendTop.map(b=>{const f=flatOf(b);return`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${MO[b.month-1]} ${b.year}</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(b.amount)}</span><button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button></div></div>`;}).join('');
+  const rRows=recent.map(b=>{const f=flatOf(b);return`<div class="li" style="cursor:pointer" data-action="open-receipt" data-id="${b.id}"><div class="fb" style="background:var(--gr);font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${MO[b.month-1]} ${b.year} · ${b.paidDate}</div></div><div style="text-align:right"><div style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--gr)">${fmt(b.amount)}</div><div style="font-size:10px;color:var(--mu)">Tap receipt</div></div></div>`;}).join('');
+  return`<div class="sg" style="margin-top:4px">
+  <div class="sc" style="background:linear-gradient(135deg,#0f2040,#1a3260)"><div class="sl" style="color:rgba(255,255,255,.6)">Total Flats</div><div class="sv" style="color:#fff">${S.flats.length}</div></div>
+  <div class="sc" style="background:linear-gradient(135deg,#c9932a,#b8821e)"><div class="sl" style="color:rgba(255,255,255,.7)">Collected</div><div class="sv" style="color:#fff;font-size:20px">${fmt(collected)}</div></div>
+  <div class="sc"><div class="sl">Pending Dues</div><div class="sv" style="color:var(--re);font-size:20px">${fmt(pending)}</div></div>
+  <div class="sc"><div class="sl">Pending Bills</div><div class="sv">${pendC}</div></div>
+</div>
+${pendTop.length?`<div class="crd"><div class="stt">⏳ Pending Dues</div>${pRows}</div>`:''}
+${recent.length?`<div class="crd"><div class="stt">✅ Recent Payments</div>${rRows}</div>`:''}
+${!S.bills.length?`<div class="crd"><div class="emp"><div class="emp-icon">🏢</div><p>Go to <strong>Bills</strong> tab → tap <strong>+ Generate</strong> to create monthly bills.</p></div></div>`:''}`;
+}
+
+// ════════════════════════════════════════════════════
+// RENDER — FLATS
+// ════════════════════════════════════════════════════
+function renderFlats(){
+  const q=S.fq.toLowerCase();
+  const list=[...S.flats].filter(f=>f.flatNo.toLowerCase().includes(q)||f.ownerName.toLowerCase().includes(q)).sort((a,b)=>a.flatNo.localeCompare(b.flatNo,undefined,{numeric:true}));
+  const rows=list.map(f=>`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}${f.maintenance===2000?'<span class="b2">2BHK</span>':''}</div><div class="isub">${f.floor} Fl · ${fmt(f.maintenance)}/mo · 📱 ${f.mobile||'—'}</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="btn bo bsm" data-action="edit-flat" data-id="${f.id}">Edit</button><button class="btn brd bsm" data-action="del-flat" data-id="${f.id}">✕</button></div></div>`).join('');
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="stt" style="margin-bottom:0">Flats (${S.flats.length})</span><button class="btn bn bsm" data-action="add-flat">+ Add Flat</button></div>
+<div class="crd" style="padding:10px 14px;margin-bottom:10px"><input class="inp" style="padding:8px 12px;font-size:15px" placeholder="🔍 Search flat or owner…" id="flat-search" value="${esc(S.fq)}" oninput="S.fq=this.value;renderPart('flats-list','flatsList')" autocomplete="off"></div>
+<div class="crd" id="flats-list">${list.length?rows:`<div class="emp"><p>No results.</p></div>`}</div>`;
+}
+function flatsList(){
+  const q=S.fq.toLowerCase();
+  const list=[...S.flats].filter(f=>f.flatNo.toLowerCase().includes(q)||f.ownerName.toLowerCase().includes(q)).sort((a,b)=>a.flatNo.localeCompare(b.flatNo,undefined,{numeric:true}));
+  return list.map(f=>`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}${f.maintenance===2000?'<span class="b2">2BHK</span>':''}</div><div class="isub">${f.floor} Fl · ${fmt(f.maintenance)}/mo · 📱 ${f.mobile||'—'}</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="btn bo bsm" data-action="edit-flat" data-id="${f.id}">Edit</button><button class="btn brd bsm" data-action="del-flat" data-id="${f.id}">✕</button></div></div>`).join('')||`<div class="emp"><p>No results.</p></div>`;
+}
+function renderPart(id,fn){const el=document.getElementById(id);if(el)el.innerHTML=window[fn]();}
+
+// ════════════════════════════════════════════════════
+// RENDER — BILLS
+// ════════════════════════════════════════════════════
+function renderBills(){
+  const bf=S.bf;
+  const allBills=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&(bf.status==='all'||b.status===bf.status));
+  const mp=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&b.status==='paid').reduce((s,b)=>s+b.amount,0);
+  const md=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&b.status==='pending').reduce((s,b)=>s+b.amount,0);
+  const pendBills=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&b.status==='pending');
+  const yrs=[...new Set([...S.bills.map(b=>b.year),now.getFullYear()])].sort((a,b)=>b-a);
+  const yrOpts=yrs.map(y=>`<option value="${y}" ${bf.year===y?'selected':''}>${y}</option>`).join('');
+  const rows=allBills.map(b=>{
+    const f=flatOf(b);
+    const paid=b.status==='paid';
+    return`<div class="li"><div class="fb" style="background:${paid?'var(--gr)':'var(--n)'};font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'Unknown')}</div><div class="isub">${paid?`Paid ${b.paidDate} · ${b.paymentMode}`:'Pending'}${b.receiptNo?' · #'+b.receiptNo:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:${paid?'var(--gr)':'var(--re)'}">${fmt(b.amount)}</span>${paid?`<button class="btn bge bsm" data-action="open-receipt" data-id="${b.id}">🧾</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-rcpt" data-id="${b.id}">💬</button>`:''}`:`<button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-bill" data-id="${b.id}">💬</button>`:''}`}</div></div>`;
+  }).join('');
+  const banner=pendBills.length&&(bf.status==='all'||bf.status==='pending')?`<div class="wa-banner"><p style="margin:0"><strong>💬 WhatsApp — ${pendBills.length} pending owner${pendBills.length>1?'s':''}</strong><br><span style="font-size:11px;opacity:.8">Send bill reminders in one go</span></p><button class="btn" style="background:#fff;color:#075e54;font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;flex-shrink:0" data-action="bulk-wa">Send All 💬</button></div>`:'';
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="stt" style="margin-bottom:0">Maintenance Bills</span><button class="btn bg bsm" data-action="open-gen">+ Generate</button></div>
+<div class="crd" style="padding:12px 14px;margin-bottom:10px">
+  <div style="display:flex;gap:8px">
+    <select class="inp" style="flex:2;padding:8px 32px 8px 10px;font-size:14px" id="bf-month" onchange="S.bf.month=+this.value;render()">${MO.map((m,i)=>`<option value="${i+1}" ${bf.month===i+1?'selected':''}>${m}</option>`).join('')}</select>
+    <select class="inp" style="flex:1;padding:8px 32px 8px 10px;font-size:14px" id="bf-year" onchange="S.bf.year=+this.value;render()">${yrOpts}</select>
+    <select class="inp" style="flex:1.2;padding:8px 32px 8px 10px;font-size:14px" id="bf-status" onchange="S.bf.status=this.value;render()"><option value="all" ${bf.status==='all'?'selected':''}>All</option><option value="pending" ${bf.status==='pending'?'selected':''}>Pending</option><option value="paid" ${bf.status==='paid'?'selected':''}>Paid</option></select>
+  </div>
+  ${(mp||md)?`<div style="display:flex;gap:8px;margin-top:10px"><div style="flex:1;font-size:11px;background:#e6f4ea;border-radius:8px;padding:6px 10px;color:var(--gr);font-weight:600">Collected: ${fmt(mp)}</div><div style="flex:1;font-size:11px;background:#fff3e0;border-radius:8px;padding:6px 10px;color:#c05000;font-weight:600">Pending: ${fmt(md)}</div></div>`:''}
+</div>
+${banner}
+${allBills.length?`<div class="crd">${rows}</div>`:`<div class="crd"><div class="emp"><div class="emp-icon">📄</div><p>No bills for ${MO[bf.month-1]} ${bf.year}.<br>Tap <strong>+ Generate</strong> to create.</p></div></div>`}`;
+}
+
+// ════════════════════════════════════════════════════
+// RENDER — REPORTS
+// ════════════════════════════════════════════════════
+function renderReports(){
+  const ry=S.ry;
+  const yrs=[...new Set([...S.bills.map(b=>b.year),now.getFullYear()])].sort((a,b)=>b-a);
+  const yb=S.bills.filter(b=>b.year===ry);
+  const yc=yb.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
+  const yp=yb.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
+  const mo=MO.map((m,i)=>{const mb=yb.filter(b=>b.month===i+1);return{name:m.slice(0,3),c:mb.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0),p:mb.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0)};});
+  const mx=Math.max(...mo.map(m=>m.c+m.p),1);
+  const mRows=mo.filter(m=>m.c||m.p).map(m=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:600;color:var(--tx);width:32px">${m.name}</span><div style="display:flex;gap:10px"><span style="color:var(--gr);font-weight:600">${fmt(m.c)}</span>${m.p?`<span style="color:var(--re)">+${fmt(m.p)} due</span>`:''}</div></div><div class="pb"><div class="pf" style="width:${(m.c/mx)*100}%"></div></div></div>`).join('');
+  const def=S.flats.map(f=>{const pb=S.bills.filter(b=>b.flatId===f.id&&b.status==='pending');return{f,amt:pb.reduce((s,b)=>s+b.amount,0),cnt:pb.length};}).filter(x=>x.amt>0).sort((a,b)=>b.amt-a.amt);
+  const defRows=def.map(({f,amt,cnt})=>`<div class="li"><div class="fb" style="background:var(--re);font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}</div><div class="isub">${cnt} month${cnt>1?'s':''} · 📱 ${f.mobile||'—'}</div></div><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(amt)}</span></div>`).join('');
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="stt" style="margin-bottom:0">Reports</span><select class="inp" style="width:auto;padding:6px 32px 6px 10px;font-size:14px" onchange="S.ry=+this.value;render()">${yrs.map(y=>`<option value="${y}" ${ry===y?'selected':''}>${y}</option>`).join('')}</select></div>
+<div class="sg"><div class="sc"><div class="sl">Year Collected</div><div class="sv" style="color:var(--gr);font-size:20px">${fmt(yc)}</div></div><div class="sc"><div class="sl">Year Pending</div><div class="sv" style="color:var(--re);font-size:20px">${fmt(yp)}</div></div></div>
+<div class="crd"><div class="stt">Monthly Summary — ${ry}</div>${mRows||`<p style="color:var(--mu);font-size:13px;text-align:center;padding:12px 0">No data for ${ry}</p>`}</div>
+${def.length?`<div class="crd"><div class="stt">🔴 Outstanding Dues</div>${defRows}</div>`:''}`;
+}
+
+// ════════════════════════════════════════════════════
+// RENDER — SETTINGS
+// ════════════════════════════════════════════════════
+function renderSettings(){
+  return`<div class="stt">Settings</div>
+<div class="crd">
+  <div class="set-row" data-action="change-pin"><div class="set-icon" style="background:#eef2ff">🔑</div><div class="set-info"><div class="set-title">Change PIN</div><div class="set-sub">Update your login PIN</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="export-data"><div class="set-icon" style="background:#e6f4ea">📦</div><div class="set-info"><div class="set-title">Export / Backup Data</div><div class="set-sub">Download all data as JSON file</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="import-trigger"><div class="set-icon" style="background:#fff3e0">📥</div><div class="set-info"><div class="set-title">Import / Restore Data</div><div class="set-sub">Restore from a backup JSON file</div></div><span style="color:var(--mu)">›</span></div>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
+</div>
+<div class="crd" style="background:linear-gradient(135deg,#0f2040,#1a3260);padding:16px">
+  <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px">About</div>
+  <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:#fff">Supreme Limra Society</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${ADDR_A}</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:10px">47 Flats · Version 2.0</div>
+</div>
+<div class="crd">
+  <button class="btn brd" style="width:100%;padding:12px" data-action="logout">🔒 Logout</button>
+</div>`;
+}
+
+// ════════════════════════════════════════════════════
+// RENDER — MODALS
+// ════════════════════════════════════════════════════
+function renderModal(){
+  const m=S.modal;
+  let body='';
+  if(m.type==='flatForm') body=renderFlatForm(m.data);
+  else if(m.type==='genBills') body=renderGenBills();
+  else if(m.type==='payment') body=renderPayment(m.data);
+  else if(m.type==='receipt') body=renderReceipt(m.data);
+  else if(m.type==='waFlow') body=renderWAFlow(m.data);
+  else if(m.type==='changePin') body=renderChangePin();
+  else if(m.type==='pdfGuide') body=renderPdfGuide(m.data);
+  else if(m.type==='imgGuide') body=renderImgGuide(m.data);
+  return`<div class="mbox" id="modal-box"><div class="mdrag"></div>${body}</div>`;
+}
+
+function renderFlatForm(flat){
+  const isEdit=!!flat;
+  return`<div class="mttl">${isEdit?'Edit Flat Owner':'Add Flat Owner'}</div>
+<div class="ig"><label class="il">Flat Number *</label><input class="inp" id="ff-no" value="${esc(flat?.flatNo||'')}" placeholder="e.g. 101, 503/504"></div>
+<div class="ig"><label class="il">Owner Name *</label><input class="inp" id="ff-name" value="${esc(flat?.ownerName||'')}" placeholder="Full name"></div>
+<div class="ig"><label class="il">WhatsApp Mobile</label><div style="display:flex;gap:8px;align-items:center"><span style="background:#f0f0f0;padding:10px;border-radius:10px;font-size:13px;font-weight:600;color:#555;border:1.5px solid #e4ddd0;white-space:nowrap">+91</span><input class="inp" id="ff-mob" type="tel" value="${esc(flat?.mobile||'')}" placeholder="10-digit number" maxlength="10"></div></div>
+<div style="display:flex;gap:10px">
+<div class="ig" style="flex:1"><label class="il">Floor</label><input class="inp" id="ff-floor" value="${esc(flat?.floor||'')}" placeholder="Ground / 1st…"></div>
+<div class="ig" style="flex:1"><label class="il">Monthly (₹) *</label><select class="inp" id="ff-maint"><option value="1000" ${(flat?.maintenance||1000)===1000?'selected':''}>₹1,000 — 1BHK</option><option value="2000" ${flat?.maintenance===2000?'selected':''}>₹2,000 — 2BHK</option></select></div>
+</div>
+<div style="display:flex;gap:10px;margin-top:4px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bn" style="flex:1" data-action="save-flat" data-id="${flat?.id||''}">Save Flat</button></div>`;
+}
+
+function renderGenBills(){
+  const existing=S.bills.filter(b=>b.month===S.bf.month&&b.year===S.bf.year);
+  const nf=S.flats.filter(f=>!existing.find(b=>b.flatId===f.id));
+  return`<div class="mttl">Generate Monthly Bills</div>
+<div style="display:flex;gap:10px">
+<div class="ig" style="flex:2"><label class="il">Month *</label><select class="inp" id="gen-month" onchange="S.bf.month=+this.value;S.modal={type:'genBills'};render()">${MO.map((m,i)=>`<option value="${i+1}" ${S.bf.month===i+1?'selected':''}>${m}</option>`).join('')}</select></div>
+<div class="ig" style="flex:1"><label class="il">Year *</label><input class="inp" id="gen-year" type="number" value="${S.bf.year}" onchange="S.bf.year=+this.value;S.modal={type:'genBills'};render()"></div>
+</div>
+<div class="ib" id="gen-info">${nf.length?`<strong>${nf.length} flat${nf.length>1?'s':''}</strong> will get bills for ${MO[S.bf.month-1]} ${S.bf.year}.${existing.length?` <span style="color:#c05000">(${existing.length} already generated.)</span>`:''}`:'<span style="color:var(--re)">⚠ Bills already generated for all flats this month.</span>'}</div>
+<div style="background:#e8faf0;border:1.5px solid #b2dfca;border-radius:12px;padding:12px 14px;margin-bottom:16px">
+<label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+<input type="checkbox" id="gen-wa" checked style="width:18px;height:18px;accent-color:#25d366">
+<div><div style="font-weight:600;font-size:13px;color:#075e54">📲 Send Bills on WhatsApp after generating</div><div style="font-size:11px;color:#4a7a60;margin-top:2px">${nf.filter(f=>f.mobile).length} of ${nf.length} owners have mobile numbers</div></div>
+</label></div>
+<div style="display:flex;gap:10px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bg" style="flex:1" data-action="do-gen" ${!nf.length?'disabled':''}>Generate Bills</button></div>`;
+}
+
+function renderPayment(bill){
+  const f=flatOf(bill);
+  const today=new Date().toISOString().slice(0,10);
+  return`<div class="mttl">Record Payment</div>
+<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:16px"><div style="font-weight:600;color:var(--n);font-size:14px">${esc(f.ownerName)} — Flat ${esc(f.flatNo)}</div><div style="color:var(--mu);font-size:12px;margin-top:3px">${MO[bill.month-1]} ${bill.year} · Generated ${bill.generatedDate}</div></div>
+<div class="ig"><label class="il">Amount Received (₹) *</label><input class="inp" id="pay-amt" type="number" value="${bill.amount}"></div>
+<div style="display:flex;gap:10px">
+<div class="ig" style="flex:1.2"><label class="il">Payment Date *</label><input class="inp" id="pay-date" type="date" value="${today}"></div>
+<div class="ig" style="flex:1"><label class="il">Mode *</label><select class="inp" id="pay-mode"><option>Cash</option><option>UPI / GPay</option><option>NEFT / IMPS</option><option>Cheque</option></select></div>
+</div>
+<div style="display:flex;gap:10px;margin-top:4px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bn" style="flex:1.5" data-action="do-pay" data-id="${bill.id}">Confirm & Get Receipt</button></div>`;
+}
+
+function renderReceipt(bill){
+  const f=flatOf(bill);
+  const items=[{sr:1,l:'Maintenance Charges',x:MS[bill.month-1]+'-'+String(bill.year).slice(-2),a:bill.amount},{sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},{sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},{sr:14,l:''},{sr:15,l:''}];
+  const trs=items.map(i=>`<tr><td class="sr">${i.sr}</td><td>${esc(i.l||'')}${i.x?'&nbsp;&nbsp;<strong>'+i.x+'</strong>':''}</td><td class="am">${i.a?i.a+'/-':''}</td></tr>`).join('');
+  return`<div class="mttl">🧾 Payment Receipt</div>
+<div class="rct-p">
+  <div class="rp-h"><h2>SUPREME LIMRA</h2><p>${ADDR_P}</p></div>
+  <div class="rp-m"><div class="rp-mi"><div class="rp-ml"><div>Received from Mr./Mrs./Ms. <span class="rp-fv">${esc(f.ownerName)}</span></div><div>Flat/Garage/Shop No.: <span class="rp-fv">${esc(f.flatNo)}</span></div><div style="font-size:10px;color:#555;margin-top:3px">On account of the particulars stated below</div></div><div class="rp-mr"><div style="font-size:10px;color:#555">No.</div><div class="rno">${bill.receiptNo}</div><div style="font-size:10px;color:#555;margin-top:6px">Date:</div><div style="font-weight:700">${bill.paidDate}</div></div></div></div>
+  <table class="rp-t"><thead><tr><th style="width:22px">Sr</th><th>Particulars</th><th style="width:65px;text-align:right">Amount</th></tr></thead><tbody>${trs}<tr class="tr"><td class="sr"></td><td class="tlb">Total</td><td class="am">${bill.amount}/-</td></tr></tbody></table>
+  <div class="rp-w"><span>Rs.in word</span><span class="rp-wv">${numToWords(bill.amount)}</span></div>
+  <div class="rp-sg"><div><div class="rp-ln"></div>Name &amp; Signature</div><div><div class="rp-ln" style="margin-left:auto"></div>Hon. Secretary / Treasurer</div></div>
+</div>
+<div style="display:flex;gap:8px;margin-top:14px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Close</button>
+  ${f.mobile?`<button class="btn bwa" style="flex:1;font-size:12px" data-action="wa-rcpt" data-id="${bill.id}">📎 Send via WhatsApp</button>`:''}
+  <button class="btn bpdf" style="flex:1" data-action="print-pdf" data-id="${bill.id}">PDF / Print 🖨️</button>
+</div>
+<div style="background:#e8faf0;border:1px solid #b2dfca;border-radius:10px;padding:8px 12px;margin-top:10px;font-size:11px;color:#075e54">📎 <strong>Send via WhatsApp</strong>: Captures receipt as image → 1-tap share if online, or long-press image to save then share from Photos.</div>`;
+}
+
+function renderWAFlow(data){
+  const {bills,step,idx,done}=data;
+  if(step==='send'){
+    const total=bills.length,sentCount=done.length;
+    const rows=bills.map((b,i)=>{const f=flatOf(b);const sent=done.includes(b.id);const cur=i===idx;return`<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:${i<bills.length-1?'1px solid #f0ebe0':'none'};opacity:${sent?'.5':'1'};background:${cur?'#f0fff4':'#fff'}"><div class="fb" style="background:${sent?'var(--gr)':cur?'var(--wa)':'var(--n)'};font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}</div><div class="isub">${fmt(b.amount)} · ${f.mobile}</div></div><span style="font-size:18px">${sent?'✅':cur?'👆':''}</span></div>`;}).join('');
+    return`<div class="mttl">📲 Sending Bills on WhatsApp</div>
+<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;color:var(--mu)"><span>Progress</span><span style="font-weight:600;color:var(--n)">${sentCount} / ${total} sent</span></div><div class="pb" style="height:10px"><div class="pf" style="width:${(sentCount/Math.max(total,1))*100}%;background:var(--wa)"></div></div></div>
+<div style="max-height:260px;overflow-y:auto;background:#fff;border-radius:14px;border:1.5px solid #e8e2d4;margin-bottom:14px">${rows}</div>
+<div style="display:flex;gap:10px">
+<button class="btn bo" style="flex:1" data-action="close-modal">${idx>=total?'Done':'Skip'}</button>
+${idx<total?`<button class="btn bwa" style="flex:1.5" data-action="wa-next">Send Next 💬 (${idx+1}/${total})</button>`:`<button class="btn bn" style="flex:1.5" data-action="close-modal">All Sent ✓</button>`}
+</div>`;
+  }
+  return`<div class="mttl">Ready to send?</div><button class="btn bwa" style="width:100%" data-action="wa-start">Start Sending</button>`;
+}
+
+function renderImgGuide(data){
+  const {bill,flat,imgDataUrl,text}=data;
+  return`<div class="mttl" style="font-size:18px">📷 Share Receipt via WhatsApp</div>
+
+<!-- Receipt Image Preview -->
+<div style="border:2px solid #ddd;border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 16px rgba(0,0,0,.1)">
+  <img src="${imgDataUrl}" style="width:100%;display:block" alt="Receipt">
+</div>
+
+<!-- Step 1: Save Image -->
+<div style="background:#f0f8ff;border:2px solid #0066cc;border-radius:14px;padding:14px;margin-bottom:10px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="background:#0066cc;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">1</span>
+    <div style="font-size:13px;font-weight:700;color:#003d7a">Save Receipt Image to Photos</div>
+  </div>
+  <div style="font-size:12px;color:#444;line-height:1.7">
+    👆 <strong>Long press</strong> on the receipt image above<br>
+    → Tap <strong>"Save to Photos"</strong> or <strong>"Save Image"</strong>
+  </div>
+</div>
+
+<!-- Step 2: Send on WhatsApp -->
+<div style="background:#e8faf0;border:2px solid #25d366;border-radius:14px;padding:14px;margin-bottom:14px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="background:#25d366;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">2</span>
+    <div style="font-size:13px;font-weight:700;color:#075e54">Send receipt + message on WhatsApp</div>
+  </div>
+  <div style="font-size:12px;color:#444;line-height:1.7;margin-bottom:10px">
+    Open WhatsApp → open <strong>${flat.ownerName}</strong>'s chat<br>
+    → tap 📎 → <strong>Gallery/Photos</strong> → select the saved receipt image → Send<br>
+    <em style="color:#888">Then tap the button below to send the text message too.</em>
+  </div>
+  <button class="btn bwa" style="width:100%;padding:11px;font-size:14px" data-action="wa-open-now" data-id="${bill.id}">
+    💬 Open WhatsApp with Message
+  </button>
+</div>
+
+<button class="btn bo" style="width:100%" data-action="close-modal">Close</button>`;
+}
+
+
+function renderPdfGuide(data){
+  const {bill,flat,pdfUrl,text}=data;
+  const fname='Receipt_'+bill.receiptNo+'_Flat'+flat.flatNo+'.pdf';
+  return`<div class="mttl" style="font-size:18px">📎 Send PDF to WhatsApp</div>
+
+<!-- STEP 1: View PDF — tap iOS share button -->
+<div style="background:#f0f8ff;border:2px solid #0066cc;border-radius:14px;padding:14px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <span style="background:#0066cc;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">1</span>
+    <div style="font-size:13px;font-weight:700;color:#003d7a">Open PDF → Share to WhatsApp</div>
+  </div>
+  <div style="font-size:11.5px;color:#555;margin-bottom:10px;line-height:1.6">
+    Tap the button below → PDF opens → tap the <strong>Share button</strong> (□↑) at the bottom of your screen → select <strong>WhatsApp</strong> → choose contact → Send
+  </div>
+  <a href="${pdfUrl}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#0066cc;color:#fff;padding:12px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px">
+    📄 Open PDF Receipt
+  </a>
+</div>
+
+<!-- STEP 2: Send WhatsApp text message -->
+<div style="background:#e8faf0;border:2px solid #25d366;border-radius:14px;padding:14px;margin-bottom:14px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <span style="background:#25d366;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">2</span>
+    <div style="font-size:13px;font-weight:700;color:#075e54">Send receipt message on WhatsApp</div>
+  </div>
+  <div style="font-size:11.5px;color:#555;margin-bottom:10px;line-height:1.6">
+    Tap below to open WhatsApp with the full receipt message pre-filled. Send it to <strong>${flat.ownerName}</strong>.
+  </div>
+  <button class="btn bwa" style="width:100%;padding:12px;font-size:14px" data-action="wa-open-now" data-id="${bill.id}">
+    💬 Open WhatsApp Message
+  </button>
+</div>
+
+<button class="btn bo" style="width:100%" data-action="close-modal">Close</button>`;
+}
+
+function renderChangePin(){
+  return`<div class="mttl">🔑 Change PIN</div>
+<div class="ig"><label class="il">Current PIN</label><input class="inp" id="pin-old" type="tel" maxlength="6" placeholder="Current PIN" inputmode="numeric" autocomplete="off"></div>
+<div class="ig"><label class="il">New PIN</label><input class="inp" id="pin-new" type="tel" maxlength="6" placeholder="New PIN (4-6 digits)" inputmode="numeric" autocomplete="off"></div>
+<div class="ig"><label class="il">Confirm New PIN</label><input class="inp" id="pin-cfm" type="tel" maxlength="6" placeholder="Repeat new PIN" inputmode="numeric" autocomplete="off"></div>
+<div id="pin-change-err" style="color:var(--re);font-size:12px;min-height:18px;margin-bottom:10px"></div>
+<div style="display:flex;gap:10px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bn" style="flex:1" data-action="do-change-pin">Update PIN</button></div>`;
+}
+
+// ════════════════════════════════════════════════════
+// MAIN RENDER
+// ════════════════════════════════════════════════════
+function ensureJsPDF(){return new Promise(r=>{if(window.jspdf){r(true);return;}const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=()=>r(true);s.onerror=()=>r(false);document.head.appendChild(s);});}
+async function uploadReceiptAndGetLink(bill,flat){if(!FB_READY||!_fbST)return null;try{const ok=await ensureJsPDF();if(!ok)return null;const doc=buildReceiptPDF(bill,flat);if(!doc)return null;const blob=doc.output('blob');const fname='receipts/Receipt_'+bill.receiptNo+'_Flat'+flat.flatNo.replace(/[/]/g,'_')+'_'+Date.now()+'.pdf';const ref=_fbST.ref(fname);await Promise.race([ref.put(blob,{contentType:'application/pdf'}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('t/o')),8000))]);return await ref.getDownloadURL();}catch(e){return null;}}
+function printPDF(bill,flat){ensureJsPDF().then(ok=>{if(!ok)return;const doc=buildReceiptPDF(bill,flat);if(!doc)return;if(/iPhone|iPad|Android/i.test(navigator.userAgent)){doc.save('Receipt_'+bill.receiptNo+'.pdf');showToast('PDF saved!');}else{const url=URL.createObjectURL(doc.output('blob'));window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000);}});}
+function waRcptWithLink(flat,bill,link){return 'PAYMENT RECEIVED - Supreme Limra Society\n\nDear '+flat.ownerName+',\nReceipt #'+bill.receiptNo+' | Flat '+flat.flatNo+'\nMonth: '+MO[bill.month-1]+' '+bill.year+'\nAmount: Rs.'+bill.amount+'/- | '+bill.paidDate+'\nMode: '+bill.paymentMode+'\n\nDownload PDF Receipt:\n'+link+'\n\nThank you! - Supreme Limra Society';}
+function goToWA(mobile,msg){const n=mobile.replace(/[^0-9]/g,'');window.location.href='https://wa.me/'+(n.startsWith('91')?n:'91'+n)+'?text='+encodeURIComponent(msg);}
+function updateSyncBadge(){const b=document.getElementById('sync-badge');if(b){b.style.background=FB_READY?'rgba(37,211,102,.2)':'rgba(255,255,255,.08)';b.style.color=FB_READY?'#5dff9a':'rgba(255,255,255,.45)';b.textContent=FB_READY?'Cloud Synced':'Local only';}}
+function updateLoginHint(){const el=document.getElementById('login-hint');if(!el)return;el.textContent=FB_READY?'Enter your Firebase password':'Default PIN: 1234';}
+function updateReceiptHint(){const el=document.getElementById('pdf-status-hint');const btn=document.getElementById('wa-send-btn');if(el){if(S._pdfUploading){el.textContent='Preparing PDF...';}else if(S._pdfUrl){el.textContent='PDF ready - WhatsApp will include download link';}else{el.textContent='Tap WhatsApp to send receipt';}}if(btn){btn.disabled=false;btn.style.background='#25d366';btn.textContent=S._pdfUrl?'WhatsApp + PDF':'WhatsApp';}}
+
+function render(){
+  document.getElementById('root').innerHTML=DB.isAuth()?renderApp():renderLogin();updateSyncBadge();updateLoginHint();updateReceiptHint();
+}
+
+// ════════════════════════════════════════════════════
+// EVENT HANDLER
+// ════════════════════════════════════════════════════
+document.addEventListener('click',function(e){
+  // Close modal when clicking the dark overlay background (not the modal card itself)
+  if(e.target.id==='modal-ov'){S.modal=null;render();return;}
+
+  const el=e.target.closest('[data-action]');
+  if(!el)return;
+  const a=el.dataset.action,id=el.dataset.id||'';
+  
+  if(a==='login'){
+    const pin=document.getElementById('pin-input')?.value||'';
+    const lbtn=document.querySelector('[data-action="login"]');
+    if(lbtn){lbtn.textContent='Checking...';lbtn.disabled=true;}
+    DB.loginUser(pin).then(result=>{
+      if(result.ok){loadData().then(()=>render());}
+      else{const err=document.getElementById('pin-err');if(err){err.textContent=result.msg||'Wrong password';setTimeout(()=>{err.textContent='';},2500);}if(lbtn){lbtn.textContent='Unlock App';lbtn.disabled=false;}}
+    });
+    return;
+  }
+  if(a==='logout'){if(confirm('Logout from the app?')){LS.logout();render();} return;}
+  if(a==='tab'){S.tab=el.dataset.tab;S.modal=null;render();return;}
+  if(a==='close-modal'){S.modal=null;render();return;}
+  
+  // Flat actions
+  if(a==='add-flat'){S.modal={type:'flatForm',data:null};render();return;}
+  if(a==='edit-flat'){S.modal={type:'flatForm',data:S.flats.find(f=>f.id===id)};render();return;}
+  if(a==='del-flat'){if(confirm('Delete this flat and all its bills?')){S.flats=S.flats.filter(f=>f.id!==id);S.bills=S.bills.filter(b=>b.flatId!==id);saveFlats();saveBills();showToast('Flat deleted');}return;}
+  if(a==='save-flat'){
+    const no=document.getElementById('ff-no')?.value.trim();
+    const name=document.getElementById('ff-name')?.value.trim();
+    const mob=document.getElementById('ff-mob')?.value.trim();
+    const floor=document.getElementById('ff-floor')?.value.trim();
+    const maint=+(document.getElementById('ff-maint')?.value||1000);
+    if(!no){alert('Flat number required');return;}
+    if(!name){alert('Owner name required');return;}
+    const data={flatNo:no,ownerName:name,mobile:mob,floor,maintenance:maint};
+    if(id){S.flats=S.flats.map(f=>f.id===id?{...data,id}:f);showToast('Flat updated ✓');}
+    else{S.flats.push({...data,id:uid()});showToast('Flat added ✓');}
+    saveFlats();S.modal=null;render();return;
+  }
+  
+  // Bills
+  if(a==='open-gen'){S.modal={type:'genBills'};render();return;}
+  if(a==='do-gen'){
+    const m=+(document.getElementById('gen-month')?.value||S.bf.month);
+    const y=+(document.getElementById('gen-year')?.value||S.bf.year);
+    const wa=document.getElementById('gen-wa')?.checked;
+    const existing=S.bills.filter(b=>b.month===m&&b.year===y);
+    const nf=S.flats.filter(f=>!existing.find(b=>b.flatId===f.id));
+    if(!nf.length){showToast('Bills already generated for all flats','err');return;}
+    const nb=nf.map(f=>({id:uid(),flatId:f.id,month:m,year:y,amount:f.maintenance,status:'pending',receiptNo:null,paidDate:null,paymentMode:null,generatedDate:new Date().toLocaleDateString('en-IN')}));
+    S.bills=[...S.bills,...nb];saveBills();S.bf.month=m;S.bf.year=y;
+    if(wa){const eligible=nb.filter(b=>S.flats.find(f=>f.id===b.flatId)?.mobile);if(eligible.length){S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[]}};showToast(`${nb.length} bills generated ✓`);render();return;}}
+    showToast(`${nb.length} bills generated ✓`);S.modal=null;render();return;
+  }
+  if(a==='open-pay'){const b=S.bills.find(x=>x.id===id);if(b){S.modal={type:'payment',data:b};render();}return;}
+  if(a==='do-pay'){
+    const b=S.bills.find(x=>x.id===id);if(!b)return;
+    const amt=+(document.getElementById('pay-amt')?.value||0);
+    const date=document.getElementById('pay-date')?.value;
+    const mode=document.getElementById('pay-mode')?.value||'Cash';
+    if(!amt){alert('Enter amount');return;}
+    const lastRcpt=S.bills.reduce((mx,b)=>Math.max(mx,+(b.receiptNo||0)),0);
+    const updated={...b,status:'paid',amount:amt,paidDate:new Date(date).toLocaleDateString('en-IN'),paymentMode:mode,receiptNo:String(lastRcpt+1).padStart(4,'0')};
+    S.bills=S.bills.map(x=>x.id===id?updated:x);saveBills();
+    showToast('Payment recorded ✓');S.modal={type:'receipt',data:updated};render();return;
+  }
+  if(a==='open-receipt'){const b=S.bills.find(x=>x.id===id);if(b){S.modal={type:'receipt',data:b};S._pdfUrl=null;S._pdfUploading=true;render();if(FB_READY&&_fbST){uploadReceiptAndGetLink(b,flatOf(b)).then(url=>{S._pdfUrl=url;S._pdfUploading=false;updateReceiptHint();}).catch(()=>{S._pdfUploading=false;updateReceiptHint();});}else{S._pdfUploading=false;}}return;}
+  if(a==='print-pdf'){const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){printPDF(b,flatOf(b));showToast('Opening PDF…','pdf');}return;}
+  
+  // WhatsApp
+  if(a==='wa-bill'){const b=S.bills.find(x=>x.id===id);if(b){const f=flatOf(b);showToast('Opening WhatsApp…','wa');sendBillOnWA(b,f);}return;}
+  if(a==='wa-open-now'){const b=S.bills.find(x=>x.id===id)||S.modal?.data?.bill;if(b){const f=flatOf(b);S.modal=null;render();setTimeout(()=>{openWA(f.mobile,waRcpt(f,b));},300);}return;}
+  if(a==='wa-rcpt'){
+    const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(!b)return;
+    const f=flatOf(b);const msg=S._pdfUrl?waRcptWithLink(f,b,S._pdfUrl):waRcpt(f,b);
+    if(window.jspdf&&typeof navigator.share==='function'){
+      try{const doc=buildReceiptPDF(b,f);if(doc){const blob=doc.output('blob');const file=new File([blob],'Receipt_'+b.receiptNo+'.pdf',{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Receipt',text:msg}).then(()=>showToast('Shared!','wa')).catch(err=>{if(err.name!=='AbortError')goToWA(f.mobile,msg);});return;}}}catch(err){}
+    }
+    goToWA(f.mobile,msg);showToast('Opening WhatsApp...','wa');return;
+  }
+  if(a==='bulk-wa'){
+    const pend=S.bills.filter(b=>b.month===S.bf.month&&b.year===S.bf.year&&b.status==='pending'&&flatOf(b).mobile);
+    if(!pend.length){showToast('No pending bills with mobile numbers','err');return;}
+    S.modal={type:'waFlow',data:{bills:pend,step:'send',idx:0,done:[]}};render();return;
+  }
+  if(a==='wa-start'){if(S.modal?.data){S.modal.data.step='send';S.modal.data.idx=0;S.modal.data.done=[];}render();return;}
+  if(a==='wa-next'){
+    const d=S.modal?.data;if(!d)return;
+    if(d.idx>=d.bills.length)return;
+    const bill=d.bills[d.idx];const f=flatOf(bill);
+    sendBillOnWA(bill,f);
+    d.done=[...d.done,bill.id];d.idx++;
+    render();return;
+  }
+  
+  // Settings
+  if(a==='change-pin'){S.modal={type:'changePin'};render();return;}
+  if(a==='do-change-pin'){
+    const old=document.getElementById('pin-old')?.value;
+    const nw=document.getElementById('pin-new')?.value;
+    const cfm=document.getElementById('pin-cfm')?.value;
+    const err=document.getElementById('pin-change-err');
+    if(old!==LS.getPin()){if(err)err.textContent='Current PIN is wrong.';return;}
+    if(!nw||nw.length<4){if(err)err.textContent='New PIN must be at least 4 digits.';return;}
+    if(nw!==cfm){if(err)err.textContent='PINs do not match.';return;}
+    LS.setPin(nw);showToast('PIN changed successfully ✓');S.modal=null;render();return;
+  }
+  if(a==='force-refresh'){if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(regs=>{Promise.all(regs.map(r=>r.unregister())).then(()=>{caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>{showToast('Reloading...','ok');setTimeout(()=>window.location.reload(true),800);});});});}else window.location.reload(true);return;}
+  if(a==='export-data'){exportData();return;}
+  if(a==='import-trigger'){document.getElementById('import-file')?.click();return;}
+});
+
+// Handle Enter key in PIN input
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    const pi=document.getElementById('pin-input');
+    if(pi===document.activeElement){document.querySelector('[data-action="login"]')?.click();}
+  }
+});
+
+
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',async function(){
+  render();
+  setTimeout(async function(){
+    initFirebase();
+    if(FB_READY&&typeof firebase!=='undefined'&&_fbAuth){await new Promise(r=>{const u=_fbAuth.onAuthStateChanged(user=>{u();r(user);});});}
+    updateLoginHint();
+    if(DB.isAuth()){await loadData();render();}else render();
+  },300);
+  // Register as PWA if supported
+  if('serviceWorker' in navigator){
+    // Optional: could add SW for offline
+  }
+});
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",async()=>{try{const r=await navigator.serviceWorker.register("./sw.js");r.update();}catch(e){}});}</script>
+</body>
+</html>
