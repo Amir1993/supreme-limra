@@ -154,16 +154,16 @@ td.tlb{text-align:right;padding-right:8px}
 //      }
 // ════════════════════════════════════════════════════
 const FIREBASE_CFG = {
-  apiKey:            "",   // ← paste your values here
-  authDomain:        "",
-  projectId:         "",
-  storageBucket:     "",
-  messagingSenderId: "",
-  appId:             ""
+  apiKey:            "AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",
+  authDomain:        "supreme-limra.firebaseapp.com",
+  projectId:         "supreme-limra",
+  storageBucket:     "supreme-limra.firebasestorage.app",
+  messagingSenderId: "765570470191",
+  appId:             "1:765570470191:web:fc13de371e46977eff91da"
 };
-const SOCIETY_EMAIL = "";  // ← email you used when creating Firebase user
-// NOTE: Your PIN in the app = the password you set for that Firebase user
-// Firebase requires 6+ char passwords, so use a PIN like "limra1234"
+const SOCIETY_EMAIL = "amir1993amirmd@gmail.com"; // ← your Gmail used in Firebase Auth
+// Your app PIN = the password you set for this email in Firebase Auth
+// Must be 6+ characters e.g.  limra2024  or  slimra@123
 
 const FB_READY = FIREBASE_CFG.apiKey && FIREBASE_CFG.apiKey.length > 5;
 let   _fbApp=null, _fbAuth=null, _fbFS=null;
