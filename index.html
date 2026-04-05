@@ -170,13 +170,18 @@ let   _fbApp=null, _fbAuth=null, _fbFS=null;
 
 function initFirebase(){
   if(!FB_READY || _fbApp) return;
+  // Guard: Firebase CDN scripts must be loaded first
+  if(typeof firebase === 'undefined'){
+    console.log('Firebase SDK not loaded yet — will retry');
+    setTimeout(initFirebase, 800);
+    return;
+  }
   try{
     _fbApp  = firebase.initializeApp(FIREBASE_CFG);
     _fbAuth = firebase.auth();
     _fbFS   = firebase.firestore();
-    // Enable offline persistence
-    _fbFS.enablePersistence({synchronizeTabs:true})
-         .catch(()=>{}); // ignore if already enabled
+    _fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    console.log('Firebase ready ✓');
   }catch(e){ console.log('Firebase init error:',e); }
 }
 
@@ -257,23 +262,39 @@ const DB={
     return sessionStorage.getItem('slimra_auth')==='1';
   },
   async loginUser(pin){
-    if(FB_READY){
+    if(FB_READY && _fbAuth){
+      // Firebase is ready — authenticate with email + password
       try{
         await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, pin);
         sessionStorage.setItem('slimra_auth','1');
         return {ok:true};
       }catch(e){
-        const msg = e.code==='auth/wrong-password'||e.code==='auth/user-not-found'
-          ? 'Wrong PIN / password' : 'Login failed: '+e.message;
-        return {ok:false, msg};
+        if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential')
+          return {ok:false, msg:'Wrong password. Use the password you set in Firebase.'};
+        if(e.code==='auth/user-not-found')
+          return {ok:false, msg:'User not found. Check Firebase Auth setup.'};
+        return {ok:false, msg:'Login error: '+e.message};
       }
     }
-    // Local-only fallback
+    if(FB_READY && !_fbAuth){
+      // Firebase config set but SDK still loading — wait and retry once
+      await new Promise(r=>setTimeout(r,1200));
+      if(_fbAuth){
+        try{
+          await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, pin);
+          sessionStorage.setItem('slimra_auth','1');
+          return {ok:true};
+        }catch(e){
+          return {ok:false, msg:'Wrong password'};
+        }
+      }
+    }
+    // Local-only fallback (no Firebase config or SDK unavailable)
     if(pin===(localStorage.getItem('slimra_pin')||'1234')){
       sessionStorage.setItem('slimra_auth','1');
       return {ok:true, local:true};
     }
-    return {ok:false, msg:'Wrong PIN'};
+    return {ok:false, msg:'Wrong PIN. Default is 1234'};
   },
   logout(){
     sessionStorage.removeItem('slimra_auth');
@@ -663,11 +684,11 @@ function renderLogin(){
   <div class="login-card">
     <div class="login-lock">🔐</div>
     <div class="login-title">Society Management</div>
-    <div class="login-hint">Enter your PIN to continue</div>
+    <div class="login-hint" id="login-hint">Enter your password to continue</div>
     <input id="pin-input" type="tel" class="pin-input" maxlength="6" placeholder="Enter PIN" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
     <div id="pin-err" class="login-err"></div>
     <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="login">Unlock App 🔓</button>
-    <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)">Default PIN: 1234</p>
+    <p id="pin-note" style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)">If Firebase not set up: default PIN is 1234</p>
   </div>
 </div>`;
 }
@@ -1027,6 +1048,26 @@ function renderChangePin(){
 // ════════════════════════════════════════════════════
 // MAIN RENDER
 // ════════════════════════════════════════════════════
+function updateLoginHint(){
+  const hint=document.getElementById('login-hint');
+  const note=document.getElementById('pin-note');
+  if(!hint) return;
+  if(FB_READY && typeof firebase!=='undefined' && _fbAuth){
+    hint.textContent='Enter your Firebase password';
+    if(note) note.textContent='Password set in Firebase Auth console';
+  } else if(FB_READY){
+    hint.textContent='Connecting to cloud… please wait';
+    if(note) note.style.display='none';
+  } else {
+    hint.textContent='Enter your PIN to continue';
+    if(note) note.textContent='Default PIN: 1234';
+  }
+}
+function updateLoginHint(){
+  const el=document.getElementById('login-hint');
+  if(!el)return;
+  el.textContent=FB_READY?'Enter your app password (set in Firebase)':'Default PIN: 1234';
+}
 function updateSyncBadge(){
   const badge=document.getElementById('sync-badge');
   if(badge){
@@ -1050,7 +1091,7 @@ function updateSyncBadge(){
   }
 }
 function render(){
-  document.getElementById('root').innerHTML=DB.isAuth()?renderApp():renderLogin();updateSyncBadge();
+  document.getElementById('root').innerHTML=DB.isAuth()?renderApp():renderLogin();updateSyncBadge();updateLoginHint();updateLoginHint();
 }
 
 // ════════════════════════════════════════════════════
@@ -1183,13 +1224,19 @@ document.addEventListener('keydown',function(e){
 // ════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded',async function(){
-  initFirebase();
-  // If already logged in (Firebase or session), load data
-  if(DB.isAuth()){
-    await loadData();
-  }
-  render();
+window.addEventListener('DOMContentLoaded', async function(){
+  render(); // Show login screen immediately
+  // Init Firebase after a short delay to ensure CDN scripts loaded
+  setTimeout(async function(){
+    initFirebase();
+    // Update login hint once Firebase status known
+    setTimeout(()=>{ updateLoginHint(); }, 1000);
+    // If already authenticated, load data and re-render
+    if(DB.isAuth()){
+      await loadData();
+      render();
+    }
+  }, 300);
 });
 </script>
 
