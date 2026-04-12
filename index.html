@@ -143,52 +143,24 @@ const FIREBASE_CFG={apiKey:"AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",authDomain:
 const SOCIETY_EMAIL="aamir2027@gmail.com";
 const FB_READY=FIREBASE_CFG.apiKey&&FIREBASE_CFG.apiKey.length>5;
 let _fbApp=null,_fbAuth=null,_fbFS=null,_fbST=null;
-function initFirebase(){if(!FB_READY||_fbApp)return;if(typeof firebase==="undefined"){setTimeout(initFirebase,800);return;}try{_fbApp=firebase.initializeApp(FIREBASE_CFG);_fbAuth=firebase.auth();_fbFS=firebase.firestore();_fbST=firebase.storage();_fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});}catch(e){console.log("FB:",e);}}
+function initFirebase(){if(!FB_READY||_fbApp)return;if(typeof firebase==="undefined"){setTimeout(initFirebase,800);return;}try{_fbApp=firebase.initializeApp(FIREBASE_CFG);_fbAuth=firebase.auth();_fbFS=firebase.firestore();_fbST=firebase.storage();_fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});if(SOCIETY_EMAIL&&sessionStorage.getItem("slimra_auth")==="1"){const p=localStorage.getItem("slimra_fb_pwd")||"SocietySupreme@605606";_fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL,p).catch(()=>{});}}catch(e){console.log("FB:",e);}}
 const DB={
   lget:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
   lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
   isAuth(){if(FB_READY&&_fbAuth)return!!_fbAuth.currentUser;return sessionStorage.getItem("slimra_auth")==="1";},
   async loginUser(pin){
-    try{
-      // Wait for Firebase to be ready (max 3s)
-      if(FB_READY && !_fbAuth){
-        for(let i=0;i<15;i++){
-          await new Promise(r=>setTimeout(r,200));
-          if(_fbAuth) break;
-        }
-      }
-      if(FB_READY && _fbAuth){
-        const res = await Promise.race([
-          _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, pin),
-          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
-        ]);
-        sessionStorage.setItem('slimra_auth','1');
-        return {ok:true};
-      }
-      // Fallback — local PIN
-      if(pin===(localStorage.getItem('slimra_pin')||'1234')){
-        sessionStorage.setItem('slimra_auth','1');
-        return {ok:true, local:true};
-      }
-      return {ok:false, msg:'Firebase not ready. Wait 2 seconds and try again.'};
-    }catch(e){
-      const code = e.code||'';
-      if(e.message==='timeout')
-        return {ok:false, msg:'Connection timeout — check internet and try again'};
-      if(code.includes('wrong-password')||code.includes('invalid-credential')||code.includes('invalid-login'))
-        return {ok:false, msg:'Wrong password'};
-      if(code.includes('user-not-found'))
-        return {ok:false, msg:'User not found in Firebase Auth'};
-      if(code.includes('network-request-failed'))
-        return {ok:false, msg:'No internet connection'};
-      if(code.includes('too-many-requests'))
-        return {ok:false, msg:'Too many attempts — wait a few minutes'};
-      return {ok:false, msg:'Error: '+(e.message||code||'unknown')};
+    // Simple local password check — no Firebase Auth needed
+    // Default password: Limra@2024 (change in Settings)
+    const stored = localStorage.getItem('slimra_pwd') || 'Limra@2024';
+    if(pin === stored){
+      sessionStorage.setItem('slimra_auth','1');
+      return {ok:true};
     }
+    return {ok:false, msg:'Wrong password. Default: Limra@2024'};
   },
   logout(){sessionStorage.removeItem("slimra_auth");if(FB_READY&&_fbAuth)_fbAuth.signOut().catch(()=>{});},
-  getPin:()=>localStorage.getItem("slimra_pin")||"1234",
-  setPin:(v)=>localStorage.setItem("slimra_pin",v),
+  getPin:()=>localStorage.getItem('slimra_pwd')||'Limra@2024',
+  setPin:(v)=>localStorage.setItem('slimra_pwd',v),
   async load(){if(FB_READY&&_fbFS&&this.isAuth()){try{const[fd,bd]=await Promise.all([_fbFS.collection("society").doc("flats").get(),_fbFS.collection("society").doc("bills").get()]);const flats=fd.exists?fd.data().list:null;const bills=bd.exists?bd.data().list:null;if(flats)this.lset("slimra_flats_v3",flats);if(bills)this.lset("slimra_bills_v2",bills);const ed=await _fbFS.collection("society").doc("expenses").get().catch(()=>({exists:false}));const expenses=ed.exists?ed.data().list:null;if(expenses)this.lset("slimra_expenses_v1",expenses);return{flats:flats||this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:bills||this.lget("slimra_bills_v2")||[],expenses:expenses||this.lget("slimra_expenses_v1")||[],source:"firebase"};}catch(e){console.log("FB load:",e);}}
     return{flats:this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:this.lget("slimra_bills_v2")||[],expenses:this.lget("slimra_expenses_v1")||[],source:"local"};
   },
@@ -548,7 +520,7 @@ function renderLogin(){
   <div class="login-card">
     <div class="login-lock">🔐</div>
     <div class="login-title">Society Management</div>
-    <div class="login-hint">Enter your PIN to continue</div>
+    <div class="login-hint" id="login-hint">Enter your app password</div>
     <input id="pin-input" type="password" class="pin-input" maxlength="30" placeholder="Enter your password" autocomplete="off">
     <div id="pin-err" class="login-err"></div>
     <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="login">Unlock App 🔓</button>
@@ -1022,7 +994,7 @@ document.addEventListener('click',function(e){
       .catch(e=>{
         // Should never reach here but safety net
         console.log('Login catch:',e);
-        showErr('Unexpected error. Please try again.');
+        showErr('Login error: '+(e.message||e.code||'check internet and try again'));
         enableBtn();
       });
     return;
@@ -1111,7 +1083,7 @@ document.addEventListener('click',function(e){
     const nw=document.getElementById('pin-new')?.value;
     const cfm=document.getElementById('pin-cfm')?.value;
     const err=document.getElementById('pin-change-err');
-    if(old!==LS.getPin()){if(err)err.textContent='Current PIN is wrong.';return;}
+    if(old!==DB.getPin()){if(err)err.textContent='Current password is wrong.';return;}
     if(!nw||nw.length<4){if(err)err.textContent='New PIN must be at least 4 digits.';return;}
     if(nw!==cfm){if(err)err.textContent='PINs do not match.';return;}
     LS.setPin(nw);showToast('PIN changed successfully ✓');S.modal=null;render();return;
