@@ -149,32 +149,42 @@ const DB={
   lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
   isAuth(){if(FB_READY&&_fbAuth)return!!_fbAuth.currentUser;return sessionStorage.getItem("slimra_auth")==="1";},
   async loginUser(pin){
-    // If Firebase ready, use it
-    if(FB_READY && _fbAuth){
-      try{
-        const p1 = _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, pin);
-        const p2 = new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000));
-        await Promise.race([p1, p2]);
+    try{
+      // Wait for Firebase to be ready (max 3s)
+      if(FB_READY && !_fbAuth){
+        for(let i=0;i<15;i++){
+          await new Promise(r=>setTimeout(r,200));
+          if(_fbAuth) break;
+        }
+      }
+      if(FB_READY && _fbAuth){
+        const res = await Promise.race([
+          _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, pin),
+          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))
+        ]);
         sessionStorage.setItem('slimra_auth','1');
         return {ok:true};
-      }catch(e){
-        if(e.message==='timeout') return {ok:false, msg:'Connection timeout. Check internet & try again.'};
-        const code = e.code||'';
-        if(code.includes('wrong-password')||code.includes('invalid-credential')||code.includes('invalid-login'))
-          return {ok:false, msg:'Wrong password. Check your Firebase Auth password.'};
-        if(code.includes('user-not-found'))
-          return {ok:false, msg:'User not found. Check Firebase Auth setup.'};
-        if(code.includes('network'))
-          return {ok:false, msg:'Network error. Check your internet connection.'};
-        return {ok:false, msg:'Login failed: '+e.message};
       }
+      // Fallback — local PIN
+      if(pin===(localStorage.getItem('slimra_pin')||'1234')){
+        sessionStorage.setItem('slimra_auth','1');
+        return {ok:true, local:true};
+      }
+      return {ok:false, msg:'Firebase not ready. Wait 2 seconds and try again.'};
+    }catch(e){
+      const code = e.code||'';
+      if(e.message==='timeout')
+        return {ok:false, msg:'Connection timeout — check internet and try again'};
+      if(code.includes('wrong-password')||code.includes('invalid-credential')||code.includes('invalid-login'))
+        return {ok:false, msg:'Wrong password'};
+      if(code.includes('user-not-found'))
+        return {ok:false, msg:'User not found in Firebase Auth'};
+      if(code.includes('network-request-failed'))
+        return {ok:false, msg:'No internet connection'};
+      if(code.includes('too-many-requests'))
+        return {ok:false, msg:'Too many attempts — wait a few minutes'};
+      return {ok:false, msg:'Error: '+(e.message||code||'unknown')};
     }
-    // Firebase not initialized yet — local PIN fallback
-    if(pin===(localStorage.getItem('slimra_pin')||'1234')){
-      sessionStorage.setItem('slimra_auth','1');
-      return {ok:true, local:true};
-    }
-    return {ok:false, msg:'Firebase not ready yet. Wait 2 seconds and try again.'};
   },
   logout(){sessionStorage.removeItem("slimra_auth");if(FB_READY&&_fbAuth)_fbAuth.signOut().catch(()=>{});},
   getPin:()=>localStorage.getItem("slimra_pin")||"1234",
