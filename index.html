@@ -962,7 +962,7 @@ function updateLoginHint(){
 function updateReceiptHint(){const el=document.getElementById('pdf-status-hint');const btn=document.getElementById('wa-send-btn');if(el){if(S._pdfUploading){el.textContent='Preparing PDF...';}else if(S._pdfUrl){el.textContent='PDF ready - WhatsApp will include download link';}else{el.textContent='Tap WhatsApp to send receipt';}}if(btn){btn.disabled=false;btn.style.background='#25d366';btn.textContent=S._pdfUrl?'WhatsApp + PDF':'WhatsApp';}}
 
 function render(){
-  document.getElementById('root').innerHTML=DB.isAuth()?renderApp():renderLogin();updateSyncBadge();updateLoginHint();updateReceiptHint();
+  document.getElementById('root').innerHTML=renderApp();updateSyncBadge();updateLoginHint();updateReceiptHint();
 }
 
 // ════════════════════════════════════════════════════
@@ -1126,40 +1126,14 @@ document.addEventListener('keydown',function(e){
 // INIT
 // ════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async function(){
-  // Show loading spinner immediately
   render();
-
-  // Wait for Firebase CDN scripts to load (max 3 seconds)
-  let waited = 0;
-  while(typeof firebase === 'undefined' && waited < 3000){
-    await new Promise(r=>setTimeout(r, 200));
-    waited += 200;
-  }
-
-  // Initialize Firebase
-  initFirebase();
-
-  // Wait for Firebase Auth to restore session from previous login
-  if(FB_READY && _fbAuth){
-    await new Promise(resolve=>{
-      const unsub = _fbAuth.onAuthStateChanged(user=>{
-        unsub();
-        resolve(user);
-      });
-      // Safety timeout — never wait more than 5 seconds
-      setTimeout(resolve, 5000);
-    });
-  }
-
-  // Update login hint now that Firebase status is known
-  updateLoginHint();
-
-  // Load data if already logged in, otherwise show login
-  if(DB.isAuth()){
+  setTimeout(async function(){
+    initFirebase();
     await loadData();
-  }
-  render();
+    render();
+  }, 300);
 });
+
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",async()=>{try{const r=await navigator.serviceWorker.register("./sw.js");r.update();}catch(e){}});}</script>
 </body>
