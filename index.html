@@ -80,7 +80,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 @keyframes sd{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 .set-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0ebe0;cursor:pointer}
-.set-row:last-child{border-bottom:none}.set-row:active{background:#f9f6f0;margin:0 -6px;padding:12px 6px;border-radius:10px}
+.set-row:last-child{border-bottom:none}
 .set-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .set-title{font-size:13px;font-weight:600;color:var(--tx)}.set-sub{font-size:11px;color:var(--mu);margin-top:2px}.set-info{flex:1}
 /* ── Misc ── */
@@ -107,67 +107,97 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .pin-input::placeholder{letter-spacing:2px;font-size:13px;color:rgba(255,255,255,.3)}
 .login-err{color:#ff8080;font-size:12px;text-align:center;margin-top:8px;min-height:18px}
 /* ── Receipt preview ── */
-.rct-p{font-family:Arial,Helvetica,sans-serif;background:#fff;border:2px solid #111;font-size:11.5px}
-.rp-h{text-align:center;border-bottom:2px solid #111;padding:8px 10px 5px}
-.rp-h h2{font-size:20px;font-weight:900;letter-spacing:3px;text-transform:uppercase}
-.rp-h p{font-size:10px;margin-top:2px}
-.rp-m{border-bottom:1px solid #555;padding:8px 10px 5px}
-.rp-mi{display:flex;justify-content:space-between;gap:8px}
-.rp-ml{flex:1;font-size:11px;line-height:1.9}.rp-mr{text-align:right;font-size:11px;min-width:80px}
-.rp-mr .rno{font-size:15px;font-weight:800}
-.rp-fv{border-bottom:1px solid #000;display:inline-block;min-width:55px;font-weight:700;padding-bottom:1px}
-table.rp-t{width:100%;border-collapse:collapse}
-table.rp-t th{border:1px solid #000;padding:4px 5px;font-size:10px;font-weight:700;text-align:center}
-table.rp-t td{border:1px solid #000;padding:2.5px 5px;font-size:10.5px;height:16px;vertical-align:middle}
-table.rp-t td.sr{text-align:center;width:22px;color:#888}
-table.rp-t td.am{text-align:right;width:65px;font-weight:600}
-table.rp-t tr.tr td{font-weight:800;font-size:12px;border-top:2px solid #000;background:#f5f5f5}
-td.tlb{text-align:right;padding-right:8px}
-.rp-w{border-top:1px solid #bbb;padding:5px 10px;font-size:11px;display:flex;gap:5px;align-items:flex-end}
-.rp-wv{border-bottom:1px solid #000;flex:1;font-weight:700;padding-bottom:1px}
-.rp-sg{border-top:1px solid #bbb;padding:8px 14px 8px;display:flex;justify-content:space-between;font-size:10px;color:#555}
-.rp-sg>div{text-align:center}.rp-ln{border-top:1px solid #888;margin-bottom:3px;margin-top:20px;width:95px}
-/* ── Settings panel ── */
-.set-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #f0ebe0;cursor:pointer}
-.set-row:last-child{border-bottom:none}
-.set-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-right:12px}
-.set-info{flex:1}.set-title{font-size:13px;font-weight:600;color:var(--tx)}.set-sub{font-size:11px;color:var(--mu);margin-top:2px}
-/* ── Spin loader ── */
-@keyframes spin{to{transform:rotate(360deg)}}
-.spin{width:36px;height:36px;border:3px solid var(--g);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+.rct-p{font-family:Arial,Helvetica,sans-serif;background:#fff;border:2px solid #0f2040;border-radius:4px;overflow:hidden;position:relative}
+      .rp-h{text-align:center;background:#0f2040;padding:12px 10px 8px}
+      .rp-h h2{font-size:20px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#fff;margin-bottom:2px}
+      .rp-h p{font-size:9px;margin-top:2px;color:#c9932a}
+      .rp-h .rp-tag{font-size:8px;color:rgba(201,147,42,.85);letter-spacing:2px;margin-top:3px;display:block}
+      .rp-gold-bar{height:3px;background:#c9932a;width:100%}
+      .rp-m{border-bottom:1px solid #e0d9cc;padding:9px 11px 6px;background:#fff}
+      .rp-mi{display:flex;justify-content:space-between;gap:8px}
+      .rp-ml{flex:1;font-size:10.5px;line-height:1.9}
+      .rp-mr{text-align:center;font-size:10.5px;min-width:72px;background:#f5f0e6;border:1px solid #ddd5c0;border-radius:5px;padding:6px 8px;flex-shrink:0}
+      .rp-mr .rno{font-size:18px;font-weight:900;color:#0f2040;line-height:1.1;display:block}
+      .rp-mr .rno-lbl{font-size:8px;color:#999;text-transform:uppercase;letter-spacing:.5px;display:block}
+      .rp-mr .rdate-lbl{font-size:8px;color:#999;text-transform:uppercase;display:block;margin-top:5px;border-top:1px solid #e0d4c0;padding-top:4px}
+      .rp-mr .rdate{font-weight:700;color:#0f2040;font-size:10px;display:block;margin-top:1px}
+      .rp-fv{border-bottom:1.5px solid #0f2040;display:inline-block;min-width:60px;font-weight:700;padding-bottom:1px;color:#0f2040}
+      .rp-note{font-size:9px;color:#aaa;margin-top:3px;font-style:italic}
+      table.rp-t{width:100%;border-collapse:collapse}
+      table.rp-t thead tr{background:#0f2040}
+      table.rp-t th{padding:6px 5px;font-size:9.5px;font-weight:700;text-align:center;color:#fff;border:1px solid #1a3260}
+      table.rp-t td{border:1px solid #e0d9cc;padding:3.5px 5px;font-size:10px;height:16px;vertical-align:middle}
+      table.rp-t tr:nth-child(even) td{background:#faf8f4}
+      table.rp-t td.sr{text-align:center;width:22px;color:#ccc;font-size:9px}
+      table.rp-t td.am{text-align:right;width:64px;font-weight:700;color:#1a7f37;font-size:10.5px}
+      table.rp-t tr.tr td{font-weight:900;font-size:12px;background:#0f2040;color:#fff;border-color:#0f2040;padding:6px 5px}
+      table.rp-t tr.tr td.am{color:#c9932a!important}
+      td.tlb{text-align:right;padding-right:8px;color:#fff}
+      .rp-w{background:#faf8f4;border-top:1px solid #e0d9cc;padding:7px 11px;font-size:10.5px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+      .rp-wv{font-weight:800;color:#0f2040}
+      .rp-mode{font-size:9.5px;color:#888;margin-left:auto;background:#eee;padding:2px 6px;border-radius:10px}
+      .rp-footer{background:#0f2040;padding:7px 11px 6px;text-align:center}
+      .rp-footer-main{font-size:9px;color:#c9932a;font-style:italic}
+      .rp-footer-sub{font-size:8px;color:rgba(255,255,255,.5);margin-top:2px}
+      .rp-paid-stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:54px;font-weight:900;color:rgba(26,127,55,0.09);letter-spacing:4px;pointer-events:none;z-index:1;white-space:nowrap;font-family:Arial,sans-serif}.spin{width:36px;height:36px;border:3px solid var(--g);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
 </style>
 </head>
 <body>
 <div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:14px"><div class="spin"></div><p style="color:#c9932a;font-size:13px;font-family:serif">Loading…</p></div></div>
 <script>
+
 const FIREBASE_CFG={apiKey:"AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",authDomain:"supreme-limra.firebaseapp.com",projectId:"supreme-limra",storageBucket:"supreme-limra.firebasestorage.app",messagingSenderId:"765570470191",appId:"1:765570470191:web:fc13de371e46977eff91da"};
 const SOCIETY_EMAIL="aamir2027@gmail.com";
 const FB_READY=FIREBASE_CFG.apiKey&&FIREBASE_CFG.apiKey.length>5;
 let _fbApp=null,_fbAuth=null,_fbFS=null,_fbST=null;
-function initFirebase(){if(!FB_READY||_fbApp)return;if(typeof firebase==="undefined"){setTimeout(initFirebase,800);return;}try{_fbApp=firebase.initializeApp(FIREBASE_CFG);_fbAuth=firebase.auth();_fbFS=firebase.firestore();_fbST=firebase.storage();_fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});if(SOCIETY_EMAIL&&sessionStorage.getItem("slimra_auth")==="1"){const p=localStorage.getItem("slimra_fb_pwd")||"SocietySupreme@605606";_fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL,p).catch(()=>{});}}catch(e){console.log("FB:",e);}}
+
+function initFirebase(){
+  if(!FB_READY||_fbApp)return;
+  if(typeof firebase==="undefined"){setTimeout(initFirebase,500);return;}
+  try{
+    _fbApp=firebase.initializeApp(FIREBASE_CFG);
+    _fbAuth=firebase.auth();_fbFS=firebase.firestore();_fbST=firebase.storage();
+    _fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    // Auto sign-in so Firestore auth rules pass
+    _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL,"SocietySupreme@605606")
+      .catch(()=>_fbAuth.signInAnonymously().catch(()=>{}));
+  }catch(e){console.log("FB:",e);}
+}
+
 const DB={
   lget:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
   lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
   isAuth(){return true;},
-  async loginUser(pin){
-    // Simple local password check — no Firebase Auth needed
-    // Default password: Limra@2024 (change in Settings)
-    const stored = localStorage.getItem('slimra_pwd') || 'Limra@2024';
-    if(pin === stored){
-      sessionStorage.setItem('slimra_auth','1');
-      return {ok:true};
+  logout(){},
+  getPin:()=>localStorage.getItem("slimra_pin")||"1234",
+  setPin:(v)=>localStorage.setItem("slimra_pin",v),
+  async load(){
+    if(FB_READY&&_fbFS){
+      try{
+        const[fd,bd,ed]=await Promise.all([
+          _fbFS.collection("society").doc("flats").get(),
+          _fbFS.collection("society").doc("bills").get(),
+          _fbFS.collection("society").doc("expenses").get().catch(()=>({exists:false}))
+        ]);
+        const flats=fd.exists?fd.data().list:null;
+        const bills=bd.exists?bd.data().list:null;
+        const expenses=ed.exists?ed.data().list:null;
+        if(flats)this.lset("slimra_flats_v3",flats);
+        if(bills)this.lset("slimra_bills_v2",bills);
+        if(expenses)this.lset("slimra_expenses_v1",expenses);
+        return{flats:flats||this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:bills||this.lget("slimra_bills_v2")||[],expenses:expenses||this.lget("slimra_expenses_v1")||[],source:"firebase"};
+      }catch(e){console.log("FB load:",e);}
     }
-    return {ok:false, msg:'Wrong password. Default: Limra@2024'};
-  },
-  logout(){sessionStorage.removeItem("slimra_auth");if(FB_READY&&_fbAuth)_fbAuth.signOut().catch(()=>{});},
-  getPin:()=>localStorage.getItem('slimra_pwd')||'Limra@2024',
-  setPin:(v)=>localStorage.setItem('slimra_pwd',v),
-  async load(){if(FB_READY&&_fbFS&&this.isAuth()){try{const[fd,bd]=await Promise.all([_fbFS.collection("society").doc("flats").get(),_fbFS.collection("society").doc("bills").get()]);const flats=fd.exists?fd.data().list:null;const bills=bd.exists?bd.data().list:null;if(flats)this.lset("slimra_flats_v3",flats);if(bills)this.lset("slimra_bills_v2",bills);const ed=await _fbFS.collection("society").doc("expenses").get().catch(()=>({exists:false}));const expenses=ed.exists?ed.data().list:null;if(expenses)this.lset("slimra_expenses_v1",expenses);return{flats:flats||this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:bills||this.lget("slimra_bills_v2")||[],expenses:expenses||this.lget("slimra_expenses_v1")||[],source:"firebase"};}catch(e){console.log("FB load:",e);}}
     return{flats:this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:this.lget("slimra_bills_v2")||[],expenses:this.lget("slimra_expenses_v1")||[],source:"local"};
   },
-  saveFlats(f){this.lset("slimra_flats_v3",f);if(FB_READY&&_fbFS&&this.isAuth())_fbFS.collection("society").doc("flats").set({list:f,updated:new Date().toISOString()}).catch(()=>{});},
-  saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS&&this.isAuth())_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
-  subscribeChanges(onF,onB){if(!FB_READY||!_fbFS)return;_fbFS.collection("society").doc("flats").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);onF(d);}});_fbFS.collection("society").doc("bills").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);onB(d);}}); }
+  saveFlats(f){this.lset("slimra_flats_v3",f);if(FB_READY&&_fbFS)_fbFS.collection("society").doc("flats").set({list:f,updated:new Date().toISOString()}).catch(()=>{});},
+  saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS)_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
+  saveExpenses(e){this.lset("slimra_expenses_v1",e);if(FB_READY&&_fbFS)_fbFS.collection("society").doc("expenses").set({list:e,updated:new Date().toISOString()}).catch(()=>{});},
+  subscribeChanges(onF,onB){
+    if(!FB_READY||!_fbFS)return;
+    _fbFS.collection("society").doc("flats").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);onF(d);}});
+    _fbFS.collection("society").doc("bills").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);onB(d);}});
+  }
 };
 const LS=DB;
 
@@ -236,43 +266,23 @@ const INIT_FLATS=[
 // ════════════════════════════════════════════════════
 // STORAGE & AUTH
 // ════════════════════════════════════════════════════
-// LS = DB (defined above)
+// LS = DB (see above)
 
 
 // ════════════════════════════════════════════════════
-// EXPENSE PRESETS — predefined categories & common items
-// Based on actual society register data
+// EXPENSE PRESETS
 // ════════════════════════════════════════════════════
-const EXP_PRESETS = [
-  {
-    cat:'Security 🔒', color:'#f0fdf4', bg:'#dcfce7',
-    items:['Watchman Salary','Watchman Advance','Watchman Gas Refill','Security Material']
-  },
-  {
-    cat:'Cleaning 🧹', color:'#e0f2fe', bg:'#bae6fd',
-    items:['Cleaning Material','Sweeper/Bai Salary','Garbage Disposal','Common Area Cleaning']
-  },
-  {
-    cat:'Water 💧', color:'#eff6ff', bg:'#dbeafe',
-    items:['Water Tanker','Water Connection Repair','Plumber Charges','Motor Repair','Water Tank Cleaning']
-  },
-  {
-    cat:'Electricity ⚡', color:'#fefce8', bg:'#fef9c3',
-    items:['Electricity Bill','Lobby Light','Staircase Light','Electrical Material','Bell Repair','Meter Charges']
-  },
-  {
-    cat:'Repair 🔧', color:'#fef2f2', bg:'#fee2e2',
-    items:['Plumbing Repair','Wall Repair','Door/Lock Repair','Lift Repair','Pump Repair','Gate Repair','Painting']
-  },
-  {
-    cat:'Admin 📋', color:'#faf5ff', bg:'#f3e8ff',
-    items:['Printing/Stationery','Bank Charges','Municipal Tax','Property Tax','Registration Charges']
-  },
-  {
-    cat:'Miscellaneous 📦', color:'#f9fafb', bg:'#f3f4f6',
-    items:['Other Expense']
-  },
+const EXP_PRESETS=[
+  {cat:'Security 🔒',bg:'#dcfce7',items:['Watchman Salary','Watchman Advance','Watchman Gas Refill','Security Material']},
+  {cat:'Cleaning 🧹',bg:'#bae6fd',items:['Cleaning Material','Sweeper/Bai Salary','Garbage Disposal','Common Area Cleaning']},
+  {cat:'Water 💧',bg:'#dbeafe',items:['Water Tanker','Water Connection Repair','Plumber Charges','Motor Repair','Water Tank Cleaning']},
+  {cat:'Electricity ⚡',bg:'#fef9c3',items:['Electricity Bill','Lobby Light','Staircase Light','Electrical Material','Bell Repair']},
+  {cat:'Repair 🔧',bg:'#fee2e2',items:['Plumbing Repair','Wall Repair','Door/Lock Repair','Lift Repair','Pump Repair','Gate Repair']},
+  {cat:'Admin 📋',bg:'#f3e8ff',items:['Printing/Stationery','Bank Charges','Municipal Tax','Property Tax']},
+  {cat:'Miscellaneous 📦',bg:'#f3f4f6',items:['Other Expense']},
 ];
+const EXP_CAT_EMOJI={'Security 🔒':'🔒','Cleaning 🧹':'🧹','Water 💧':'💧','Electricity ⚡':'⚡','Repair 🔧':'🔧','Admin 📋':'📋','Miscellaneous 📦':'📦'};
+const EXP_CAT_BG={'Security 🔒':'#f0fdf4','Cleaning 🧹':'#e0f2fe','Water 💧':'#eff6ff','Electricity ⚡':'#fefce8','Repair 🔧':'#fef2f2','Admin 📋':'#faf5ff','Miscellaneous 📦':'#f9fafb'};
 
 // ════════════════════════════════════════════════════
 // GLOBAL STATE
@@ -281,42 +291,23 @@ const S={
   tab:'dashboard',
   modal:null,
   flats:[],bills:[],expenses:[],
+  expFilter:{month:new Date().getMonth()+1,year:new Date().getFullYear()},
   bf:{month:now.getMonth()+1,year:now.getFullYear(),status:'all'},
   fq:'',ry:now.getFullYear(),
   toast:null,_toastT:null,
   _waIdx:0,_waBills:[],_waDone:[],
-  expFilter:{month:now.getMonth()+1,year:now.getFullYear()},
 };
 
 async function loadData(){
-  // First sign into Firebase so Firestore rules (auth required) pass
-  if(FB_READY && _fbAuth && !_fbAuth.currentUser){
-    try{
-      await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, 'SocietySupreme@605606');
-    }catch(e){
-      // Try anonymous sign-in as fallback so we can read data
-      try{ await _fbAuth.signInAnonymously(); }catch(e2){}
-    }
+  initFirebase();
+  if(FB_READY&&_fbAuth){let w=0;while(!_fbAuth.currentUser&&w<4000){await new Promise(r=>setTimeout(r,300));w+=300;}}
+  const{flats,bills,expenses,source}=await DB.load();
+  S.flats=flats||JSON.parse(JSON.stringify(INIT_FLATS));
+  S.bills=bills||[];S.expenses=expenses||[];
+  if(source==="firebase"&&FB_READY){
+    if(!flats||!flats.length){const lf=DB.lget("slimra_flats_v3");if(lf&&lf.length){DB.saveFlats(lf);S.flats=lf;}}
+    DB.subscribeChanges(f=>{if(f&&f.length){S.flats=f;}render();},b=>{S.bills=b||[];render();});
   }
-
-  const {flats, bills, expenses, source} = await DB.load();
-  S.flats   = flats  || JSON.parse(JSON.stringify(INIT_FLATS));
-  S.bills   = bills  || [];
-  S.expenses= expenses || [];
-
-  if(source === 'firebase' && FB_READY){
-    // If Firebase had no data, push local cache up
-    if(!flats || !flats.length){
-      const lf = DB.lget('slimra_flats_v3');
-      if(lf && lf.length){ DB.saveFlats(lf); S.flats = lf; }
-    }
-    // Subscribe to real-time updates
-    DB.subscribeChanges(
-      f => { if(f && f.length){ S.flats = f; } render(); },
-      b => { S.bills = b || []; render(); }
-    );
-  }
-  console.log('Loaded:', S.flats.length, 'flats,', S.bills.length, 'bills from', source);
 }
 function saveFlats(){DB.saveFlats(S.flats);}
 function saveBills(){DB.saveBills(S.bills);}
@@ -350,136 +341,102 @@ function flatOf(bill){return S.flats.find(f=>f.id===bill.flatId)||{};}
 // GENERATE RECEIPT PDF using jsPDF
 // ════════════════════════════════════════════════════
 function buildReceiptPDF(bill, flat) {
-  if(!window.jspdf) return null;
-  const {jsPDF}=window.jspdf;
+  if(!window.jspdf)return null;
+  const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'p',unit:'mm',format:[148,210]});
-  const W=148, mx=6, rw=136; let y=6;
-
-  // Outer border
-  doc.setLineWidth(0.8); doc.setDrawColor(15,32,64); doc.rect(mx,y,rw,196);
-
+  const W=148,mx=6,rw=136;let y=6;
+  doc.setLineWidth(0.8);doc.setDrawColor(15,32,64);doc.rect(mx,y,rw,196);
   // Navy header
-  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,26,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(255,255,255);
-  doc.text('SUPREME LIMRA', W/2, y+10, {align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(201,147,42);
-  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048', W/2, y+17, {align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,147,42);
-  doc.setCharSpace(1.5); doc.text('MAINTENANCE RECEIPT', W/2, y+23, {align:'center'}); doc.setCharSpace(0);
-
-  // Gold bar
-  doc.setFillColor(201,147,42); doc.rect(mx,y+26,rw,1.5,'F'); y+=29;
-
-  // Right boxes — draw backgrounds FIRST to prevent overlap
-  const R=mx+rw, bx=R-30, bw=29;
-  doc.setFillColor(245,240,230); doc.setDrawColor(200,190,170); doc.setLineWidth(0.3);
-  doc.rect(bx,y,bw,17,'F'); doc.rect(bx,y,bw,17);   // Receipt No box
-  doc.rect(bx,y+19,bw,13,'F'); doc.rect(bx,y+19,bw,13); // Date box
-
-  // Receipt No text
-  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(130,130,130);
-  doc.text('RECEIPT NO.', bx+bw/2, y+4.5, {align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(15,32,64);
-  doc.text(String(bill.receiptNo||''), bx+bw/2, y+13, {align:'center'});
-
-  // Date text
-  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(130,130,130);
-  doc.text('DATE', bx+bw/2, y+23, {align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(15,32,64);
-  doc.text(bill.paidDate||'', bx+bw/2, y+30, {align:'center'});
-
-  // Left — Received from (row 1)
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,90,90);
-  doc.text('Received from Mr./Mrs./Ms.', mx+3, y+6);
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,26,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(20);doc.setTextColor(255,255,255);
+  doc.text('SUPREME LIMRA',W/2,y+10,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(201,147,42);
+  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+17,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setCharSpace(1.5);
+  doc.text('MAINTENANCE RECEIPT',W/2,y+23,{align:'center'});doc.setCharSpace(0);
+  doc.setFillColor(201,147,42);doc.rect(mx,y+26,rw,1.5,'F');y+=29;
+  // Right boxes — ALL backgrounds first
+  const R=mx+rw,bx=R-30,bw=29;
+  doc.setFillColor(245,240,230);doc.setDrawColor(200,190,170);doc.setLineWidth(0.3);
+  doc.rect(bx,y,bw,17,'F');doc.rect(bx,y,bw,17);
+  doc.rect(bx,y+19,bw,13,'F');doc.rect(bx,y+19,bw,13);
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(130,130,130);
+  doc.text('RECEIPT NO.',bx+bw/2,y+4.5,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(15,32,64);
+  doc.text(String(bill.receiptNo||''),bx+bw/2,y+13,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(130,130,130);
+  doc.text('DATE',bx+bw/2,y+23,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(15,32,64);
+  doc.text(bill.paidDate||'',bx+bw/2,y+30,{align:'center'});
+  // Left — Name
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,90,90);
+  doc.text('Received from Mr./Mrs./Ms.',mx+3,y+6);
   const nw=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(10,10,10);
-  doc.text(flat.ownerName||'', mx+3+nw, y+6);
-  doc.setLineWidth(0.3); doc.setDrawColor(15,32,64);
-  doc.line(mx+3+nw, y+7.2, bx-2, y+7.2);
-
-  // Left — Flat No (row 2)
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(10,10,10);
+  doc.text(flat.ownerName||'',mx+3+nw,y+6);
+  doc.setLineWidth(0.3);doc.setDrawColor(15,32,64);doc.line(mx+3+nw,y+7.2,bx-2,y+7.2);
   y+=11;
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,90,90);
-  doc.text('Flat / Garage / Shop No. :', mx+3, y+5);
+  // Left — Flat
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,90,90);
+  doc.text('Flat / Garage / Shop No. :',mx+3,y+5);
   const fw=doc.getTextWidth('Flat / Garage / Shop No. :  ');
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(10,10,10);
-  doc.text(flat.flatNo||'', mx+3+fw, y+5);
-  doc.setLineWidth(0.3); doc.setDrawColor(15,32,64);
-  doc.line(mx+3+fw, y+6.2, bx-2, y+6.2);
-
-  // On account note
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(10,10,10);
+  doc.text(flat.flatNo||'',mx+3+fw,y+5);
+  doc.setLineWidth(0.3);doc.setDrawColor(15,32,64);doc.line(mx+3+fw,y+6.2,bx-2,y+6.2);
   y+=10;
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(160,160,160);
-  doc.text('On account of the particulars stated below', mx+3, y+2);
-  y+=5;
-
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(160,160,160);
+  doc.text('On account of the particulars stated below',mx+3,y+2);y+=5;
   // Gold divider
-  doc.setFillColor(201,147,42); doc.rect(mx,y,rw,0.8,'F'); y+=1.5;
-
-  // Table header
-  const srW=11, amtW=28, ptW=rw-srW-amtW, hdrH=8, rowH=7;
-  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,hdrH,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
-  doc.text('Sr', mx+srW/2, y+5.5, {align:'center'});
-  doc.text('Particulars', mx+srW+ptW/2, y+5.5, {align:'center'});
-  doc.text('Amount', mx+srW+ptW+amtW/2, y+5.5, {align:'center'});
-  y+=hdrH; doc.setLineWidth(0.2);
-
+  doc.setFillColor(201,147,42);doc.rect(mx,y,rw,0.8,'F');y+=1.5;
+  // Table
+  const srW=11,amtW=28,ptW=rw-srW-amtW,hdrH=8,rowH=7;
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,hdrH,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
+  doc.text('Sr',mx+srW/2,y+5.5,{align:'center'});
+  doc.text('Particulars',mx+srW+ptW/2,y+5.5,{align:'center'});
+  doc.text('Amount',mx+srW+ptW+amtW/2,y+5.5,{align:'center'});
+  y+=hdrH;doc.setLineWidth(0.2);
   const itemM=MS[bill.month-1]+'-'+String(bill.year).slice(-2);
-  [{sr:1,l:'Maintenance Charges',x:itemM,a:bill.amount},{sr:2,l:'Entrance Fees'},
-   {sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},
-   {sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},
-   {sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},
-   {sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},
-   {sr:14,l:''},{sr:15,l:''}
+  [{sr:1,l:'Maintenance Charges',x:itemM,a:bill.amount},{sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},{sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},{sr:14,l:''},{sr:15,l:''}
   ].forEach((row,i)=>{
     if(i%2===0){doc.setFillColor(252,250,246);doc.rect(mx,y,rw,rowH,'F');}
     doc.setDrawColor(220,215,205);
-    doc.rect(mx,y,srW,rowH); doc.rect(mx+srW,y,ptW,rowH); doc.rect(mx+srW+ptW,y,amtW,rowH);
-    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,200,200);
-    doc.text(String(row.sr), mx+srW/2, y+5, {align:'center'});
+    doc.rect(mx,y,srW,rowH);doc.rect(mx+srW,y,ptW,rowH);doc.rect(mx+srW+ptW,y,amtW,rowH);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(200,200,200);
+    doc.text(String(row.sr),mx+srW/2,y+5,{align:'center'});
     if(row.l){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(30,30,30);doc.text(row.l,mx+srW+2,y+5);}
     if(row.x){const lx=doc.getTextWidth(row.l)+2;doc.setFont('helvetica','bold');doc.setTextColor(15,32,64);doc.setFontSize(8.5);doc.text(row.x,mx+srW+lx+2,y+5);doc.setTextColor(30,30,30);}
     if(row.a){doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(26,127,55);doc.text(row.a+'/-',mx+srW+ptW+amtW-2,y+5,{align:'right'});}
     y+=rowH;
   });
-
-  // Total row
-  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,9,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
-  doc.text('Total', mx+srW+ptW-2, y+6.5, {align:'right'});
-  doc.setTextColor(201,147,42); doc.setFontSize(11);
-  doc.text(bill.amount+'/-', mx+srW+ptW+amtW-2, y+6.5, {align:'right'}); y+=11;
-
+  // Total
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,9,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(255,255,255);
+  doc.text('Total',mx+srW+ptW-2,y+6.5,{align:'right'});
+  doc.setTextColor(201,147,42);doc.setFontSize(11);
+  doc.text(bill.amount+'/-',mx+srW+ptW+amtW-2,y+6.5,{align:'right'});y+=11;
   // Rs in words
-  doc.setFillColor(252,250,246); doc.rect(mx,y,rw,9,'F');
-  doc.setDrawColor(220,215,205); doc.rect(mx,y,rw,9);
-  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(80,80,80);
-  doc.text('Rs. in words:', mx+3, y+6);
+  doc.setFillColor(252,250,246);doc.rect(mx,y,rw,9,'F');
+  doc.setDrawColor(220,215,205);doc.rect(mx,y,rw,9);
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(80,80,80);
+  doc.text('Rs. in words:',mx+3,y+6);
   const wlw=doc.getTextWidth('Rs. in words:  ');
-  doc.setFont('helvetica','bold'); doc.setTextColor(0,0,0);
-  doc.text(numToWords(bill.amount), mx+3+wlw, y+6);
-  if(bill.paymentMode){
-    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,100,100);
-    doc.text('Mode: '+bill.paymentMode, R-3, y+6, {align:'right'});
-  }
+  doc.setFont('helvetica','bold');doc.setTextColor(0,0,0);
+  doc.text(numToWords(bill.amount),mx+3+wlw,y+6);
+  if(bill.paymentMode){doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(100,100,100);doc.text('Mode: '+bill.paymentMode,R-3,y+6,{align:'right'});}
   y+=11;
-
-  // Footer — navy bar with "Computer Generated"
-  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,14,'F');
-  doc.setFont('helvetica','bolditalic'); doc.setFontSize(8); doc.setTextColor(201,147,42);
-  doc.text('This is a Computer Generated Receipt — No Signature Required', W/2, y+6, {align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(255,255,255,0.5);
-  doc.setTextColor(180,180,180);
-  doc.text('Supreme Limra Society Management  ·  '+new Date().getFullYear(), W/2, y+11, {align:'center'});
-
+  // Footer — navy
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,14,'F');
+  doc.setFont('helvetica','bolditalic');doc.setFontSize(8);doc.setTextColor(201,147,42);
+  doc.text('Computer Generated Receipt — No Signature Required',W/2,y+6,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(180,180,180);
+  doc.text('Supreme Limra Society Management  -  '+new Date().getFullYear(),W/2,y+11,{align:'center'});
   // PAID watermark
   doc.saveGraphicsState();
   doc.setGState(new doc.GState({opacity:0.08}));
-  doc.setFont('helvetica','bold'); doc.setFontSize(56); doc.setTextColor(26,127,55);
-  doc.text('PAID', W/2, 110, {align:'center', angle:40});
+  doc.setFont('helvetica','bold');doc.setFontSize(56);doc.setTextColor(26,127,55);
+  doc.text('PAID',W/2,110,{align:'center',angle:40});
   doc.restoreGraphicsState();
-
   return doc;
 }
 
@@ -579,8 +536,22 @@ async function sendBillOnWA(bill, flat) {
 // ════════════════════════════════════════════════════
 // PDF GENERATION (Blob URL — works in ALL browsers)
 // ════════════════════════════════════════════════════
-// printPDF defined above
-
+function printPDF(bill,flat){
+  const m=MS[bill.month-1],y=String(bill.year).slice(-2);
+  const rows=[{sr:1,label:'Maintenance Charges',extra:m+'-'+y,amt:bill.amount},{sr:2,label:'Entrance Fees'},{sr:3,label:'Interest On Defaulted Dues'},{sr:4,label:'Contribution Towards Construction'},{sr:5,label:'Lease Rent'},{sr:6,label:'Municipal Taxes'},{sr:7,label:'Water Charges'},{sr:8,label:'Electricity Charges'},{sr:9,label:'Parking Charges'},{sr:10,label:'Lift Charges'},{sr:11,label:'Service Charges'},{sr:12,label:'Miscellaneous'},{sr:13,label:'Terrace Charge'},{sr:14,label:''},{sr:15,label:''}];
+  const trs=rows.map(r=>`<tr><td class="sr">${r.sr}</td><td class="pt">${r.label||''}${r.extra?'&nbsp;&nbsp;<strong>'+r.extra+'</strong>':''}</td><td class="am">${r.amt?r.amt+'/-':''}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt #${bill.receiptNo} - Supreme Limra</title><style>@page{size:148mm 210mm;margin:8mm 10mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11pt;color:#000;background:#fff}.rc{border:2.5pt solid #000;width:100%}.hd{text-align:center;border-bottom:2pt solid #000;padding:7pt 8pt 5pt}.ht{font-size:28pt;font-weight:900;letter-spacing:4pt;text-transform:uppercase;line-height:1}.ha{font-size:9pt;margin-top:3pt}.mt{border-bottom:1pt solid #000;padding:7pt 9pt 5pt}.mi{display:flex;justify-content:space-between;align-items:flex-start;gap:8pt}.ml{flex:1}.mr{text-align:right;min-width:85pt;font-size:10.5pt}.mr .rn{font-size:16pt;font-weight:800}.fr{display:flex;align-items:flex-end;font-size:10.5pt;margin-bottom:5pt;gap:3pt}.fl{white-space:nowrap}.fv{border-bottom:1pt solid #000;flex:1;min-width:60pt;padding:0 2pt 1pt;font-weight:700;font-size:11pt}.mn{font-size:9.5pt;margin-top:3pt}table{width:100%;border-collapse:collapse}table th{border:1pt solid #000;padding:4pt 5pt;text-align:center;font-size:10.5pt;font-weight:700}table th.ta{width:68pt}table th.ts{width:22pt}table td{border:1pt solid #000;padding:2.5pt 5pt;font-size:10.5pt;height:16pt;vertical-align:middle}td.sr{text-align:center;width:22pt}td.pt{}td.am{text-align:right;width:68pt;font-weight:600}.tr td{border-top:1.5pt solid #000;font-weight:800;font-size:11pt}.tl{text-align:right;padding-right:8pt}.wr{border-top:1pt solid #000;padding:5pt 9pt;font-size:10.5pt;display:flex;align-items:flex-end;gap:5pt}.wl{white-space:nowrap}.wv{border-bottom:1pt solid #000;flex:1;padding-bottom:1pt;font-weight:700;font-size:11pt}.sg{border-top:1pt solid #000;padding:5pt 14pt 8pt;display:flex;justify-content:space-between;align-items:flex-end}.sb{text-align:center;font-size:9.5pt}.sl{border-top:1pt solid #000;width:100pt;margin-bottom:3pt;margin-top:24pt}.sr2{text-align:right}.sr2 .sl{margin-left:auto}</style></head><body><div class="rc"><div class="hd"><div class="ht">SUPREME LIMRA</div><div class="ha">${ADDR_P}</div></div><div class="mt"><div class="mi"><div class="ml"><div class="fr"><span class="fl">Received from Mr./Mrs./Ms.</span><span class="fv">${flat.ownerName||''}</span></div><div class="fr"><span class="fl">Flat/Garage/Shop No.:</span><span class="fv">${flat.flatNo||''}</span></div><div class="mn">On account of the particulars stated below</div></div><div class="mr"><div style="font-size:10pt">No.</div><div class="rn">${bill.receiptNo}</div><div style="margin-top:6pt;font-size:10pt">Date :</div><div style="font-weight:700;font-size:10.5pt">${bill.paidDate}</div></div></div></div><table><thead><tr><th class="ts">Sr</th><th>Particulars</th><th class="ta">Amount</th></tr></thead><tbody>${trs}<tr class="tr"><td class="sr"></td><td class="pt tl">Total</td><td class="am">${bill.amount}/-</td></tr></tbody></table><div class="wr"><span class="wl">Rs.in word</span><span class="wv">${numToWords(bill.amount)}</span></div><div class="sg"><div class="sb"><div class="sl"></div>Name &amp; Signature</div><div class="sb sr2"><div class="sl"></div>Hon. Secretary / Treasurer<br><span style="font-size:8.5pt">Signature</span></div></div></div><script>window.addEventListener('load',function(){setTimeout(function(){window.print();},400);});<\/script></body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(!win){
+    // Fallback: download as HTML file
+    const a=document.createElement('a');
+    a.href=url;a.download='Receipt_'+bill.receiptNo+'.html';a.click();
+    showToast('Receipt downloaded — open in browser to print','ok');
+  }
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
+}
 
 // ════════════════════════════════════════════════════
 // WHATSAPP
@@ -636,11 +607,11 @@ function renderLogin(){
   <div class="login-card">
     <div class="login-lock">🔐</div>
     <div class="login-title">Society Management</div>
-    <div class="login-hint" id="login-hint">Enter your app password</div>
-    <input id="pin-input" type="password" class="pin-input" maxlength="30" placeholder="Enter your password" autocomplete="off">
+    <div class="login-hint">Enter your PIN to continue</div>
+    <input id="pin-input" type="tel" class="pin-input" maxlength="6" placeholder="Enter PIN" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
     <div id="pin-err" class="login-err"></div>
     <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="login">Unlock App 🔓</button>
-    <p id="login-note" style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)"></p>
+    <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)">Default PIN: 1234</p>
   </div>
 </div>`;
 }
@@ -668,7 +639,7 @@ function renderApp(){
   const toast=S.toast?`<div class="toast t${S.toast.type}">${esc(S.toast.msg)}</div>`:'';
   return`<div class="app">
   <div class="hdr">
-    <div class="hbdg">Society Management</div><div id="sync-badge" style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)">Local only</div>
+    <div class="hbdg">Society Management</div>
     <div class="hdr-row">
       <div><h1>Supreme Limra Society</h1><p>${ADDR_A}</p></div>
       <div class="hdr-icons">
@@ -686,28 +657,18 @@ function renderApp(){
 // RENDER — DASHBOARD
 // ════════════════════════════════════════════════════
 function renderDashboard(){
-  // 25th reminder banner
-  const today25 = now.getDate()===25;
-  const mnthName = MO[now.getMonth()];
   const collected=S.bills.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
-  const thisYearExp=(S.expenses||[]).filter(e=>new Date(e.date).getFullYear()===now.getFullYear()).reduce((s,e)=>s+e.amount,0);
-  const netBal=collected-thisYearExp;
   const pending=S.bills.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
   const pendC=S.bills.filter(b=>b.status==='pending').length;
   const recent=[...S.bills].filter(b=>b.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate)).slice(0,5);
   const pendTop=S.bills.filter(b=>b.status==='pending').slice(0,5);
   const pRows=pendTop.map(b=>{const f=flatOf(b);return`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${MO[b.month-1]} ${b.year}</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(b.amount)}</span><button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button></div></div>`;}).join('');
   const rRows=recent.map(b=>{const f=flatOf(b);return`<div class="li" style="cursor:pointer" data-action="open-receipt" data-id="${b.id}"><div class="fb" style="background:var(--gr);font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${MO[b.month-1]} ${b.year} · ${b.paidDate}</div></div><div style="text-align:right"><div style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--gr)">${fmt(b.amount)}</div><div style="font-size:10px;color:var(--mu)">Tap receipt</div></div></div>`;}).join('');
-  return`${today25?`<div style="background:linear-gradient(135deg,#1a7f37,#145a28);border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-  <div><div style="color:#fff;font-weight:700;font-size:13px">📊 Monthly Report Ready</div><div style="color:rgba(255,255,255,.75);font-size:11px;margin-top:2px">Today is 25th — generate ${mnthName} Excel report</div></div>
-  <button class="btn" style="background:#fff;color:#1a7f37;font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;flex-shrink:0" data-action="gen-monthly-excel">Generate 📊</button>
-</div>`:''}
-<div class="sg" style="margin-top:4px">
+  return`<div class="sg" style="margin-top:4px">
   <div class="sc" style="background:linear-gradient(135deg,#0f2040,#1a3260)"><div class="sl" style="color:rgba(255,255,255,.6)">Total Flats</div><div class="sv" style="color:#fff">${S.flats.length}</div></div>
   <div class="sc" style="background:linear-gradient(135deg,#c9932a,#b8821e)"><div class="sl" style="color:rgba(255,255,255,.7)">Collected</div><div class="sv" style="color:#fff;font-size:20px">${fmt(collected)}</div></div>
   <div class="sc"><div class="sl">Pending Dues</div><div class="sv" style="color:var(--re);font-size:20px">${fmt(pending)}</div></div>
   <div class="sc"><div class="sl">Pending Bills</div><div class="sv">${pendC}</div></div>
-  <div class="sc" style="grid-column:1/-1"><div class="sl">Net Balance (Collected - Spent)</div><div class="sv" style="font-size:20px;color:${netBal>=0?'var(--gr)':'var(--re)'}">${fmt(netBal)}</div><div style="font-size:10px;color:var(--mu);margin-top:4px">${fmt(collected)} collected · ${fmt(thisYearExp)} spent this year</div></div>
 </div>
 ${pendTop.length?`<div class="crd"><div class="stt">⏳ Pending Dues</div>${pRows}</div>`:''}
 ${recent.length?`<div class="crd"><div class="stt">✅ Recent Payments</div>${rRows}</div>`:''}
@@ -767,200 +728,24 @@ ${allBills.length?`<div class="crd">${rows}</div>`:`<div class="crd"><div class=
 // ════════════════════════════════════════════════════
 function renderReports(){
   const ry=S.ry;
-  const allYrs=[...new Set([...S.bills.map(b=>b.year),...(S.expenses||[]).map(e=>new Date(e.date).getFullYear()),now.getFullYear()])].sort((a,b)=>b-a);
+  const yrs=[...new Set([...S.bills.map(b=>b.year),now.getFullYear()])].sort((a,b)=>b-a);
   const yb=S.bills.filter(b=>b.year===ry);
   const yc=yb.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
   const yp=yb.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
-  const yearExp=(S.expenses||[]).filter(e=>new Date(e.date).getFullYear()===ry);
-  const ye=yearExp.reduce((s,e)=>s+e.amount,0);
-  const ybal=yc-ye;
-
   const mo=MO.map((m,i)=>{const mb=yb.filter(b=>b.month===i+1);return{name:m.slice(0,3),c:mb.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0),p:mb.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0)};});
-  const mxv=Math.max(...mo.map(m=>m.c+m.p),1);
-  const mRows=mo.filter(m=>m.c||m.p).map(m=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:600;color:var(--tx);width:32px">${m.name}</span><div style="display:flex;gap:10px"><span style="color:var(--gr);font-weight:600">${fmt(m.c)}</span>${m.p?`<span style="color:var(--re)">+${fmt(m.p)} due</span>`:''}</div></div><div class="pb"><div class="pf" style="width:${(m.c/mxv)*100}%"></div></div></div>`).join('');
-
+  const mx=Math.max(...mo.map(m=>m.c+m.p),1);
+  const mRows=mo.filter(m=>m.c||m.p).map(m=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:600;color:var(--tx);width:32px">${m.name}</span><div style="display:flex;gap:10px"><span style="color:var(--gr);font-weight:600">${fmt(m.c)}</span>${m.p?`<span style="color:var(--re)">+${fmt(m.p)} due</span>`:''}</div></div><div class="pb"><div class="pf" style="width:${(m.c/mx)*100}%"></div></div></div>`).join('');
   const def=S.flats.map(f=>{const pb=S.bills.filter(b=>b.flatId===f.id&&b.status==='pending');return{f,amt:pb.reduce((s,b)=>s+b.amount,0),cnt:pb.length};}).filter(x=>x.amt>0).sort((a,b)=>b.amt-a.amt);
-  const defRows=def.map(({f,amt,cnt})=>`<div class="li"><div class="fb" style="background:var(--re);font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}</div><div class="isub">${cnt} month${cnt>1?'s':''} pending · ${f.mobile||'—'}</div></div><div style="text-align:right"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:var(--re)">${fmt(amt)}</span></div></div>`).join('');
-
-  const expCatEmoji={Repair:'🔧',Cleaning:'🧹',Electricity:'💡',Water:'💧',Security:'🔒',Miscellaneous:'📦'};
-  const expCatBg={Repair:'#fee2e2',Cleaning:'#e0f2fe',Electricity:'#fef9c3',Water:'#dbeafe',Security:'#f0fdf4',Miscellaneous:'#f3f4f6'};
-  const sortedExp=[...yearExp].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const expRows=sortedExp.map(e=>`<div class="li">
-    <div style="width:40px;height:40px;border-radius:10px;background:${expCatBg[e.category]||'#f3f4f6'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${expCatEmoji[e.category]||'📦'}</div>
-    <div class="ii"><div class="iname">${esc(e.description)}</div><div class="isub">${e.category}${e.notes?' · '+esc(e.notes):''} · ${new Date(e.date).toLocaleDateString('en-IN')}</div></div>
-    <div style="text-align:right"><div style="font-family:var(--serif);font-weight:700;font-size:15px;color:var(--re)">${fmt(e.amount)}</div>
-    <button class="btn brd bsm" style="margin-top:3px;padding:3px 7px;font-size:10px" data-action="del-expense" data-id="${e.id}">✕</button></div>
-  </div>`).join('');
-
-  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-  <span class="stt" style="margin-bottom:0">Reports</span>
-  <div style="display:flex;gap:8px">
-    <select class="inp" style="width:auto;padding:6px 32px 6px 10px;font-size:14px" onchange="S.ry=+this.value;render()">${allYrs.map(y=>`<option value="${y}" ${ry===y?'selected':''}>${y}</option>`).join('')}</select>
-    <button class="btn bg bsm" data-action="add-expense">+ Expense</button>
-  </div>
-</div>
-
-<!-- ── Balance Summary ── -->
-<div class="crd" style="background:linear-gradient(135deg,#0f2040,#1a3260);padding:16px">
-  <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase">Balance Summary — ${ry}</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
-    <div style="text-align:center">
-      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:4px">Collected</div>
-      <div style="font-family:var(--serif);font-size:17px;font-weight:700;color:#5dff9a">${fmt(yc)}</div>
-    </div>
-    <div style="text-align:center;border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1)">
-      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:4px">Spent</div>
-      <div style="font-family:var(--serif);font-size:17px;font-weight:700;color:#ffb347">${fmt(ye)}</div>
-    </div>
-    <div style="text-align:center">
-      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:4px">Net Balance</div>
-      <div style="font-family:var(--serif);font-size:17px;font-weight:700;color:${ybal>=0?'#c9932a':'#ff6b6b'}">${fmt(Math.abs(ybal))}</div>
-      <div style="font-size:9px;color:rgba(255,255,255,.4)">${ybal>=0?'surplus':'deficit'}</div>
-    </div>
-  </div>
-  ${yp>0?`<div style="background:rgba(255,100,100,.15);border:1px solid rgba(255,100,100,.25);border-radius:8px;padding:7px 10px;font-size:11px;color:#ffb3b3">⚠ ${fmt(yp)} pending from flat owners</div>`:
-    `<div style="background:rgba(93,255,154,.1);border:1px solid rgba(93,255,154,.2);border-radius:8px;padding:7px 10px;font-size:11px;color:#5dff9a">✅ All dues collected for ${ry}</div>`}
-</div>
-
-${def.length?`<div class="crd"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="stt" style="margin-bottom:0">🔴 Outstanding Dues</div><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:var(--re)">${fmt(def.reduce((s,x)=>s+x.amt,0))}</span></div>${defRows}</div>`:''}
-
-<div class="crd"><div class="stt">Monthly Collections — ${ry}</div>${mRows||`<p style="color:var(--mu);font-size:13px;text-align:center;padding:12px 0">No data for ${ry}</p>`}</div>
-
-<div class="crd">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <div class="stt" style="margin-bottom:0">💸 Expenses — ${ry}</div>
-    <span style="font-family:var(--serif);font-weight:700;color:var(--re)">${fmt(ye)}</span>
-  </div>
-  ${expRows||`<div class="emp" style="padding:16px 0"><div class="emp-icon" style="font-size:28px">💸</div><p>No expenses for ${ry}.<br>Tap <strong>+ Expense</strong> to add.</p></div>`}
-</div>`;
+  const defRows=def.map(({f,amt,cnt})=>`<div class="li"><div class="fb" style="background:var(--re);font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}</div><div class="isub">${cnt} month${cnt>1?'s':''} · 📱 ${f.mobile||'—'}</div></div><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(amt)}</span></div>`).join('');
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="stt" style="margin-bottom:0">Reports</span><select class="inp" style="width:auto;padding:6px 32px 6px 10px;font-size:14px" onchange="S.ry=+this.value;render()">${yrs.map(y=>`<option value="${y}" ${ry===y?'selected':''}>${y}</option>`).join('')}</select></div>
+<div class="sg"><div class="sc"><div class="sl">Year Collected</div><div class="sv" style="color:var(--gr);font-size:20px">${fmt(yc)}</div></div><div class="sc"><div class="sl">Year Pending</div><div class="sv" style="color:var(--re);font-size:20px">${fmt(yp)}</div></div></div>
+<div class="crd"><div class="stt">Monthly Summary — ${ry}</div>${mRows||`<p style="color:var(--mu);font-size:13px;text-align:center;padding:12px 0">No data for ${ry}</p>`}</div>
+${def.length?`<div class="crd"><div class="stt">🔴 Outstanding Dues</div>${defRows}</div>`:''}`;
 }
 
 // ════════════════════════════════════════════════════
 // RENDER — SETTINGS
 // ════════════════════════════════════════════════════
-function renderExpenses(){
-  const em = S.expFilter||{month:now.getMonth()+1, year:now.getFullYear()};
-  const allYrs=[...new Set([...(S.expenses||[]).map(e=>new Date(e.date).getFullYear()),now.getFullYear()])].sort((a,b)=>b-a);
-  const yrs = allYrs.length ? allYrs : [now.getFullYear()];
-
-  // Filter expenses
-  const filtered = (S.expenses||[]).filter(e=>{
-    const d=new Date(e.date);
-    return d.getMonth()+1===em.month && d.getFullYear()===em.year;
-  }).sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-  const totalExp = filtered.reduce((s,e)=>s+e.amount,0);
-
-  // Group by category
-  const byCat = {};
-  filtered.forEach(e=>{
-    if(!byCat[e.category]) byCat[e.category]=[];
-    byCat[e.category].push(e);
-  });
-
-  // Category totals
-  const catTotals = Object.entries(byCat).map(([cat,items])=>({
-    cat, total:items.reduce((s,e)=>s+e.amount,0), count:items.length
-  })).sort((a,b)=>b.total-a.total);
-
-  // Collected this month for balance
-  const collected = S.bills.filter(b=>b.month===em.month&&b.year===em.year&&b.status==='paid')
-    .reduce((s,b)=>s+b.amount,0);
-  const balance = collected - totalExp;
-
-  const catEmoji = {
-    'Security 🔒':'🔒','Cleaning 🧹':'🧹','Water 💧':'💧',
-    'Electricity ⚡':'⚡','Repair 🔧':'🔧','Admin 📋':'📋','Miscellaneous 📦':'📦',
-    // legacy
-    'Security':'🔒','Cleaning':'🧹','Water':'💧','Electricity':'💡','Repair':'🔧','Miscellaneous':'📦'
-  };
-  const catBg = {
-    'Security 🔒':'#f0fdf4','Cleaning 🧹':'#e0f2fe','Water 💧':'#eff6ff',
-    'Electricity ⚡':'#fefce8','Repair 🔧':'#fef2f2','Admin 📋':'#faf5ff','Miscellaneous 📦':'#f9fafb',
-    'Security':'#f0fdf4','Cleaning':'#e0f2fe','Water':'#eff6ff','Electricity':'#fefce8','Repair':'#fef2f2','Miscellaneous':'#f9fafb'
-  };
-
-  // Build expense list rows
-  const expRows = filtered.map(e=>`
-    <div class="li" style="align-items:flex-start;padding:10px 0">
-      <div style="width:38px;height:38px;border-radius:10px;background:${catBg[e.category]||'#f3f4f6'};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-top:2px">${catEmoji[e.category]||'📦'}</div>
-      <div class="ii">
-        <div class="iname" style="font-size:13px">${esc(e.description)}</div>
-        <div class="isub">${e.category} · ${new Date(e.date).toLocaleDateString('en-IN')}${e.notes?' · <em>'+esc(e.notes)+'</em>':''}</div>
-      </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-family:var(--serif);font-weight:700;font-size:15px;color:var(--re)">${fmt(e.amount)}</div>
-        <button class="btn brd bsm" style="padding:3px 7px;font-size:10px;margin-top:3px" data-action="del-expense" data-id="${e.id}">✕</button>
-      </div>
-    </div>`).join('');
-
-  // Quick-add preset buttons
-  const presetBtns = EXP_PRESETS.map(p=>`
-    <button class="btn bsm" style="background:${p.bg};color:#333;border:1px solid ${p.color};font-size:11px;margin:3px"
-      data-action="quick-expense" data-cat="${esc(p.cat)}">
-      ${p.cat}
-    </button>`).join('');
-
-  return`
-<!-- Header -->
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-  <span class="stt" style="margin-bottom:0">Society Expenses</span>
-  <button class="btn bg bsm" data-action="add-expense">+ Add Entry</button>
-</div>
-
-<!-- Month filter -->
-<div class="crd" style="padding:10px 14px;margin-bottom:10px">
-  <div style="display:flex;gap:8px">
-    <select class="inp" style="flex:2;padding:7px 28px 7px 10px;font-size:14px"
-      onchange="S.expFilter={...(S.expFilter||{}),month:+this.value};render()">
-      ${MO.map((m,i)=>`<option value="${i+1}" ${em.month===i+1?'selected':''}>${m}</option>`).join('')}
-    </select>
-    <select class="inp" style="flex:1;padding:7px 28px 7px 10px;font-size:14px"
-      onchange="S.expFilter={...(S.expFilter||{}),year:+this.value};render()">
-      ${yrs.map(y=>`<option value="${y}" ${em.year===y?'selected':''}>${y}</option>`).join('')}
-    </select>
-  </div>
-</div>
-
-<!-- Balance strip -->
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
-  <div class="sc" style="padding:12px"><div class="sl">Collected</div><div style="font-family:var(--serif);font-size:17px;font-weight:700;color:var(--gr)">${fmt(collected)}</div></div>
-  <div class="sc" style="padding:12px"><div class="sl">Spent</div><div style="font-family:var(--serif);font-size:17px;font-weight:700;color:var(--re)">${fmt(totalExp)}</div></div>
-  <div class="sc" style="padding:12px"><div class="sl">Balance</div><div style="font-family:var(--serif);font-size:17px;font-weight:700;color:${balance>=0?'var(--gr)':'var(--re)'}">${fmt(Math.abs(balance))}</div><div style="font-size:9px;color:var(--mu)">${balance>=0?'surplus':'deficit'}</div></div>
-</div>
-
-<!-- Quick Add Presets -->
-<div class="crd" style="padding:12px 14px">
-  <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Quick Add — Tap a Category</div>
-  <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${presetBtns}</div>
-</div>
-
-<!-- Category breakdown -->
-${catTotals.length?`<div class="crd"><div class="stt">Category Summary</div>
-  ${catTotals.map(ct=>`<div class="li">
-    <div style="width:36px;height:36px;border-radius:8px;background:${catBg[ct.cat]||'#f3f4f6'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${catEmoji[ct.cat]||'📦'}</div>
-    <div class="ii"><div class="iname">${ct.cat.replace(/[🔒🧹💧⚡🔧📋📦]/g,'').trim()}</div><div class="isub">${ct.count} item${ct.count>1?'s':''}</div></div>
-    <div style="font-family:var(--serif);font-weight:700;font-size:15px;color:var(--re)">${fmt(ct.total)}</div>
-  </div>`).join('')}
-  <div style="display:flex;justify-content:space-between;padding:10px 0 2px;border-top:1.5px solid #f0ebe0;margin-top:4px">
-    <span style="font-weight:700;color:var(--tx)">Total</span>
-    <span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(totalExp)}</span>
-  </div>
-</div>`:''}
-
-<!-- All entries -->
-<div class="crd">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-    <div class="stt" style="margin-bottom:0">All Entries — ${MO[em.month-1]} ${em.year}</div>
-    <span style="font-size:11px;color:var(--mu)">${filtered.length} items</span>
-  </div>
-  ${expRows||`<div class="emp" style="padding:20px 0">
-    <div style="font-size:32px;opacity:.4;text-align:center;margin-bottom:8px">💸</div>
-    <p style="text-align:center;color:var(--mu);font-size:13px">No expenses for ${MO[em.month-1]} ${em.year}<br>Tap <strong>+ Add Entry</strong> or a category above</p>
-  </div>`}
-</div>`;
-}
-
 function renderSettings(){
   return`<div class="stt">Settings</div>
 <div class="crd">
@@ -1061,20 +846,15 @@ function renderReceipt(bill){
     <td style="font-size:10px">${esc(i.l||'')}${i.x?`&nbsp;<strong style="color:#0f2040;font-size:10.5px">${i.x}</strong>`:''}</td>
     <td class="am">${i.a?i.a+'/-':''}</td>
   </tr>`).join('');
-
   return`<div class="mttl" style="font-size:18px;margin-bottom:12px">🧾 Payment Receipt</div>
 <div class="rct-p" id="receipt-capture">
   <div class="rp-paid-stamp">PAID</div>
-
-  <!-- ── Navy Header ── -->
   <div class="rp-h">
     <h2>SUPREME LIMRA</h2>
     <p>${ADDR_P}</p>
-    <div class="rp-tag">✦ Maintenance Receipt ✦</div>
+    <div class="rp-tag">✦ MAINTENANCE RECEIPT ✦</div>
   </div>
   <div class="rp-gold-bar"></div>
-
-  <!-- ── Meta ── -->
   <div class="rp-m">
     <div class="rp-mi">
       <div class="rp-ml">
@@ -1083,15 +863,13 @@ function renderReceipt(bill){
         <div class="rp-note">On account of the particulars stated below</div>
       </div>
       <div class="rp-mr">
-        <div class="rno-lbl">Receipt No.</div>
-        <div class="rno">${bill.receiptNo}</div>
+        <span class="rno-lbl">Receipt No.</span>
+        <span class="rno">${bill.receiptNo}</span>
         <span class="rdate-lbl">Date</span>
         <span class="rdate">${bill.paidDate}</span>
       </div>
     </div>
   </div>
-
-  <!-- ── Table ── -->
   <table class="rp-t">
     <thead><tr>
       <th style="width:22px">Sr</th>
@@ -1101,38 +879,27 @@ function renderReceipt(bill){
     <tbody>
       ${trs}
       <tr class="tr">
-        <td class="sr" colspan="2" style="text-align:right;padding-right:12px;color:#fff;font-size:11px">Total</td>
+        <td colspan="2" style="text-align:right;padding-right:12px;color:#fff;font-size:11px">Total</td>
         <td class="am">${bill.amount}/-</td>
       </tr>
     </tbody>
   </table>
-
-  <!-- ── Amount in words ── -->
   <div class="rp-w">
     <span style="color:#777;font-size:9px">Rs. in words:</span>
     <span class="rp-wv">${numToWords(bill.amount)}</span>
     ${bill.paymentMode?`<span class="rp-mode">${bill.paymentMode}</span>`:''}
   </div>
-
-  <!-- ── Footer ── -->
   <div class="rp-footer">
-    <div class="rp-footer-main">✦ This is a Computer Generated Receipt — No Signature Required ✦</div>
+    <div class="rp-footer-main">✦ Computer Generated Receipt — No Signature Required ✦</div>
     <div class="rp-footer-sub">Supreme Limra Society Management · ${new Date().getFullYear()}</div>
   </div>
 </div>
-
-<!-- ── Buttons ── -->
 <div style="display:flex;gap:8px;margin-top:14px">
   <button class="btn bo" style="flex:1" data-action="close-modal">Close</button>
   <button class="btn bpdf" style="flex:1;font-size:12px" data-action="print-pdf" data-id="${bill.id}">PDF / Print 🖨️</button>
-  ${f.mobile?`<button class="btn bwa" style="flex:1.2;font-size:12px" id="wa-send-btn"
-    data-action="wa-rcpt" data-id="${bill.id}">
-    ${S._pdfUploading?'⏳ Uploading...':S._pdfUrl?'WhatsApp + PDF 💬':'Send via WhatsApp 💬'}
-  </button>`:''}
+  ${f.mobile?`<button class="btn bwa" id="wa-send-btn" style="flex:1.2;font-size:12px" data-action="wa-rcpt" data-id="${bill.id}">${S._pdfUploading?'⏳ Uploading...':S._pdfUrl?'WhatsApp + PDF 💬':'Send via WhatsApp 💬'}</button>`:''}
 </div>
-${f.mobile?`<div id="pdf-status-hint" style="margin-top:8px;background:#f0f8ff;border-radius:8px;padding:7px 10px;font-size:11px;color:#555;text-align:center">
-  💬 WhatsApp opens directly to ${esc(f.ownerName)}'s chat
-</div>`:''}`;
+${f.mobile?`<div id="pdf-status-hint" style="margin-top:8px;background:#f0f8ff;border-radius:8px;padding:7px 10px;font-size:11px;color:#555;text-align:center">💬 WhatsApp opens directly to ${esc(f.ownerName)}'s chat</div>`:''}`;
 }
 
 function renderWAFlow(data){
@@ -1228,59 +995,6 @@ function renderPdfGuide(data){
 <button class="btn bo" style="width:100%" data-action="close-modal">Close</button>`;
 }
 
-function renderAddExpense(presetCat='', presetDesc=''){
-  const today=new Date().toISOString().slice(0,10);
-  // Build category options from presets
-  const catOpts = EXP_PRESETS.map(p=>`<option value="${p.cat}" ${presetCat===p.cat?'selected':''}>${p.cat}</option>`).join('');
-
-  // If preset selected, show its common items as quick-fill buttons
-  const preset = EXP_PRESETS.find(p=>p.cat===presetCat);
-  const quickItems = preset ? preset.items.map(item=>
-    `<button type="button" class="btn bsm" style="background:#f0f4ff;color:var(--n);border:1px solid #dde4ff;font-size:11px;margin:2px"
-      onclick="document.getElementById('exp-desc').value='${item.replace(/'/g,"\\'")}'">${item}</button>`
-  ).join('') : '';
-
-  return`<div class="mttl">💸 Add Expense Entry</div>
-
-${presetCat?`<div style="background:${(EXP_PRESETS.find(p=>p.cat===presetCat)||{}).bg||'#f3f4f6'};border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12px;font-weight:600;color:#333">${presetCat}</div>`:''}
-
-<div class="ig">
-  <label class="il">Category *</label>
-  <select class="inp" id="exp-cat" onchange="S.modal={type:'addExpense',data:{cat:this.value,desc:''}};render()">
-    <option value="">— Select Category —</option>
-    ${catOpts}
-  </select>
-</div>
-
-${quickItems?`<div style="margin-bottom:14px"><label class="il">Common Items — tap to fill</label><div style="display:flex;flex-wrap:wrap;gap:4px">${quickItems}</div></div>`:''}
-
-<div class="ig">
-  <label class="il">Description *</label>
-  <input class="inp" id="exp-desc" placeholder="e.g. Watchman April salary" value="${esc(presetDesc)}" autocomplete="off">
-</div>
-
-<div style="display:flex;gap:10px">
-  <div class="ig" style="flex:1.2">
-    <label class="il">Amount (₹) *</label>
-    <input class="inp" id="exp-amt" type="number" placeholder="0" inputmode="numeric">
-  </div>
-  <div class="ig" style="flex:1">
-    <label class="il">Date *</label>
-    <input class="inp" id="exp-date" type="date" value="${today}">
-  </div>
-</div>
-
-<div class="ig">
-  <label class="il">Paid By / Notes (optional)</label>
-  <input class="inp" id="exp-note" placeholder="e.g. Paid from fund by Secretary">
-</div>
-
-<div style="display:flex;gap:10px;margin-top:4px">
-  <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
-  <button class="btn bn" style="flex:1.5" data-action="save-expense">Save Expense ✓</button>
-</div>`;
-}
-
 function renderChangePin(){
   return`<div class="mttl">🔑 Change PIN</div>
 <div class="ig"><label class="il">Current PIN</label><input class="inp" id="pin-old" type="tel" maxlength="6" placeholder="Current PIN" inputmode="numeric" autocomplete="off"></div>
@@ -1293,209 +1007,103 @@ function renderChangePin(){
 // ════════════════════════════════════════════════════
 // MAIN RENDER
 // ════════════════════════════════════════════════════
-function ensureJsPDF(){return new Promise(r=>{if(window.jspdf){r(true);return;}const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=()=>r(true);s.onerror=()=>r(false);document.head.appendChild(s);});}
-async function uploadReceiptAndGetLink(bill,flat){if(!FB_READY||!_fbST)return null;try{const ok=await ensureJsPDF();if(!ok)return null;const doc=buildReceiptPDF(bill,flat);if(!doc)return null;const blob=doc.output('blob');const fname='receipts/Receipt_'+bill.receiptNo+'_Flat'+flat.flatNo.replace(/[/]/g,'_')+'_'+Date.now()+'.pdf';const ref=_fbST.ref(fname);await Promise.race([ref.put(blob,{contentType:'application/pdf'}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('t/o')),8000))]);return await ref.getDownloadURL();}catch(e){return null;}}
-function printPDF(bill,flat){ensureJsPDF().then(ok=>{if(!ok)return;const doc=buildReceiptPDF(bill,flat);if(!doc)return;if(/iPhone|iPad|Android/i.test(navigator.userAgent)){doc.save('Receipt_'+bill.receiptNo+'.pdf');showToast('PDF saved!');}else{const url=URL.createObjectURL(doc.output('blob'));window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000);}});}
-function waRcptWithLink(flat,bill,link){return 'PAYMENT RECEIVED - Supreme Limra Society\n\nDear '+flat.ownerName+',\nReceipt #'+bill.receiptNo+' | Flat '+flat.flatNo+'\nMonth: '+MO[bill.month-1]+' '+bill.year+'\nAmount: Rs.'+bill.amount+'/- | '+bill.paidDate+'\nMode: '+bill.paymentMode+'\n\nDownload PDF Receipt:\n'+link+'\n\nThank you! - Supreme Limra Society';}
-function goToWA(mobile,msg){const n=mobile.replace(/[^0-9]/g,'');window.location.href='https://wa.me/'+(n.startsWith('91')?n:'91'+n)+'?text='+encodeURIComponent(msg);}
-function updateSyncBadge(){const b=document.getElementById('sync-badge');if(b){b.style.background=FB_READY?'rgba(37,211,102,.2)':'rgba(255,255,255,.08)';b.style.color=FB_READY?'#5dff9a':'rgba(255,255,255,.45)';b.textContent=FB_READY?'Cloud Synced':'Local only';}}
-function updateLoginHint(){
-  const el=document.getElementById('login-hint');
-  const note=document.getElementById('login-note');
-  if(!el)return;
-  if(FB_READY&&_fbAuth){
-    el.textContent='Enter your app password';
-    if(note)note.textContent='Password set in Firebase Auth console';
-  } else if(FB_READY){
-    el.textContent='Connecting to Firebase...';
-    if(note)note.textContent='Please wait a moment';
-  } else {
-    el.textContent='Enter your PIN to continue';
-    if(note)note.textContent='Default PIN: 1234';
-  }
-}
-function updateReceiptHint(){const el=document.getElementById('pdf-status-hint');const btn=document.getElementById('wa-send-btn');if(el){if(S._pdfUploading){el.textContent='Preparing PDF...';}else if(S._pdfUrl){el.textContent='PDF ready - WhatsApp will include download link';}else{el.textContent='Tap WhatsApp to send receipt';}}if(btn){btn.disabled=false;btn.style.background='#25d366';btn.textContent=S._pdfUrl?'WhatsApp + PDF':'WhatsApp';}}
-
-// ════════════════════════════════════════════════════
-// EXCEL MONTHLY REPORT — SheetJS
-// ════════════════════════════════════════════════════
-function generateMonthlyExcel(month, year){
-  if(typeof XLSX === 'undefined'){
-    showToast('Loading Excel library...','ok');
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    s.onload=()=>generateMonthlyExcel(month,year);
-    s.onerror=()=>showToast('Could not load Excel library','err');
-    document.head.appendChild(s);
-    return;
-  }
-
-  const wb = XLSX.utils.book_new();
-  const mn = MO[month-1];
-  const ms = MS[month-1];
-
-  // ── Sheet 1: Flat-wise Collection Register ───────────────────────────────
-  const s1 = [];
-  s1.push(['SUPREME LIMRA SOCIETY — MAINTENANCE REGISTER']);
-  s1.push(['Sr. No. 15/16, Inam Nagar, Kondhwa Khurd, Pune – 411048']);
-  s1.push([`Month: ${mn} ${year}`,'','','','',`Generated: ${new Date().toLocaleDateString('en-IN')}`]);
-  s1.push([]);
-  s1.push(['Flat No.','Owner Name','Maintenance','Status','Amount Paid','Payment Date','Mode','Receipt No.','Remarks']);
-
-  const monthBills = S.bills.filter(b=>b.month===month&&b.year===year);
-  let totalCollected=0, totalPending=0;
-
-  // Sort flats in order
-  const sortedFlats = [...S.flats].sort((a,b)=>a.flatNo.localeCompare(b.flatNo,undefined,{numeric:true}));
-
-  sortedFlats.forEach(f=>{
-    const bill = monthBills.find(b=>b.flatId===f.id);
-    if(!bill){
-      s1.push([f.flatNo, f.ownerName, f.maintenance, 'Not Generated', '', '', '', '', '']);
-    } else if(bill.status==='paid'){
-      totalCollected += bill.amount;
-      s1.push([f.flatNo, f.ownerName, f.maintenance, 'PAID', bill.amount, bill.paidDate, bill.paymentMode||'', '#'+bill.receiptNo, '']);
-    } else {
-      totalPending += bill.maintenance || f.maintenance;
-      s1.push([f.flatNo, f.ownerName, f.maintenance, 'PENDING', '', '', '', '', '']);
-    }
-  });
-
-  s1.push([]);
-  s1.push(['', '', 'TOTAL', '', totalCollected, '', '', '', '']);
-  s1.push(['', '', 'PENDING', '', totalPending, '', '', '', '']);
-  s1.push(['', '', 'TOTAL FLATS', S.flats.length, '', '', '', '', '']);
-
-  const ws1 = XLSX.utils.aoa_to_sheet(s1);
-
-  // Set column widths
-  ws1['!cols'] = [{wch:10},{wch:28},{wch:14},{wch:12},{wch:14},{wch:14},{wch:12},{wch:12},{wch:16}];
-
-  // Style header rows
-  ws1['!merges'] = [
-    {s:{r:0,c:0},e:{r:0,c:8}},
-    {s:{r:1,c:0},e:{r:1,c:8}},
-  ];
-
-  XLSX.utils.book_append_sheet(wb, ws1, `${ms}-${String(year).slice(-2)} Collections`);
-
-  // ── Sheet 2: Expense Register ─────────────────────────────────────────────
-  const s2 = [];
-  s2.push(['SUPREME LIMRA SOCIETY — EXPENSE REGISTER']);
-  s2.push([`Month: ${mn} ${year}`]);
-  s2.push([]);
-  s2.push(['Sr.','Date','Description','Category','Amount (₹)','Paid By / Notes']);
-
-  const monthExp = (S.expenses||[]).filter(e=>{
-    const d=new Date(e.date);
-    return d.getMonth()+1===month && d.getFullYear()===year;
-  }).sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-  let totalExp = 0;
-  monthExp.forEach((e,i)=>{
-    totalExp += e.amount;
-    s2.push([i+1, new Date(e.date).toLocaleDateString('en-IN'), e.description, e.category, e.amount, e.notes||'']);
-  });
-
-  s2.push([]);
-  s2.push(['','','','TOTAL EXPENSES', totalExp, '']);
-
-  if(monthExp.length===0){
-    s2.push(['','','No expenses recorded for this month','','','']);
-  }
-
-  // Category-wise breakdown
-  s2.push([]);
-  s2.push(['Category Breakdown','','','','','']);
-  const cats = {};
-  monthExp.forEach(e=>{ cats[e.category]=(cats[e.category]||0)+e.amount; });
-  Object.entries(cats).forEach(([cat,amt])=>{
-    s2.push(['', cat, '', '', amt, '']);
-  });
-
-  const ws2 = XLSX.utils.aoa_to_sheet(s2);
-  ws2['!cols'] = [{wch:6},{wch:14},{wch:35},{wch:16},{wch:14},{wch:30}];
-  ws2['!merges'] = [{s:{r:0,c:0},e:{r:0,c:5}}];
-
-  XLSX.utils.book_append_sheet(wb, ws2, `${ms}-${String(year).slice(-2)} Expenses`);
-
-  // ── Sheet 3: Balance Summary ──────────────────────────────────────────────
-  const s3 = [];
-  s3.push(['SUPREME LIMRA SOCIETY — MONTHLY BALANCE SHEET']);
-  s3.push([`Month: ${mn} ${year}`]);
-  s3.push([]);
-  s3.push(['INCOME','','']);
-  s3.push(['Maintenance Collected', '', totalCollected]);
-  s3.push(['Pending (not yet paid)', '', totalPending]);
-  s3.push(['Total Billed', '', totalCollected+totalPending]);
-  s3.push([]);
-  s3.push(['EXPENSES','','']);
-  
-  const cats2 = {};
-  monthExp.forEach(e=>{ cats2[e.category]=(cats2[e.category]||0)+e.amount; });
-  Object.entries(cats2).forEach(([cat,amt])=>{
-    s3.push([cat,'',amt]);
-  });
-  if(Object.keys(cats2).length===0) s3.push(['No expenses this month','',0]);
-  
-  s3.push(['Total Expenses','',totalExp]);
-  s3.push([]);
-  s3.push(['NET BALANCE (Collected - Expenses)','',totalCollected-totalExp]);
-  s3.push([]);
-  s3.push(['Outstanding dues from previous months']);
-
-  // Add per-flat outstanding
-  const outstandingFlats = S.flats.map(f=>{
-    const pending = S.bills.filter(b=>b.flatId===f.id&&b.status==='pending');
-    const amt = pending.reduce((s,b)=>s+b.amount,0);
-    return {f, amt, cnt:pending.length};
-  }).filter(x=>x.amt>0).sort((a,b)=>b.amt-a.amt);
-
-  if(outstandingFlats.length>0){
-    s3.push(['Flat No.','Owner','Outstanding Amount','Months Pending']);
-    outstandingFlats.forEach(({f,amt,cnt})=>{
-      s3.push([f.flatNo, f.ownerName, amt, cnt+' month'+(cnt>1?'s':'')]);
-    });
-    s3.push(['TOTAL OUTSTANDING','',outstandingFlats.reduce((s,x)=>s+x.amt,0),'']);
-  } else {
-    s3.push(['All dues cleared ✓','','','']);
-  }
-
-  const ws3 = XLSX.utils.aoa_to_sheet(s3);
-  ws3['!cols'] = [{wch:35},{wch:20},{wch:16},{wch:16}];
-  ws3['!merges'] = [{s:{r:0,c:0},e:{r:0,c:3}}];
-
-  XLSX.utils.book_append_sheet(wb, ws3, `${ms}-${String(year).slice(-2)} Balance`);
-
-  // ── Download ──────────────────────────────────────────────────────────────
-  const fname = `SupremeLimra_${mn}_${year}_Report.xlsx`;
-  XLSX.writeFile(wb, fname);
-  showToast(`${mn} ${year} Excel report downloaded ✓`,'ok');
-}
-
-function openMonthlyExcelModal(){
-  S.modal={type:'monthlyExcel'};render();
-}
-
-function renderMonthlyExcelModal(){
-  const yrs=[...new Set([...S.bills.map(b=>b.year),now.getFullYear()])].sort((a,b)=>b-a);
-  const curM=now.getMonth()+1, curY=now.getFullYear();
-  return`<div class="mttl">📊 Generate Monthly Report</div>
-<div class="ib">Creates a detailed Excel file with 3 sheets:<br>
-<strong>1)</strong> Flat-wise collection register &nbsp;
-<strong>2)</strong> Expense register &nbsp;
-<strong>3)</strong> Balance summary</div>
-<div style="display:flex;gap:10px">
-  <div class="ig" style="flex:2"><label class="il">Month</label>
-    <select class="inp" id="xls-month">${MO.map((m,i)=>`<option value="${i+1}" ${curM===i+1?'selected':''}>${m}</option>`).join('')}</select>
-  </div>
-  <div class="ig" style="flex:1"><label class="il">Year</label>
-    <select class="inp" id="xls-year">${yrs.map(y=>`<option value="${y}" ${curY===y?'selected':''}>${y}</option>`).join('')}</select>
-  </div>
+function renderExpenses(){
+  const em=S.expFilter||{month:new Date().getMonth()+1,year:new Date().getFullYear()};
+  const allYrs=[...new Set([...(S.expenses||[]).map(e=>new Date(e.date).getFullYear()),new Date().getFullYear()])].sort((a,b)=>b-a);
+  const filtered=(S.expenses||[]).filter(e=>{const d=new Date(e.date);return d.getMonth()+1===em.month&&d.getFullYear()===em.year;}).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const totalExp=filtered.reduce((s,e)=>s+e.amount,0);
+  const collected=S.bills.filter(b=>b.month===em.month&&b.year===em.year&&b.status==='paid').reduce((s,b)=>s+b.amount,0);
+  const balance=collected-totalExp;
+  const byCat={};filtered.forEach(e=>{if(!byCat[e.category])byCat[e.category]=[];byCat[e.category].push(e);});
+  const catTotals=Object.entries(byCat).map(([cat,items])=>({cat,total:items.reduce((s,e)=>s+e.amount,0),count:items.length})).sort((a,b)=>b.total-a.total);
+  const presetBtns=EXP_PRESETS.map(p=>`<button class="btn bsm" style="background:${p.bg};color:#333;border:1px solid rgba(0,0,0,.08);font-size:11px;margin:3px" data-action="quick-expense" data-cat="${esc(p.cat)}">${p.cat}</button>`).join('');
+  const expRows=filtered.map(e=>`<div class="li" style="align-items:flex-start;padding:10px 0">
+    <div style="width:38px;height:38px;border-radius:10px;background:${EXP_CAT_BG[e.category]||'#f3f4f6'};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-top:2px">${EXP_CAT_EMOJI[e.category]||'📦'}</div>
+    <div class="ii"><div class="iname">${esc(e.description)}</div><div class="isub">${e.category} · ${new Date(e.date).toLocaleDateString('en-IN')}${e.notes?' · <em>'+esc(e.notes)+'</em>':''}</div></div>
+    <div style="text-align:right;flex-shrink:0"><div style="font-family:var(--serif);font-weight:700;font-size:15px;color:var(--re)">${fmt(e.amount)}</div>
+    <button class="btn brd bsm" style="padding:3px 7px;font-size:10px;margin-top:3px" data-action="del-expense" data-id="${e.id}">✕</button></div>
+  </div>`).join('');
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="stt" style="margin-bottom:0">Society Expenses</span><button class="btn bg bsm" data-action="add-expense">+ Add Entry</button></div>
+<div class="crd" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;gap:8px">
+  <select class="inp" style="flex:2;padding:7px 28px 7px 10px;font-size:14px" onchange="S.expFilter={...(S.expFilter||{}),month:+this.value};render()">${MO.map((m,i)=>`<option value="${i+1}" ${em.month===i+1?'selected':''}>${m}</option>`).join('')}</select>
+  <select class="inp" style="flex:1;padding:7px 28px 7px 10px;font-size:14px" onchange="S.expFilter={...(S.expFilter||{}),year:+this.value};render()">${allYrs.map(y=>`<option value="${y}" ${em.year===y?'selected':''}>${y}</option>`).join('')}</select>
+</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+  <div class="sc" style="padding:12px"><div class="sl">Collected</div><div style="font-family:var(--serif);font-size:17px;font-weight:700;color:var(--gr)">${fmt(collected)}</div></div>
+  <div class="sc" style="padding:12px"><div class="sl">Spent</div><div style="font-family:var(--serif);font-size:17px;font-weight:700;color:var(--re)">${fmt(totalExp)}</div></div>
+  <div class="sc" style="padding:12px"><div class="sl">Balance</div><div style="font-family:var(--serif);font-size:17px;font-weight:700;color:${balance>=0?'var(--gr)':'var(--re)'}">${fmt(Math.abs(balance))}</div><div style="font-size:9px;color:var(--mu)">${balance>=0?'surplus':'deficit'}</div></div>
 </div>
-<div style="background:#e8faf0;border:1.5px solid #b2dfca;border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#075e54">
-  📁 File will be saved as:<br>
-  <strong>SupremeLimra_[Month]_[Year]_Report.xlsx</strong>
+<div class="crd" style="padding:12px 14px"><div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Quick Add — Tap a Category</div><div style="display:flex;flex-wrap:wrap;gap:4px">${presetBtns}</div></div>
+${catTotals.length?`<div class="crd"><div class="stt">Category Summary</div>${catTotals.map(ct=>`<div class="li"><div style="width:36px;height:36px;border-radius:8px;background:${EXP_CAT_BG[ct.cat]||'#f3f4f6'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${EXP_CAT_EMOJI[ct.cat]||'📦'}</div><div class="ii"><div class="iname">${ct.cat.replace(/[\u{1F300}-\u{1FAD6}]/gu,'').trim()}</div><div class="isub">${ct.count} item${ct.count>1?'s':''}</div></div><div style="font-family:var(--serif);font-weight:700;font-size:15px;color:var(--re)">${fmt(ct.total)}</div></div>`).join('')}<div style="display:flex;justify-content:space-between;padding:10px 0 2px;border-top:1.5px solid #f0ebe0;margin-top:4px"><span style="font-weight:700;color:var(--tx)">Total</span><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(totalExp)}</span></div></div>`:''}
+<div class="crd"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div class="stt" style="margin-bottom:0">All Entries — ${MO[em.month-1]} ${em.year}</div><span style="font-size:11px;color:var(--mu)">${filtered.length} items</span></div>${expRows||`<div class="emp" style="padding:20px 0"><div style="font-size:32px;opacity:.4;text-align:center;margin-bottom:8px">💸</div><p style="text-align:center;color:var(--mu);font-size:13px">No expenses for ${MO[em.month-1]} ${em.year}<br>Tap <strong>+ Add Entry</strong> or a category above</p></div>`}</div>`;
+}
+
+function renderAddExpense(presetCat='',presetDesc=''){
+  const today=new Date().toISOString().slice(0,10);
+  const catOpts=EXP_PRESETS.map(p=>`<option value="${p.cat}" ${presetCat===p.cat?'selected':''}>${p.cat}</option>`).join('');
+  const preset=EXP_PRESETS.find(p=>p.cat===presetCat);
+  const quickItems=preset?preset.items.map(item=>`<button type="button" class="btn bsm" style="background:#f0f4ff;color:var(--n);border:1px solid #dde4ff;font-size:11px;margin:2px" onclick="document.getElementById('exp-desc').value='${item.replace(/'/g,"\\'")}';">${item}</button>`).join(''):'';
+  return`<div class="mttl">💸 Add Society Expense</div>
+<div class="ig"><label class="il">Category *</label>
+  <select class="inp" id="exp-cat" onchange="S.modal={type:'addExpense',data:{cat:this.value,desc:''}};render()"><option value="">— Select Category —</option>${catOpts}</select>
+</div>
+${quickItems?`<div style="margin-bottom:14px"><label class="il">Common Items — tap to fill</label><div style="display:flex;flex-wrap:wrap;gap:4px">${quickItems}</div></div>`:''}
+<div class="ig"><label class="il">Description *</label><input class="inp" id="exp-desc" placeholder="e.g. Watchman April salary" value="${esc(presetDesc)}" autocomplete="off"></div>
+<div style="display:flex;gap:10px">
+  <div class="ig" style="flex:1.2"><label class="il">Amount (₹) *</label><input class="inp" id="exp-amt" type="number" placeholder="0" inputmode="numeric"></div>
+  <div class="ig" style="flex:1"><label class="il">Date *</label><input class="inp" id="exp-date" type="date" value="${today}"></div>
+</div>
+<div class="ig"><label class="il">Paid By / Notes</label><input class="inp" id="exp-note" placeholder="e.g. Paid from fund by Secretary"></div>
+<div style="display:flex;gap:10px;margin-top:4px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
+  <button class="btn bn" style="flex:1.5" data-action="save-expense">Save Expense ✓</button>
+</div>`;
+}
+
+function generateMonthlyExcel(month,year){
+  if(typeof XLSX==='undefined'){
+    const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>generateMonthlyExcel(month,year);s.onerror=()=>showToast('Excel library failed','err');
+    document.head.appendChild(s);showToast('Loading Excel library...','ok');return;
+  }
+  const wb=XLSX.utils.book_new(),mn=MO[month-1],ms2=MS[month-1];
+  const monthBills=S.bills.filter(b=>b.month===month&&b.year===year);
+  const sortedFlats=[...S.flats].sort((a,b)=>a.flatNo.localeCompare(b.flatNo,undefined,{numeric:true}));
+  let totalCol=0,totalPend=0;
+  const s1=[['SUPREME LIMRA SOCIETY — MAINTENANCE REGISTER'],['Sr. No. 15/16, Inam Nagar, Kondhwa Khurd, Pune – 411048'],[`Month: ${mn} ${year}`,``,``,``,``,`Generated: ${new Date().toLocaleDateString('en-IN')}`],[],['Flat No.','Owner Name','Maintenance (₹)','Status','Amount Paid','Payment Date','Mode','Receipt No.']];
+  sortedFlats.forEach(f=>{const b=monthBills.find(x=>x.flatId===f.id);if(!b){s1.push([f.flatNo,f.ownerName,f.maintenance,'Not Generated','','','','']);}else if(b.status==='paid'){totalCol+=b.amount;s1.push([f.flatNo,f.ownerName,f.maintenance,'PAID',b.amount,b.paidDate,b.paymentMode||'','#'+b.receiptNo]);}else{totalPend+=f.maintenance;s1.push([f.flatNo,f.ownerName,f.maintenance,'PENDING','','','','']);}});
+  s1.push([]);s1.push(['','','TOTAL COLLECTED','',totalCol,'','','']);s1.push(['','','TOTAL PENDING','',totalPend,'','','']);
+  const ws1=XLSX.utils.aoa_to_sheet(s1);ws1['!cols']=[{wch:10},{wch:28},{wch:14},{wch:12},{wch:14},{wch:14},{wch:12},{wch:12}];
+  ws1['!merges']=[{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
+  XLSX.utils.book_append_sheet(wb,ws1,`${ms2}-${String(year).slice(-2)} Collections`);
+  const monthExp=(S.expenses||[]).filter(e=>{const d=new Date(e.date);return d.getMonth()+1===month&&d.getFullYear()===year;}).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  let totalExp=0;
+  const s2=[['SUPREME LIMRA SOCIETY — EXPENSE REGISTER'],[`Month: ${mn} ${year}`],[],['Sr.','Date','Description','Category','Amount (₹)','Paid By / Notes']];
+  monthExp.forEach((e,i)=>{totalExp+=e.amount;s2.push([i+1,new Date(e.date).toLocaleDateString('en-IN'),e.description,e.category,e.amount,e.notes||'']);});
+  s2.push([]);s2.push(['','','','TOTAL EXPENSES',totalExp,'']);
+  const ws2=XLSX.utils.aoa_to_sheet(s2);ws2['!cols']=[{wch:6},{wch:14},{wch:35},{wch:16},{wch:14},{wch:30}];
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:5}}];
+  XLSX.utils.book_append_sheet(wb,ws2,`${ms2}-${String(year).slice(-2)} Expenses`);
+  const s3=[['SUPREME LIMRA SOCIETY — BALANCE SHEET'],[`Month: ${mn} ${year}`],[],['INCOME','',''],['Maintenance Collected','',totalCol],['Still Pending','',totalPend],['Total Billed','',totalCol+totalPend],[],['EXPENSES','','']];
+  const cats={};monthExp.forEach(e=>{cats[e.category]=(cats[e.category]||0)+e.amount;});
+  Object.entries(cats).forEach(([c,a])=>s3.push([c,'',a]));
+  s3.push(['Total Expenses','',totalExp]);s3.push([]);s3.push(['NET BALANCE (Collected - Expenses)','',totalCol-totalExp]);
+  const outstanding=S.flats.map(f=>{const pb=S.bills.filter(b=>b.flatId===f.id&&b.status==='pending');return{f,amt:pb.reduce((s,b)=>s+b.amount,0),cnt:pb.length};}).filter(x=>x.amt>0);
+  if(outstanding.length){s3.push([]);s3.push(['OUTSTANDING DUES','','']);s3.push(['Flat No.','Owner','Amount','Months']);outstanding.forEach(({f,amt,cnt})=>s3.push([f.flatNo,f.ownerName,amt,cnt+' month'+(cnt>1?'s':'')]));s3.push(['TOTAL OUTSTANDING','',outstanding.reduce((s,x)=>s+x.amt,0)]);}
+  const ws3=XLSX.utils.aoa_to_sheet(s3);ws3['!cols']=[{wch:30},{wch:20},{wch:16},{wch:14}];ws3['!merges']=[{s:{r:0,c:0},e:{r:0,c:3}}];
+  XLSX.utils.book_append_sheet(wb,ws3,`${ms2}-${String(year).slice(-2)} Balance`);
+  XLSX.writeFile(wb,`SupremeLimra_${mn}_${year}_Report.xlsx`);
+  showToast(`${mn} ${year} Excel downloaded ✓`,'ok');
+}
+function openMonthlyExcelModal(){S.modal={type:'monthlyExcel'};render();}
+function renderMonthlyExcelModal(){
+  const yrs=[...new Set([...S.bills.map(b=>b.year),new Date().getFullYear()])].sort((a,b)=>b-a);
+  const curM=new Date().getMonth()+1,curY=new Date().getFullYear();
+  return`<div class="mttl">📊 Monthly Excel Report</div>
+<div class="ib">Creates Excel with 3 sheets: Collections · Expenses · Balance</div>
+<div style="display:flex;gap:10px">
+  <div class="ig" style="flex:2"><label class="il">Month</label><select class="inp" id="xls-month">${MO.map((m,i)=>`<option value="${i+1}" ${curM===i+1?'selected':''}>${m}</option>`).join('')}</select></div>
+  <div class="ig" style="flex:1"><label class="il">Year</label><select class="inp" id="xls-year">${yrs.map(y=>`<option value="${y}" ${curY===y?'selected':''}>${y}</option>`).join('')}</select></div>
 </div>
 <div style="display:flex;gap:10px">
   <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
@@ -1504,7 +1112,7 @@ function renderMonthlyExcelModal(){
 }
 
 function render(){
-  document.getElementById('root').innerHTML=renderApp();updateSyncBadge();updateLoginHint();updateReceiptHint();
+  document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
 }
 
 // ════════════════════════════════════════════════════
@@ -1520,25 +1128,8 @@ document.addEventListener('click',function(e){
   
   if(a==='login'){
     const pin=document.getElementById('pin-input')?.value||'';
-    const lbtn=document.querySelector('[data-action="login"]');
-    const enableBtn=()=>{if(lbtn){lbtn.textContent='Unlock App';lbtn.disabled=false;}};
-    const showErr=(msg)=>{const err=document.getElementById('pin-err');if(err){err.textContent=msg;setTimeout(()=>{err.textContent='';},3000);}};
-    if(lbtn){lbtn.textContent='Checking...';lbtn.disabled=true;}
-    DB.loginUser(pin)
-      .then(result=>{
-        if(result.ok){
-          loadData().then(()=>render()).catch(e=>{console.log('loadData err:',e);render();});
-        } else {
-          showErr(result.msg||'Wrong password');
-          enableBtn();
-        }
-      })
-      .catch(e=>{
-        // Should never reach here but safety net
-        console.log('Login catch:',e);
-        showErr('Login error: '+(e.message||e.code||'check internet and try again'));
-        enableBtn();
-      });
+    if(pin===LS.getPin()){LS.login();render();}
+    else{const err=document.getElementById('pin-err');if(err){err.textContent='Wrong PIN. Try again.';setTimeout(()=>{err.textContent='';},2000);}}
     return;
   }
   if(a==='logout'){if(confirm('Logout from the app?')){LS.logout();render();} return;}
@@ -1589,20 +1180,13 @@ document.addEventListener('click',function(e){
     S.bills=S.bills.map(x=>x.id===id?updated:x);saveBills();
     showToast('Payment recorded ✓');S.modal={type:'receipt',data:updated};render();return;
   }
-  if(a==='open-receipt'){const b=S.bills.find(x=>x.id===id);if(b){S.modal={type:'receipt',data:b};S._pdfUrl=null;S._pdfUploading=true;render();if(FB_READY&&_fbST){uploadReceiptAndGetLink(b,flatOf(b)).then(url=>{S._pdfUrl=url;S._pdfUploading=false;updateReceiptHint();}).catch(()=>{S._pdfUploading=false;updateReceiptHint();});}else{S._pdfUploading=false;}}return;}
+  if(a==='open-receipt'){const b=S.bills.find(x=>x.id===id);if(b){S.modal={type:'receipt',data:b};render();}return;}
   if(a==='print-pdf'){const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){printPDF(b,flatOf(b));showToast('Opening PDF…','pdf');}return;}
   
   // WhatsApp
   if(a==='wa-bill'){const b=S.bills.find(x=>x.id===id);if(b){const f=flatOf(b);showToast('Opening WhatsApp…','wa');sendBillOnWA(b,f);}return;}
   if(a==='wa-open-now'){const b=S.bills.find(x=>x.id===id)||S.modal?.data?.bill;if(b){const f=flatOf(b);S.modal=null;render();setTimeout(()=>{openWA(f.mobile,waRcpt(f,b));},300);}return;}
-  if(a==='wa-rcpt'){
-    const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(!b)return;
-    const f=flatOf(b);const msg=S._pdfUrl?waRcptWithLink(f,b,S._pdfUrl):waRcpt(f,b);
-    if(window.jspdf&&typeof navigator.share==='function'){
-      try{const doc=buildReceiptPDF(b,f);if(doc){const blob=doc.output('blob');const file=new File([blob],'Receipt_'+b.receiptNo+'.pdf',{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Receipt',text:msg}).then(()=>showToast('Shared!','wa')).catch(err=>{if(err.name!=='AbortError')goToWA(f.mobile,msg);});return;}}}catch(err){}
-    }
-    goToWA(f.mobile,msg);showToast('Opening WhatsApp...','wa');return;
-  }
+  if(a==='wa-rcpt'){const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){const f=flatOf(b);shareReceiptOnWA(b,f);}return;}
   if(a==='bulk-wa'){
     const pend=S.bills.filter(b=>b.month===S.bf.month&&b.year===S.bf.year&&b.status==='pending'&&flatOf(b).mobile);
     if(!pend.length){showToast('No pending bills with mobile numbers','err');return;}
@@ -1625,44 +1209,29 @@ document.addEventListener('click',function(e){
     const nw=document.getElementById('pin-new')?.value;
     const cfm=document.getElementById('pin-cfm')?.value;
     const err=document.getElementById('pin-change-err');
-    if(old!==DB.getPin()){if(err)err.textContent='Current password is wrong.';return;}
+    if(old!==LS.getPin()){if(err)err.textContent='Current PIN is wrong.';return;}
     if(!nw||nw.length<4){if(err)err.textContent='New PIN must be at least 4 digits.';return;}
     if(nw!==cfm){if(err)err.textContent='PINs do not match.';return;}
     LS.setPin(nw);showToast('PIN changed successfully ✓');S.modal=null;render();return;
   }
-  if(a==='force-refresh'){if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(regs=>{Promise.all(regs.map(r=>r.unregister())).then(()=>{caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>{showToast('Reloading...','ok');setTimeout(()=>window.location.reload(true),800);});});});}else window.location.reload(true);return;}
   if(a==='add-expense'){S.modal={type:'addExpense',data:{cat:'',desc:''}};render();return;}
-  if(a==='quick-expense'){
-    const cat=el.dataset.cat||'';
-    S.modal={type:'addExpense',data:{cat,desc:''}};render();return;
-  }
+  if(a==='quick-expense'){S.modal={type:'addExpense',data:{cat:el.dataset.cat||'',desc:''}};render();return;}
   if(a==='save-expense'){
+    const cat=document.getElementById('exp-cat')?.value||'';
     const desc=document.getElementById('exp-desc')?.value.trim();
     const amt=+(document.getElementById('exp-amt')?.value||0);
     const date=document.getElementById('exp-date')?.value;
-    const cat=document.getElementById('exp-cat')?.value||'Miscellaneous 📦';
     const note=document.getElementById('exp-note')?.value.trim();
-    if(!cat||cat===''){alert('Please select a category');return;}
+    if(!cat){alert('Please select a category');return;}
     if(!desc){alert('Description required');return;}
     if(!amt||amt<=0){alert('Enter a valid amount');return;}
-    if(!date){alert('Date required');return;}
     if(!S.expenses)S.expenses=[];
     S.expenses.push({id:uid(),description:desc,amount:amt,date,category:cat,notes:note,addedDate:new Date().toISOString()});
     saveExpenses();showToast('Expense saved ✓');S.modal=null;render();return;
   }
-  if(a==='del-expense'){
-    if(!confirm('Delete this expense?'))return;
-    S.expenses=(S.expenses||[]).filter(e=>e.id!==id);
-    saveExpenses();showToast('Expense deleted');render();return;
-  }
+  if(a==='del-expense'){if(!confirm('Delete this expense?'))return;S.expenses=(S.expenses||[]).filter(e=>e.id!==id);saveExpenses();showToast('Expense deleted');render();return;}
   if(a==='gen-monthly-excel'||a==='open-monthly-excel'){openMonthlyExcelModal();return;}
-  if(a==='do-gen-excel'){
-    const m=+(document.getElementById('xls-month')?.value||now.getMonth()+1);
-    const y=+(document.getElementById('xls-year')?.value||now.getFullYear());
-    S.modal=null;render();
-    setTimeout(()=>generateMonthlyExcel(m,y),200);
-    return;
-  }
+  if(a==='do-gen-excel'){const m=+(document.getElementById('xls-month')?.value||new Date().getMonth()+1);const y=+(document.getElementById('xls-year')?.value||new Date().getFullYear());S.modal=null;render();setTimeout(()=>generateMonthlyExcel(m,y),200);return;}
   if(a==='export-data'){exportData();return;}
   if(a==='import-trigger'){document.getElementById('import-file')?.click();return;}
 });
@@ -1680,29 +1249,20 @@ document.addEventListener('keydown',function(e){
 // ════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', async function(){
-  render(); // show loading spinner
+window.addEventListener('DOMContentLoaded',async function(){
+  render();
   setTimeout(async function(){
     initFirebase();
-    // Wait for Firebase SDK to be ready
-    if(FB_READY && typeof firebase !== 'undefined'){
-      let waited = 0;
-      while(!_fbAuth && waited < 3000){ 
-        await new Promise(r=>setTimeout(r,100)); 
-        waited+=100; 
-      }
-    }
-    await loadData();
-    render();
-    // Auto-show monthly Excel modal on 25th (once per day)
-    if(new Date().getDate()===25 && !sessionStorage.getItem('excel25shown')){
-      sessionStorage.setItem('excel25shown','1');
-      setTimeout(()=>{S.modal={type:'monthlyExcel'};render();},1500);
-    }
-  }, 300);
+    if(FB_READY&&typeof firebase!=='undefined'){let w=0;while(!_fbAuth&&w<3000){await new Promise(r=>setTimeout(r,200));w+=200;}}
+    if(FB_READY&&_fbAuth){let w=0;while(!_fbAuth.currentUser&&w<4000){await new Promise(r=>setTimeout(r,300));w+=300;}}
+    await loadData();render();
+    if(new Date().getDate()===25&&!sessionStorage.getItem('excel25shown')){sessionStorage.setItem('excel25shown','1');setTimeout(()=>{S.modal={type:'monthlyExcel'};render();},1500);}
+  },300);
+  // Register as PWA if supported
+  if('serviceWorker' in navigator){
+    // Optional: could add SW for offline
+  }
 });
-
 </script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",async()=>{try{const r=await navigator.serviceWorker.register("./sw.js");r.update();}catch(e){}});}</script>
 </body>
 </html>
