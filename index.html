@@ -167,8 +167,9 @@ function initFirebase(){
 const DB={
   lget:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
   lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
-  isAuth(){return true;},
-  logout(){},
+  isAuth(){return sessionStorage.getItem('slimra_auth')==='1'||localStorage.getItem('slimra_skip_auth')==='1';},
+  doLogin(pin){const stored=localStorage.getItem('slimra_pin')||'1234';if(pin===stored){sessionStorage.setItem('slimra_auth','1');return true;}return false;},
+  logout(){sessionStorage.removeItem('slimra_auth');},
   getPin:()=>localStorage.getItem("slimra_pin")||"1234",
   setPin:(v)=>localStorage.setItem("slimra_pin",v),
   async load(){
@@ -214,53 +215,53 @@ const now=new Date();
 // INITIAL FLATS DATA
 // ════════════════════════════════════════════════════
 const INIT_FLATS=[
-  {id:'g1',flatNo:'G1',ownerName:'Malik R. Shaikh',mobile:'9890011001',floor:'Ground',maintenance:1000},
-  {id:'g2',flatNo:'G2',ownerName:'Sarfaraz A.L. Shaikh',mobile:'9890011002',floor:'Ground',maintenance:1000},
-  {id:'f101',flatNo:'101',ownerName:'Furqan A. Shaikh',mobile:'9890011101',floor:'1st',maintenance:1000},
-  {id:'f102',flatNo:'102',ownerName:'Yasmeen M. Khodil',mobile:'9890011102',floor:'1st',maintenance:1000},
-  {id:'f103',flatNo:'103',ownerName:'Faiyaz I. Bagban',mobile:'9890011103',floor:'1st',maintenance:1000},
-  {id:'f104',flatNo:'104',ownerName:'Rashid A. Shaikh',mobile:'9890011104',floor:'1st',maintenance:1000},
-  {id:'f105',flatNo:'105',ownerName:'Naaznin A. Hashmi',mobile:'9890011105',floor:'1st',maintenance:1000},
-  {id:'f106',flatNo:'106',ownerName:'Sarfaraz I. Shaikh',mobile:'9890011106',floor:'1st',maintenance:1000},
-  {id:'f107',flatNo:'107',ownerName:'Saifulla I. Shaikh',mobile:'9890011107',floor:'1st',maintenance:1000},
-  {id:'f108',flatNo:'108',ownerName:'Shehnaz B. Siddiqui',mobile:'9890011108',floor:'1st',maintenance:1000},
-  {id:'f201',flatNo:'201',ownerName:'Fayyaj R. Patel',mobile:'9890011201',floor:'2nd',maintenance:1000},
-  {id:'f202',flatNo:'202',ownerName:'Inayatullah B. Siddiqui',mobile:'9890011202',floor:'2nd',maintenance:1000},
-  {id:'f203',flatNo:'203',ownerName:'Sayed Taherali',mobile:'9890011203',floor:'2nd',maintenance:1000},
-  {id:'f204',flatNo:'204',ownerName:'Shafaque Zafar Shaikh',mobile:'9890011204',floor:'2nd',maintenance:1000},
-  {id:'f205',flatNo:'205',ownerName:'Jamir B. Shaikh',mobile:'9890011205',floor:'2nd',maintenance:1000},
-  {id:'f206',flatNo:'206',ownerName:'Abdul S. Shaikh',mobile:'9890011206',floor:'2nd',maintenance:1000},
-  {id:'f207',flatNo:'207',ownerName:'Ibrahim Shaikh',mobile:'9890011207',floor:'2nd',maintenance:1000},
-  {id:'f208',flatNo:'208',ownerName:'Zaib N. Inamdar',mobile:'9890011208',floor:'2nd',maintenance:1000},
-  {id:'f301',flatNo:'301',ownerName:'Asiya N. Inamdaar',mobile:'9890011301',floor:'3rd',maintenance:1000},
-  {id:'f302',flatNo:'302',ownerName:'Naaz Hamid Sk.',mobile:'9890011302',floor:'3rd',maintenance:1000},
-  {id:'f303',flatNo:'303',ownerName:'Bismillah A. Siddiqui',mobile:'9890011303',floor:'3rd',maintenance:1000},
-  {id:'f304',flatNo:'304',ownerName:'Feroz Y. Shaikh',mobile:'9890011304',floor:'3rd',maintenance:1000},
-  {id:'f305',flatNo:'305',ownerName:'Mehboob B. Shaikh',mobile:'9890011305',floor:'3rd',maintenance:1000},
-  {id:'f306',flatNo:'306',ownerName:'Ayaz K. Ansari',mobile:'9890011306',floor:'3rd',maintenance:1000},
-  {id:'f307',flatNo:'307',ownerName:'Rafique M. Bukhari',mobile:'9890011307',floor:'3rd',maintenance:1000},
-  {id:'f308',flatNo:'308',ownerName:'Yasmeen Abdul',mobile:'9890011308',floor:'3rd',maintenance:1000},
-  {id:'f401',flatNo:'401',ownerName:'Anwar G. Shaikh',mobile:'9890011401',floor:'4th',maintenance:1000},
-  {id:'f402',flatNo:'402',ownerName:'Javed R. Shaikh',mobile:'9890011402',floor:'4th',maintenance:1000},
-  {id:'f403',flatNo:'403',ownerName:'Sameer I. Shaikh',mobile:'9890011403',floor:'4th',maintenance:1000},
-  {id:'f404',flatNo:'404',ownerName:'Chand R. Sayyed',mobile:'9890011404',floor:'4th',maintenance:1000},
-  {id:'f405',flatNo:'405',ownerName:'Mohammad Anwar Bagwan',mobile:'9890011405',floor:'4th',maintenance:1000},
-  {id:'f406',flatNo:'406',ownerName:'Wasim M. Husaini',mobile:'9890011406',floor:'4th',maintenance:1000},
-  {id:'f407',flatNo:'407',ownerName:'Ammar R. Shaikh',mobile:'9890011407',floor:'4th',maintenance:1000},
-  {id:'f408',flatNo:'408',ownerName:'Shaquib A. Shaikh',mobile:'9890011408',floor:'4th',maintenance:1000},
-  {id:'f501',flatNo:'501',ownerName:'Avez M. Shaikh',mobile:'9890011501',floor:'5th',maintenance:1000},
-  {id:'f502',flatNo:'502',ownerName:'Javed Shaikh',mobile:'9890011502',floor:'5th',maintenance:1000},
-  {id:'f503',flatNo:'503/504',ownerName:'Sameer B. Khan',mobile:'9890011503',floor:'5th',maintenance:2000},
-  {id:'f505',flatNo:'505',ownerName:'Jishan S. Shaikh',mobile:'9890011505',floor:'5th',maintenance:1000},
-  {id:'f506',flatNo:'506',ownerName:'Shohab S. Shaikh',mobile:'9890011506',floor:'5th',maintenance:1000},
-  {id:'f507',flatNo:'507',ownerName:'Shaibaaz Shaikh',mobile:'9890011507',floor:'5th',maintenance:1000},
-  {id:'f508',flatNo:'508',ownerName:'Wasim M. Attar',mobile:'9890011508',floor:'5th',maintenance:1000},
-  {id:'f601',flatNo:'601',ownerName:'Awaiz S. Ansari',mobile:'9890011601',floor:'6th',maintenance:1000},
-  {id:'f602',flatNo:'602',ownerName:'Md. Mustafa A.',mobile:'9890011602',floor:'6th',maintenance:1000},
-  {id:'f603',flatNo:'603',ownerName:'Shadab F. Qureshi',mobile:'9890011603',floor:'6th',maintenance:1000},
-  {id:'f604',flatNo:'604',ownerName:'Ab. Rahim B.',mobile:'9890011604',floor:'6th',maintenance:1000},
-  {id:'f605',flatNo:'605/606',ownerName:'Nazir B. Shaikh',mobile:'9890011605',floor:'6th',maintenance:2000},
-  {id:'f607',flatNo:'607/608',ownerName:'Manzoor Y. Shaikh',mobile:'9890011607',floor:'6th',maintenance:2000},
+  {id:'g1',flatNo:'G1',ownerName:'Malik R. Shaikh',mobile:'9325432780',floor:'Ground',maintenance:1000},
+  {id:'g2',flatNo:'G2',ownerName:'Sarfaraz A.L. Shaikh',mobile:'9604013042',floor:'Ground',maintenance:1000},
+  {id:'f101',flatNo:'101',ownerName:'Furqan A. Shaikh',mobile:'8208459943',floor:'1st',maintenance:1000},
+  {id:'f102',flatNo:'102',ownerName:'Yasmeen M. Khodil',mobile:'9325432780',floor:'1st',maintenance:1000},
+  {id:'f103',flatNo:'103',ownerName:'Faiyaz I. Bagban',mobile:'9604013042',floor:'1st',maintenance:1000},
+  {id:'f104',flatNo:'104',ownerName:'Rashid A. Shaikh',mobile:'8208459943',floor:'1st',maintenance:1000},
+  {id:'f105',flatNo:'105',ownerName:'Naaznin A. Hashmi',mobile:'9325432780',floor:'1st',maintenance:1000},
+  {id:'f106',flatNo:'106',ownerName:'Sarfaraz I. Shaikh',mobile:'9604013042',floor:'1st',maintenance:1000},
+  {id:'f107',flatNo:'107',ownerName:'Saifulla I. Shaikh',mobile:'8208459943',floor:'1st',maintenance:1000},
+  {id:'f108',flatNo:'108',ownerName:'Shehnaz B. Siddiqui',mobile:'9325432780',floor:'1st',maintenance:1000},
+  {id:'f201',flatNo:'201',ownerName:'Fayyaj R. Patel',mobile:'9604013042',floor:'2nd',maintenance:1000},
+  {id:'f202',flatNo:'202',ownerName:'Inayatullah B. Siddiqui',mobile:'8208459943',floor:'2nd',maintenance:1000},
+  {id:'f203',flatNo:'203',ownerName:'Sayed Taherali',mobile:'9325432780',floor:'2nd',maintenance:1000},
+  {id:'f204',flatNo:'204',ownerName:'Shafaque Zafar Shaikh',mobile:'9604013042',floor:'2nd',maintenance:1000},
+  {id:'f205',flatNo:'205',ownerName:'Jamir B. Shaikh',mobile:'8208459943',floor:'2nd',maintenance:1000},
+  {id:'f206',flatNo:'206',ownerName:'Abdul S. Shaikh',mobile:'9325432780',floor:'2nd',maintenance:1000},
+  {id:'f207',flatNo:'207',ownerName:'Ibrahim Shaikh',mobile:'9604013042',floor:'2nd',maintenance:1000},
+  {id:'f208',flatNo:'208',ownerName:'Zaib N. Inamdar',mobile:'8208459943',floor:'2nd',maintenance:1000},
+  {id:'f301',flatNo:'301',ownerName:'Asiya N. Inamdaar',mobile:'9325432780',floor:'3rd',maintenance:1000},
+  {id:'f302',flatNo:'302',ownerName:'Naaz Hamid Sk.',mobile:'9604013042',floor:'3rd',maintenance:1000},
+  {id:'f303',flatNo:'303',ownerName:'Bismillah A. Siddiqui',mobile:'8208459943',floor:'3rd',maintenance:1000},
+  {id:'f304',flatNo:'304',ownerName:'Feroz Y. Shaikh',mobile:'9325432780',floor:'3rd',maintenance:1000},
+  {id:'f305',flatNo:'305',ownerName:'Mehboob B. Shaikh',mobile:'9604013042',floor:'3rd',maintenance:1000},
+  {id:'f306',flatNo:'306',ownerName:'Ayaz K. Ansari',mobile:'8208459943',floor:'3rd',maintenance:1000},
+  {id:'f307',flatNo:'307',ownerName:'Rafique M. Bukhari',mobile:'9325432780',floor:'3rd',maintenance:1000},
+  {id:'f308',flatNo:'308',ownerName:'Yasmeen Abdul',mobile:'9604013042',floor:'3rd',maintenance:1000},
+  {id:'f401',flatNo:'401',ownerName:'Anwar G. Shaikh',mobile:'8208459943',floor:'4th',maintenance:1000},
+  {id:'f402',flatNo:'402',ownerName:'Javed R. Shaikh',mobile:'9325432780',floor:'4th',maintenance:1000},
+  {id:'f403',flatNo:'403',ownerName:'Sameer I. Shaikh',mobile:'9604013042',floor:'4th',maintenance:1000},
+  {id:'f404',flatNo:'404',ownerName:'Chand R. Sayyed',mobile:'8208459943',floor:'4th',maintenance:1000},
+  {id:'f405',flatNo:'405',ownerName:'Mohammad Anwar Bagwan',mobile:'9325432780',floor:'4th',maintenance:1000},
+  {id:'f406',flatNo:'406',ownerName:'Wasim M. Husaini',mobile:'9604013042',floor:'4th',maintenance:1000},
+  {id:'f407',flatNo:'407',ownerName:'Ammar R. Shaikh',mobile:'8208459943',floor:'4th',maintenance:1000},
+  {id:'f408',flatNo:'408',ownerName:'Shaquib A. Shaikh',mobile:'9325432780',floor:'4th',maintenance:1000},
+  {id:'f501',flatNo:'501',ownerName:'Avez M. Shaikh',mobile:'9604013042',floor:'5th',maintenance:1000},
+  {id:'f502',flatNo:'502',ownerName:'Javed Shaikh',mobile:'8208459943',floor:'5th',maintenance:1000},
+  {id:'f503',flatNo:'503/504',ownerName:'Sameer B. Khan',mobile:'9325432780',floor:'5th',maintenance:2000},
+  {id:'f505',flatNo:'505',ownerName:'Jishan S. Shaikh',mobile:'9604013042',floor:'5th',maintenance:1000},
+  {id:'f506',flatNo:'506',ownerName:'Shohab S. Shaikh',mobile:'8208459943',floor:'5th',maintenance:1000},
+  {id:'f507',flatNo:'507',ownerName:'Shaibaaz Shaikh',mobile:'9325432780',floor:'5th',maintenance:1000},
+  {id:'f508',flatNo:'508',ownerName:'Wasim M. Attar',mobile:'9604013042',floor:'5th',maintenance:1000},
+  {id:'f601',flatNo:'601',ownerName:'Awaiz S. Ansari',mobile:'8208459943',floor:'6th',maintenance:1000},
+  {id:'f602',flatNo:'602',ownerName:'Md. Mustafa A.',mobile:'9325432780',floor:'6th',maintenance:1000},
+  {id:'f603',flatNo:'603',ownerName:'Shadab F. Qureshi',mobile:'9604013042',floor:'6th',maintenance:1000},
+  {id:'f604',flatNo:'604',ownerName:'Ab. Rahim B.',mobile:'8208459943',floor:'6th',maintenance:1000},
+  {id:'f605',flatNo:'605/606',ownerName:'Nazir B. Shaikh',mobile:'9325432780',floor:'6th',maintenance:2000},
+  {id:'f607',flatNo:'607/608',ownerName:'Manzoor Y. Shaikh',mobile:'9604013042',floor:'6th',maintenance:2000},
 ];
 
 // ════════════════════════════════════════════════════
@@ -558,8 +559,54 @@ function printPDF(bill,flat){
 // ════════════════════════════════════════════════════
 // WHATSAPP
 // ════════════════════════════════════════════════════
-function waMsg(flat,bill){return`🏢 *SUPREME LIMRA SOCIETY*\n${ADDR_A}\n\nAssalamu Alaikum / Namaskar,\nDear *${flat.ownerName}*,\n\nYour monthly maintenance bill is ready. Kindly pay at earliest.\n\n━━━━━━━━━━━━━━━━━━\n🏠 Flat No.  : *${flat.flatNo}*\n📅 Month     : *${MO[bill.month-1]} ${bill.year}*\n💰 Amount Due: *₹${bill.amount.toLocaleString('en-IN')}/-*\n━━━━━━━━━━━━━━━━━━\n\n✅ *Payment Accepted Via:*\n• Cash (society office)\n• UPI / GPay / PhonePe\n• NEFT / IMPS\n\n_For PDF receipt, contact Secretary._\n_For queries contact Society Secretary._\n\n🙏 Thank you,\n_Supreme Limra Society Management_`;}
-function waRcpt(flat,bill){return`✅ *PAYMENT RECEIVED*\n🏢 *SUPREME LIMRA SOCIETY*\n\nDear *${flat.ownerName}*,\n\nWe confirm receipt of your maintenance payment.\n\n━━━━━━━━━━━━━━━━━━\n🧾 Receipt No.: *#${bill.receiptNo}*\n🏠 Flat No.   : *${flat.flatNo}*\n📅 Month      : *${MO[bill.month-1]} ${bill.year}*\n💰 Amount Paid: *₹${bill.amount.toLocaleString('en-IN')}/-*\n📆 Date       : *${bill.paidDate}*\n💳 Mode       : *${bill.paymentMode}*\n━━━━━━━━━━━━━━━━━━\n\nThank you for timely payment! 🙏\n\n_Supreme Limra Society Management_`;}
+function waMsg(flat,bill){return`🏢 *SUPREME LIMRA SOCIETY*
+${ADDR_A}
+
+Assalamu Alaikum,
+Dear *${flat.ownerName}*,
+
+Your monthly maintenance bill is ready. Kindly pay at the earliest.
+
+━━━━━━━━━━━━━━━━━━
+🏠 Flat No.   : *${flat.flatNo}*
+📅 Month      : *${MO[bill.month-1]} ${bill.year}*
+💰 Amount Due : *₹${bill.amount.toLocaleString('en-IN')}/-*
+━━━━━━━━━━━━━━━━━━
+
+✅ *Payment Accepted Via:*
+• Cash (society office)
+• UPI / GPay / PhonePe
+• NEFT / IMPS
+
+_For queries, contact Society Secretary._
+
+_Supreme Limra Society Management_`;}
+function waRcpt(flat,bill){return`✅ *PAYMENT RECEIVED*
+🏢 *SUPREME LIMRA SOCIETY*
+${ADDR_A}
+
+Assalamu Alaikum,
+Dear *${flat.ownerName}*,
+
+We confirm receipt of your maintenance payment.
+
+━━━━━━━━━━━━━━━━━━
+🧾 Receipt No.: *#${bill.receiptNo}*
+🏠 Flat No.   : *${flat.flatNo}*
+📅 Month      : *${MO[bill.month-1]} ${bill.year}*
+💰 Amount Paid: *₹${bill.amount.toLocaleString('en-IN')}/-*
+📆 Date       : *${bill.paidDate}*
+💳 Mode       : *${bill.paymentMode}*
+━━━━━━━━━━━━━━━━━━
+
+JazakAllah Khair for your payment.
+
+_Supreme Limra Society Management_`;}
+function goToWA(mobile,msg){
+  const n=mobile.replace(/[^0-9]/g,"");
+  window.location.href="https://wa.me/"+(n.startsWith("91")?n:"91"+n)+"?text="+encodeURIComponent(msg);
+}
+
 function openWA(mobile,msg){
   const n=mobile.replace(/\D/g,'');
   const url='https://wa.me/'+(n.startsWith('91')?n:'91'+n)+'?text='+encodeURIComponent(msg);
@@ -574,6 +621,14 @@ function openWA(mobile,msg){
 // ════════════════════════════════════════════════════
 // DATA EXPORT / IMPORT
 // ════════════════════════════════════════════════════
+function waReminder(flat,bill){
+  return '🔔 *MAINTENANCE REMINDER*\n🏢 *SUPREME LIMRA SOCIETY*\n'+ADDR_A+'\n\nAssalamu Alaikum,\nDear *'+flat.ownerName+'*,\n\nThis is a gentle reminder that your maintenance payment is due.\n\n━━━━━━━━━━━━━━━━━━\n🏠 Flat No.   : *'+flat.flatNo+'*\n📅 Month      : *'+MO[bill.month-1]+' '+bill.year+'*\n💰 Amount Due : *₹'+bill.amount.toLocaleString('en-IN')+'/-*\n━━━━━━━━━━━━━━━━━━\n\nKindly pay at the earliest.\n\n✅ *Payment Accepted Via:*\n• Cash (society office)\n• UPI / GPay / PhonePe\n• NEFT / IMPS\n\n_Supreme Limra Society Management_';
+}
+
+function waOverdueReminder(flat,bill,daysLate){
+  return '⚠️ *OVERDUE MAINTENANCE NOTICE*\n🏢 *SUPREME LIMRA SOCIETY*\n'+ADDR_A+'\n\nAssalamu Alaikum,\nDear *'+flat.ownerName+'*,\n\nYour maintenance payment is overdue by *'+daysLate+' day'+(daysLate>1?'s':'')+'*.\n\n━━━━━━━━━━━━━━━━━━\n🏠 Flat No.   : *'+flat.flatNo+'*\n📅 Month      : *'+MO[bill.month-1]+' '+bill.year+'*\n💰 Amount Due : *₹'+bill.amount.toLocaleString('en-IN')+'/-*\n⏰ Overdue    : *'+daysLate+' day'+(daysLate>1?'s':'')+'*\n━━━━━━━━━━━━━━━━━━\n\nRequest you to clear your dues at the earliest.\n\n_Supreme Limra Society Management_';
+}
+
 function exportData(){
   const data={flats:S.flats,bills:S.bills,expenses:S.expenses||[],exportDate:new Date().toISOString(),version:'1.0'};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -683,7 +738,7 @@ ${!S.bills.length?`<div class="crd"><div class="emp"><div class="emp-icon">🏢<
 function renderFlats(){
   const q=S.fq.toLowerCase();
   const list=[...S.flats].filter(f=>f.flatNo.toLowerCase().includes(q)||f.ownerName.toLowerCase().includes(q)).sort((a,b)=>a.flatNo.localeCompare(b.flatNo,undefined,{numeric:true}));
-  const rows=list.map(f=>`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}${f.maintenance===2000?'<span class="b2">2BHK</span>':''}</div><div class="isub">${f.floor} Fl · ${fmt(f.maintenance)}/mo · 📱 ${f.mobile||'—'}</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="btn bo bsm" data-action="edit-flat" data-id="${f.id}">Edit</button><button class="btn brd bsm" data-action="del-flat" data-id="${f.id}">✕</button></div></div>`).join('');
+  const rows=list.map(f=>`<div class="li"><div class="fb" style="font-size:11px;cursor:pointer" data-action="flat-history" data-id="${f.id}">${esc(f.flatNo)}</div><div class="ii" style="cursor:pointer" data-action="flat-history" data-id="${f.id}"><div class="iname">${esc(f.ownerName)}${f.maintenance===2000?'<span class="b2">2BHK</span>':''}</div><div class="isub">${f.floor} Fl · ${fmt(f.maintenance)}/mo · 📱 ${f.mobile||'—'}${f.notes?' · 📝 '+esc(f.notes):''}</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="btn bsm" style="background:#f0f8ff;color:#0066cc;border:1px solid #c8e0ff" data-action="flat-history" data-id="${f.id}">📋</button><button class="btn bo bsm" data-action="edit-flat" data-id="${f.id}">Edit</button><button class="btn brd bsm" data-action="del-flat" data-id="${f.id}">✕</button></div></div>`).join('');
   return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="stt" style="margin-bottom:0">Flats (${S.flats.length})</span><button class="btn bn bsm" data-action="add-flat">+ Add Flat</button></div>
 <div class="crd" style="padding:10px 14px;margin-bottom:10px"><input class="inp" style="padding:8px 12px;font-size:15px" placeholder="🔍 Search flat or owner…" id="flat-search" value="${esc(S.fq)}" oninput="S.fq=this.value;renderPart('flats-list','flatsList')" autocomplete="off"></div>
 <div class="crd" id="flats-list">${list.length?rows:`<div class="emp"><p>No results.</p></div>`}</div>`;
@@ -691,7 +746,7 @@ function renderFlats(){
 function flatsList(){
   const q=S.fq.toLowerCase();
   const list=[...S.flats].filter(f=>f.flatNo.toLowerCase().includes(q)||f.ownerName.toLowerCase().includes(q)).sort((a,b)=>a.flatNo.localeCompare(b.flatNo,undefined,{numeric:true}));
-  return list.map(f=>`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo)}</div><div class="ii"><div class="iname">${esc(f.ownerName)}${f.maintenance===2000?'<span class="b2">2BHK</span>':''}</div><div class="isub">${f.floor} Fl · ${fmt(f.maintenance)}/mo · 📱 ${f.mobile||'—'}</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="btn bo bsm" data-action="edit-flat" data-id="${f.id}">Edit</button><button class="btn brd bsm" data-action="del-flat" data-id="${f.id}">✕</button></div></div>`).join('')||`<div class="emp"><p>No results.</p></div>`;
+  return list.map(f=>`<div class="li"><div class="fb" style="font-size:11px;cursor:pointer" data-action="flat-history" data-id="${f.id}">${esc(f.flatNo)}</div><div class="ii" style="cursor:pointer" data-action="flat-history" data-id="${f.id}"><div class="iname">${esc(f.ownerName)}${f.maintenance===2000?'<span class="b2">2BHK</span>':''}</div><div class="isub">${f.floor} Fl · ${fmt(f.maintenance)}/mo · 📱 ${f.mobile||'—'}${f.notes?' · 📝 '+esc(f.notes):''}</div></div><div style="display:flex;gap:5px;flex-shrink:0"><button class="btn bsm" style="background:#f0f8ff;color:#0066cc;border:1px solid #c8e0ff" data-action="flat-history" data-id="${f.id}">📋</button><button class="btn bo bsm" data-action="edit-flat" data-id="${f.id}">Edit</button><button class="btn brd bsm" data-action="del-flat" data-id="${f.id}">✕</button></div></div>`).join('')||`<div class="emp"><p>No results.</p></div>`;
 }
 function renderPart(id,fn){const el=document.getElementById(id);if(el)el.innerHTML=window[fn]();}
 
@@ -709,10 +764,24 @@ function renderBills(){
   const rows=allBills.map(b=>{
     const f=flatOf(b);
     const paid=b.status==='paid';
-    return`<div class="li"><div class="fb" style="background:${paid?'var(--gr)':'var(--n)'};font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'Unknown')}</div><div class="isub">${paid?`Paid ${b.paidDate} · ${b.paymentMode}`:'Pending'}${b.receiptNo?' · #'+b.receiptNo:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:${paid?'var(--gr)':'var(--re)'}">${fmt(b.amount)}</span>${paid?`<button class="btn bge bsm" data-action="open-receipt" data-id="${b.id}">🧾</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-rcpt" data-id="${b.id}">💬</button>`:''}`:`<button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-bill" data-id="${b.id}">💬</button>`:''}`}</div></div>`;
+    return`<div class="li"><div class="fb" style="background:${paid?'var(--gr)':'var(--n)'};font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'Unknown')}</div><div class="isub">${paid?`Paid ${b.paidDate} · ${b.paymentMode}`:'Pending'}${b.receiptNo?' · #'+b.receiptNo:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:${paid?'var(--gr)':'var(--re)'}">${fmt(b.amount)}</span>${paid?`<button class="btn bge bsm" data-action="open-receipt" data-id="${b.id}">🧾</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-rcpt" data-id="${b.id}">💬</button>`:''}`:`<button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-bill" data-id="${b.id}">💬</button><button class="btn bsm" style="background:#fff8ea;color:#c9932a;border:1px solid #f0c96a" data-action="wa-remind" data-id="${b.id}">🔔</button>`:''}`}</div></div>`;
   }).join('');
   const banner=pendBills.length&&(bf.status==='all'||bf.status==='pending')?`<div class="wa-banner"><p style="margin:0"><strong>💬 WhatsApp — ${pendBills.length} pending owner${pendBills.length>1?'s':''}</strong><br><span style="font-size:11px;opacity:.8">Send bill reminders in one go</span></p><button class="btn" style="background:#fff;color:#075e54;font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;flex-shrink:0" data-action="bulk-wa">Send All 💬</button></div>`:'';
-  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="stt" style="margin-bottom:0">Maintenance Bills</span><button class="btn bg bsm" data-action="open-gen">+ Generate</button></div>
+  const isFirst = now.getDate()===1;
+  const isOverdue5 = (b) => {
+    if(b.status!=='pending') return false;
+    const gen = S.bills.find(x=>x.id===b.id);
+    if(!gen||!gen.generatedDate) return false;
+    const parts = gen.generatedDate.split('/');
+    if(parts.length<3) return false;
+    const genDt = new Date(parts[2],parts[1]-1,parts[0]);
+    return (new Date()-genDt)/(1000*60*60*24) >= 5;
+  };
+  return`${isFirst?`<div style="background:linear-gradient(135deg,#1a7f37,#145a28);border-radius:14px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+  <div><div style="color:#fff;font-weight:700;font-size:13px">🔔 1st of Month — Send Reminders</div><div style="color:rgba(255,255,255,.75);font-size:11px;margin-top:2px">Send payment reminders to all pending owners</div></div>
+  <button class="btn" style="background:#fff;color:#1a7f37;font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;flex-shrink:0" data-action="send-all-reminders">Send All 🔔</button>
+</div>`:''}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="stt" style="margin-bottom:0">Maintenance Bills</span><button class="btn bg bsm" data-action="open-gen">+ Generate</button></div>
 <div class="crd" style="padding:12px 14px;margin-bottom:10px">
   <div style="display:flex;gap:8px">
     <select class="inp" style="flex:2;padding:8px 32px 8px 10px;font-size:14px" id="bf-month" onchange="S.bf.month=+this.value;render()">${MO.map((m,i)=>`<option value="${i+1}" ${bf.month===i+1?'selected':''}>${m}</option>`).join('')}</select>
@@ -784,6 +853,7 @@ function renderModal(){
   else if(m.type==='waReady') body=renderWaReady(m.data);
   else if(m.type==='yearEnd') body=renderYearEnd(m.data);
   else if(m.type==='addExpense') body=renderAddExpense(m.data?.cat||'',m.data?.desc||'');
+  else if(m.type==='flatHistory') body=renderFlatHistory(m.data);
   else if(m.type==='monthlyExcel') body=renderMonthlyExcelModal();
   return`<div class="mbox" id="modal-box"><div class="mdrag"></div>${body}</div>`;
 }
@@ -798,6 +868,7 @@ function renderFlatForm(flat){
 <div class="ig" style="flex:1"><label class="il">Floor</label><input class="inp" id="ff-floor" value="${esc(flat?.floor||'')}" placeholder="Ground / 1st…"></div>
 <div class="ig" style="flex:1"><label class="il">Monthly (₹) *</label><select class="inp" id="ff-maint"><option value="1000" ${(flat?.maintenance||1000)===1000?'selected':''}>₹1,000 — 1BHK</option><option value="2000" ${flat?.maintenance===2000?'selected':''}>₹2,000 — 2BHK</option></select></div>
 </div>
+<div class="ig"><label class="il">Notes (optional)</label><input class="inp" id="ff-notes" value="${esc(flat?.notes||'')}" placeholder="e.g. 2BHK owner, paid advance, outstanding etc"></div>
 <div style="display:flex;gap:10px;margin-top:4px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bn" style="flex:1" data-action="save-flat" data-id="${flat?.id||''}">Save Flat</button></div>`;
 }
 
@@ -896,6 +967,10 @@ function renderReceipt(bill){
     <div class="rp-footer-sub">Supreme Limra Society Management · ${new Date().getFullYear()}</div>
   </div>
 </div>
+${S._autoWA?`<div style="background:#e8faf0;border:1.5px solid #b2dfca;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+  <div style="font-size:12px;color:#075e54"><strong>Send receipt via WhatsApp?</strong><br><span style="font-size:11px;opacity:.8">Owner will receive PDF receipt link</span></div>
+  <button class="btn bwa bsm" data-action="wa-rcpt" data-id="${bill.id}" style="flex-shrink:0">Send Now 💬</button>
+</div>`:''}
 <div style="display:flex;gap:8px;margin-top:14px">
   <button class="btn bo" style="flex:1" data-action="close-modal">Close</button>
   <button class="btn bpdf" style="flex:1;font-size:12px" data-action="print-pdf" data-id="${bill.id}">PDF / Print 🖨️</button>
@@ -1113,6 +1188,147 @@ function renderMonthlyExcelModal(){
 </div>`;
 }
 
+function renderLogin(){
+  return`<div class="login-wrap">
+  <div class="login-logo">Supreme Limra</div>
+  <div class="login-sub">${ADDR_A}</div>
+  <div class="login-card">
+    <div class="login-lock">🔐</div>
+    <div class="login-title">Society Management</div>
+    <div class="login-hint">Enter your PIN to continue</div>
+    <input id="pin-input" type="password" class="pin-input" maxlength="10" placeholder="Enter PIN" autocomplete="current-password" inputmode="numeric">
+    <div id="pin-err" class="login-err"></div>
+    <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="do-pin-login">Unlock 🔓</button>
+    <p style="text-align:center;margin-top:12px;font-size:11px;color:rgba(255,255,255,.35)">Default PIN: 1234</p>
+  </div>
+</div>`;
+}
+
+function renderFlatHistory(flat){
+  if(!flat) return '<div class="mttl">Not found</div>';
+  const allBills=S.bills.filter(b=>b.flatId===flat.id).sort((a,b)=>{if(a.year!==b.year)return b.year-a.year;return b.month-a.month;});
+  const totalPaid=allBills.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
+  const totalPending=allBills.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
+  const rows=allBills.map(b=>`<div class="li">
+    <div style="width:36px;height:36px;border-radius:8px;background:${b.status==='paid'?'#e6f4ea':'#fee2e2'};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${b.status==='paid'?'✅':'⏳'}</div>
+    <div class="ii">
+      <div class="iname">${MO[b.month-1]} ${b.year}</div>
+      <div class="isub">${b.status==='paid'?`Paid ${b.paidDate} · ${b.paymentMode} · #${b.receiptNo}`:'Pending'}</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:var(--serif);font-weight:700;font-size:15px;color:${b.status==='paid'?'var(--gr)':'var(--re)'}">₹${b.amount.toLocaleString('en-IN')}</div>
+      ${b.status==='pending'&&flat.mobile?`<button class="btn bsm" style="background:#e8faf0;color:#075e54;border:1px solid #b2dfca;font-size:10px;padding:3px 7px;margin-top:3px" data-action="wa-remind" data-id="${b.id}">🔔</button>`:''}
+    </div>
+  </div>`).join('');
+  return`<div class="mttl" style="font-size:18px">📋 Payment History</div>
+<div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px">
+  <div style="font-weight:700;font-size:15px;color:var(--n)">${esc(flat.ownerName)}</div>
+  <div style="font-size:12px;color:var(--mu);margin-top:2px">Flat ${esc(flat.flatNo)} · ${flat.floor} Floor · ₹${flat.maintenance}/mo${flat.notes?'<br>📝 '+esc(flat.notes):''}</div>
+  <div style="display:flex;gap:10px;margin-top:10px">
+    <div style="flex:1;background:#e6f4ea;border-radius:8px;padding:8px 10px;text-align:center">
+      <div style="font-size:10px;color:var(--gr);font-weight:600;text-transform:uppercase">Total Paid</div>
+      <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--gr)">₹${totalPaid.toLocaleString('en-IN')}</div>
+    </div>
+    ${totalPending?`<div style="flex:1;background:#fee2e2;border-radius:8px;padding:8px 10px;text-align:center">
+      <div style="font-size:10px;color:var(--re);font-weight:600;text-transform:uppercase">Pending</div>
+      <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--re)">₹${totalPending.toLocaleString('en-IN')}</div>
+    </div>`:''}
+  </div>
+</div>
+${rows||`<div class="emp"><div class="emp-icon">📄</div><p>No bills yet for this flat.</p></div>`}
+<button class="btn bo" style="width:100%;margin-top:12px" data-action="close-modal">Close</button>`;
+}
+
+function generateDefaulterPDF(){
+  if(!window.jspdf){ensureJsPDF().then(ok=>ok&&generateDefaulterPDF());return;}
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  const W=210,mx=15,rw=180;let y=15;
+
+  // Header
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,28,'F');
+  doc.setFillColor(201,147,42);doc.rect(mx,y+28,rw,1.5,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(255,255,255);
+  doc.text('SUPREME LIMRA SOCIETY',W/2,y+10,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(201,147,42);
+  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+18,{align:'center'});
+  doc.setFontSize(8);doc.setTextColor(180,160,100);
+  doc.text('DEFAULTER / OUTSTANDING DUES REPORT  —  Generated: '+new Date().toLocaleDateString('en-IN'),W/2,y+25,{align:'center'});
+  y+=35;
+
+  // Get all defaulters
+  const defaulters=S.flats.map(f=>{
+    const pb=S.bills.filter(b=>b.flatId===f.id&&b.status==='pending');
+    return{f,bills:pb,total:pb.reduce((s,b)=>s+b.amount,0),months:pb.length};
+  }).filter(x=>x.total>0).sort((a,b)=>b.total-a.total);
+
+  if(defaulters.length===0){
+    doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(26,127,55);
+    doc.text('All dues are cleared — No outstanding payments!',W/2,y+20,{align:'center'});
+    doc.save('SupremeLimra_Defaulters_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.pdf');
+    showToast('No defaulters — All dues cleared!','ok');
+    return;
+  }
+
+  // Summary box
+  const totalOut=defaulters.reduce((s,d)=>s+d.total,0);
+  doc.setFillColor(255,245,245);doc.rect(mx,y,rw,18,'F');
+  doc.setDrawColor(192,57,43);doc.setLineWidth(0.5);doc.rect(mx,y,rw,18);
+  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(192,57,43);
+  doc.text('Total Defaulters: '+defaulters.length+' flats',mx+6,y+8);
+  doc.text('Total Outstanding: Rs.'+totalOut.toLocaleString('en-IN')+'/-',mx+6,y+14);
+  doc.setFontSize(10);doc.setTextColor(80,80,80);
+  doc.text('Report Date: '+new Date().toLocaleDateString('en-IN'),mx+rw-6,y+8,{align:'right'});
+  y+=24;
+
+  // Table header
+  const colW=[18,55,35,20,30,22];
+  const hdrs=['Flat','Owner Name','Mobile','Months','Amount (₹)','Last Bill'];
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,9,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
+  let cx=mx;
+  hdrs.forEach((hd,i)=>{doc.text(hd,cx+colW[i]/2,y+6.5,{align:'center'});cx+=colW[i];});
+  y+=9;
+
+  defaulters.forEach((d,idx)=>{
+    if(y>265){doc.addPage();y=15;}
+    const rowH=9;
+    doc.setFillColor(idx%2===0?255:249,idx%2===0?255:249,idx%2===0?255:249);
+    doc.rect(mx,y,rw,rowH,'F');
+    doc.setDrawColor(220,215,205);doc.setLineWidth(0.2);
+    cx=mx;colW.forEach(w=>{doc.rect(cx,y,w,rowH);cx+=w;});
+
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(15,32,64);
+    doc.text(d.f.flatNo,mx+colW[0]/2,y+6.5,{align:'center'});
+    doc.setFont('helvetica','normal');doc.setTextColor(20,20,20);
+    doc.text(d.f.ownerName,mx+colW[0]+2,y+6.5);
+    doc.text(d.f.mobile||'—',mx+colW[0]+colW[1]+colW[2]/2,y+6.5,{align:'center'});
+    doc.setFont('helvetica','bold');doc.setTextColor(192,57,43);
+    doc.text(String(d.months),mx+colW[0]+colW[1]+colW[2]+colW[3]/2,y+6.5,{align:'center'});
+    doc.text(d.total.toLocaleString('en-IN'),mx+colW[0]+colW[1]+colW[2]+colW[3]+colW[4]-2,y+6.5,{align:'right'});
+    // Last pending month
+    const lastB=d.bills.sort((a,b)=>a.year-b.year||a.month-b.month)[0];
+    doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);doc.setFontSize(7.5);
+    doc.text(lastB?MS[lastB.month-1]+'-'+String(lastB.year).slice(-2):'—',mx+colW[0]+colW[1]+colW[2]+colW[3]+colW[4]+colW[5]/2,y+6.5,{align:'center'});
+    y+=rowH;
+  });
+
+  // Total row
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,10,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(255,255,255);
+  doc.text('TOTAL OUTSTANDING',mx+6,y+7);
+  doc.setTextColor(201,147,42);
+  doc.text('Rs.'+totalOut.toLocaleString('en-IN')+'/-',mx+rw-6,y+7,{align:'right'});
+  y+=16;
+
+  // Footer
+  doc.setFont('helvetica','italic');doc.setFontSize(7.5);doc.setTextColor(150,150,150);
+  doc.text('Computer Generated Report — Supreme Limra Society Management — '+new Date().getFullYear(),W/2,y,{align:'center'});
+
+  doc.save('SupremeLimra_Defaulters_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.pdf');
+  showToast('Defaulter PDF downloaded ✓','ok');
+}
+
 function render(){
   document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
 }
@@ -1135,10 +1351,23 @@ document.addEventListener('click',function(e){
     return;
   }
   if(a==='logout'){if(confirm('Logout from the app?')){LS.logout();render();} return;}
+  if(a==='do-pin-login'){
+    const pin=document.getElementById('pin-input')?.value||'';
+    const btn=e.target.closest('[data-action="do-pin-login"]');
+    if(DB.doLogin(pin)){
+      if(btn){btn.textContent='Loading…';btn.disabled=true;}
+      (async()=>{await loadData();render();})();
+    } else {
+      const err=document.getElementById('pin-err');
+      if(err){err.textContent='Wrong PIN. Try again.';setTimeout(()=>{err.textContent='';},2000);}
+    }
+    return;
+  }
   if(a==='tab'){S.tab=el.dataset.tab;S.modal=null;render();return;}
-  if(a==='close-modal'){S.modal=null;render();return;}
+  if(a==='close-modal'){S.modal=null;S._autoWA=false;render();return;}
   
   // Flat actions
+  if(a==='flat-history'){const f=S.flats.find(x=>x.id===id);if(f){S.modal={type:'flatHistory',data:f};render();}return;}
   if(a==='add-flat'){S.modal={type:'flatForm',data:null};render();return;}
   if(a==='edit-flat'){S.modal={type:'flatForm',data:S.flats.find(f=>f.id===id)};render();return;}
   if(a==='del-flat'){if(confirm('Delete this flat and all its bills?')){S.flats=S.flats.filter(f=>f.id!==id);S.bills=S.bills.filter(b=>b.flatId!==id);saveFlats();saveBills();showToast('Flat deleted');}return;}
@@ -1150,7 +1379,8 @@ document.addEventListener('click',function(e){
     const maint=+(document.getElementById('ff-maint')?.value||1000);
     if(!no){alert('Flat number required');return;}
     if(!name){alert('Owner name required');return;}
-    const data={flatNo:no,ownerName:name,mobile:mob,floor,maintenance:maint};
+    const notes=document.getElementById('ff-notes')?.value.trim();
+    const data={flatNo:no,ownerName:name,mobile:mob,floor,maintenance:maint,notes};
     if(id){S.flats=S.flats.map(f=>f.id===id?{...data,id}:f);showToast('Flat updated ✓');}
     else{S.flats.push({...data,id:uid()});showToast('Flat added ✓');}
     saveFlats();S.modal=null;render();return;
@@ -1177,8 +1407,10 @@ document.addEventListener('click',function(e){
     const date=document.getElementById('pay-date')?.value;
     const mode=document.getElementById('pay-mode')?.value||'Cash';
     if(!amt){alert('Enter amount');return;}
-    const lastRcpt=S.bills.reduce((mx,b)=>Math.max(mx,+(b.receiptNo||0)),0);
-    const updated={...b,status:'paid',amount:amt,paidDate:new Date(date).toLocaleDateString('en-IN'),paymentMode:mode,receiptNo:String(lastRcpt+1).padStart(4,'0')};
+    // Safe receipt number — use max existing + 1, padded
+    const maxRcpt=S.bills.reduce((mx,b)=>Math.max(mx,+(b.receiptNo||0)),0);
+    const newRcptNo=String(maxRcpt+1).padStart(4,'0');
+    const updated={...b,status:'paid',amount:amt,paidDate:new Date(date).toLocaleDateString('en-IN'),paymentMode:mode,receiptNo:newRcptNo};
     S.bills=S.bills.map(x=>x.id===id?updated:x);saveBills();
     showToast('Payment recorded ✓');S.modal={type:'receipt',data:updated};render();return;
   }
@@ -1186,6 +1418,29 @@ document.addEventListener('click',function(e){
   if(a==='print-pdf'){const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){printPDF(b,flatOf(b));showToast('Opening PDF…','pdf');}return;}
   
   // WhatsApp
+  if(a==='send-all-reminders'){
+    const m=S.bf.month,y=S.bf.year;
+    const pendBills=S.bills.filter(b=>b.month===m&&b.year===y&&b.status==='pending');
+    const eligible=pendBills.filter(b=>flatOf(b).mobile);
+    if(!eligible.length){showToast('No pending bills with mobile numbers','err');return;}
+    S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[],msgType:'reminder'}};render();return;
+  }
+  if(a==='wa-remind'){
+    const b=S.bills.find(x=>x.id===id);
+    if(b){
+      const f=flatOf(b);
+      if(!f.mobile){showToast('No mobile number for this flat','err');return;}
+      // Calculate days since generated
+      let daysLate=5;
+      if(b.generatedDate){
+        const parts=b.generatedDate.split('/');
+        if(parts.length===3){const genDt=new Date(parts[2],parts[1]-1,parts[0]);daysLate=Math.floor((new Date()-genDt)/(1000*60*60*24));}
+      }
+      goToWA(f.mobile,waOverdueReminder(f,b,daysLate));
+      showToast('Opening WhatsApp reminder…','wa');
+    }
+    return;
+  }
   if(a==='wa-bill'){const b=S.bills.find(x=>x.id===id);if(b){const f=flatOf(b);showToast('Opening WhatsApp…','wa');sendBillOnWA(b,f);}return;}
   if(a==='wa-open-now'){const b=S.bills.find(x=>x.id===id)||S.modal?.data?.bill;if(b){const f=flatOf(b);S.modal=null;render();setTimeout(()=>{openWA(f.mobile,waRcpt(f,b));},300);}return;}
   if(a==='wa-rcpt'){
@@ -1216,7 +1471,7 @@ document.addEventListener('click',function(e){
     const nw=document.getElementById('pin-new')?.value;
     const cfm=document.getElementById('pin-cfm')?.value;
     const err=document.getElementById('pin-change-err');
-    if(old!==LS.getPin()){if(err)err.textContent='Current PIN is wrong.';return;}
+    if(old!==DB.getPin()){if(err)err.textContent='Current PIN is wrong.';return;}
     if(!nw||nw.length<4){if(err)err.textContent='New PIN must be at least 4 digits.';return;}
     if(nw!==cfm){if(err)err.textContent='PINs do not match.';return;}
     LS.setPin(nw);showToast('PIN changed successfully ✓');S.modal=null;render();return;
@@ -1238,12 +1493,14 @@ document.addEventListener('click',function(e){
   }
   if(a==='del-expense'){if(!confirm('Delete this expense?'))return;S.expenses=(S.expenses||[]).filter(e=>e.id!==id);saveExpenses();showToast('Expense deleted');render();return;}
   if(a==='gen-monthly-excel'||a==='open-monthly-excel'){openMonthlyExcelModal();return;}
+  if(a==='gen-defaulter-pdf'){generateDefaulterPDF();return;}
   if(a==='do-gen-excel'){const m=+(document.getElementById('xls-month')?.value||new Date().getMonth()+1);const y=+(document.getElementById('xls-year')?.value||new Date().getFullYear());S.modal=null;render();setTimeout(()=>generateMonthlyExcel(m,y),200);return;}
   if(a==='export-data'){exportData();return;}
   if(a==='import-trigger'){document.getElementById('import-file')?.click();return;}
 });
 
 // Handle Enter key in PIN input
+document.addEventListener('keydown',function(e){if(e.key==='Enter'){const pi=document.getElementById('pin-input');if(pi===document.activeElement){document.querySelector('[data-action="do-pin-login"]')?.click();}}});
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'){
     const pi=document.getElementById('pin-input');
@@ -1257,13 +1514,16 @@ document.addEventListener('keydown',function(e){
 // INIT
 // ════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded',async function(){
-  render();
+  render(); // show login or loading
   setTimeout(async function(){
     initFirebase();
     if(FB_READY&&typeof firebase!=='undefined'){let w=0;while(!_fbAuth&&w<3000){await new Promise(r=>setTimeout(r,200));w+=200;}}
-    if(FB_READY&&_fbAuth){let w=0;while(!_fbAuth.currentUser&&w<4000){await new Promise(r=>setTimeout(r,300));w+=300;}}
-    await loadData();render();
-    if(new Date().getDate()===25&&!sessionStorage.getItem('excel25shown')){sessionStorage.setItem('excel25shown','1');setTimeout(()=>{S.modal={type:'monthlyExcel'};render();},1500);}
+    if(DB.isAuth()){
+      if(FB_READY&&_fbAuth){let w=0;while(!_fbAuth.currentUser&&w<4000){await new Promise(r=>setTimeout(r,300));w+=300;}}
+      await loadData();
+    }
+    render();
+    if(new Date().getDate()===25&&!sessionStorage.getItem('excel25shown')&&DB.isAuth()){sessionStorage.setItem('excel25shown','1');setTimeout(()=>{S.modal={type:'monthlyExcel'};render();},1500);}
   },300);
   // Register as PWA if supported
   if('serviceWorker' in navigator){
