@@ -350,82 +350,136 @@ function flatOf(bill){return S.flats.find(f=>f.id===bill.flatId)||{};}
 // GENERATE RECEIPT PDF using jsPDF
 // ════════════════════════════════════════════════════
 function buildReceiptPDF(bill, flat) {
-  if(!window.jspdf)return null;
-  const{jsPDF}=window.jspdf;
+  if(!window.jspdf) return null;
+  const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'p',unit:'mm',format:[148,210]});
-  const W=148,mx=6,rw=136;let y=6;
-  doc.setLineWidth(0.8);doc.setDrawColor(15,32,64);doc.rect(mx,y,rw,196);
-  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,24,'F');
-  doc.setFillColor(201,147,42);doc.rect(mx,y+24,rw,1.5,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(20);doc.setTextColor(255,255,255);
-  doc.text('SUPREME LIMRA',W/2,y+11,{align:'center'});
-  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(201,147,42);
-  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+18,{align:'center'});
-  doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(180,130,30);
-  doc.text('MAINTENANCE RECEIPT',W/2,y+22,{align:'center'});
-  y+=27;
-  const R=mx+rw,bx=R-29,bw=28;
-  doc.setFillColor(242,237,227);doc.setDrawColor(200,190,175);doc.setLineWidth(0.3);
-  doc.rect(bx,y,bw,16,'F');doc.rect(bx,y,bw,16);
-  doc.rect(bx,y+18,bw,13,'F');doc.rect(bx,y+18,bw,13);
-  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(100,100,100);
-  doc.text('No.',bx+bw/2,y+5,{align:'center'});
-  doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(15,32,64);
-  doc.text(String(bill.receiptNo||''),bx+bw/2,y+13,{align:'center'});
-  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(100,100,100);
-  doc.text('Date',bx+bw/2,y+23,{align:'center'});
-  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(15,32,64);
-  doc.text(bill.paidDate||'',bx+bw/2,y+29.5,{align:'center'});
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,80,80);
-  doc.text('Received from Mr./Mrs./Ms.',mx+3,y+6);
-  const lw1=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
-  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,0,0);
-  doc.text(flat.ownerName||'',mx+3+lw1,y+6);
-  doc.setLineWidth(0.3);doc.setDrawColor(180,180,180);doc.line(mx+3+lw1,y+7,bx-2,y+7);
+  const W=148, mx=6, rw=136; let y=6;
+
+  // Outer border
+  doc.setLineWidth(0.8); doc.setDrawColor(15,32,64); doc.rect(mx,y,rw,196);
+
+  // Navy header
+  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,26,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(255,255,255);
+  doc.text('SUPREME LIMRA', W/2, y+10, {align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(201,147,42);
+  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048', W/2, y+17, {align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,147,42);
+  doc.setCharSpace(1.5); doc.text('MAINTENANCE RECEIPT', W/2, y+23, {align:'center'}); doc.setCharSpace(0);
+
+  // Gold bar
+  doc.setFillColor(201,147,42); doc.rect(mx,y+26,rw,1.5,'F'); y+=29;
+
+  // Right boxes — draw backgrounds FIRST to prevent overlap
+  const R=mx+rw, bx=R-30, bw=29;
+  doc.setFillColor(245,240,230); doc.setDrawColor(200,190,170); doc.setLineWidth(0.3);
+  doc.rect(bx,y,bw,17,'F'); doc.rect(bx,y,bw,17);   // Receipt No box
+  doc.rect(bx,y+19,bw,13,'F'); doc.rect(bx,y+19,bw,13); // Date box
+
+  // Receipt No text
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(130,130,130);
+  doc.text('RECEIPT NO.', bx+bw/2, y+4.5, {align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(15,32,64);
+  doc.text(String(bill.receiptNo||''), bx+bw/2, y+13, {align:'center'});
+
+  // Date text
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(130,130,130);
+  doc.text('DATE', bx+bw/2, y+23, {align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(15,32,64);
+  doc.text(bill.paidDate||'', bx+bw/2, y+30, {align:'center'});
+
+  // Left — Received from (row 1)
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,90,90);
+  doc.text('Received from Mr./Mrs./Ms.', mx+3, y+6);
+  const nw=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(10,10,10);
+  doc.text(flat.ownerName||'', mx+3+nw, y+6);
+  doc.setLineWidth(0.3); doc.setDrawColor(15,32,64);
+  doc.line(mx+3+nw, y+7.2, bx-2, y+7.2);
+
+  // Left — Flat No (row 2)
+  y+=11;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,90,90);
+  doc.text('Flat / Garage / Shop No. :', mx+3, y+5);
+  const fw=doc.getTextWidth('Flat / Garage / Shop No. :  ');
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(10,10,10);
+  doc.text(flat.flatNo||'', mx+3+fw, y+5);
+  doc.setLineWidth(0.3); doc.setDrawColor(15,32,64);
+  doc.line(mx+3+fw, y+6.2, bx-2, y+6.2);
+
+  // On account note
   y+=10;
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,80,80);
-  doc.text('Flat / Garage / Shop No. :',mx+3,y+5);
-  const fw2=doc.getTextWidth('Flat / Garage / Shop No. : ');
-  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,0,0);
-  doc.text(flat.flatNo||'',mx+3+fw2,y+5);
-  doc.setLineWidth(0.3);doc.setDrawColor(180,180,180);doc.line(mx+3+fw2,y+6,bx-2,y+6);
-  y+=10;
-  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150,150,150);
-  doc.text('On account of the particulars stated below',mx+3,y+3);
-  y+=7;
-  doc.setFillColor(201,147,42);doc.rect(mx,y,rw,0.8,'F');y+=1.5;
-  const srW=11,amtW=28,ptW=rw-srW-amtW,hdrH=8,rowH=7;
-  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,hdrH,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
-  doc.text('Sr',mx+srW/2,y+5.5,{align:'center'});doc.text('Particulars',mx+srW+ptW/2,y+5.5,{align:'center'});doc.text('Amount',mx+srW+ptW+amtW/2,y+5.5,{align:'center'});
-  y+=hdrH;doc.setLineWidth(0.2);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(160,160,160);
+  doc.text('On account of the particulars stated below', mx+3, y+2);
+  y+=5;
+
+  // Gold divider
+  doc.setFillColor(201,147,42); doc.rect(mx,y,rw,0.8,'F'); y+=1.5;
+
+  // Table header
+  const srW=11, amtW=28, ptW=rw-srW-amtW, hdrH=8, rowH=7;
+  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,hdrH,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
+  doc.text('Sr', mx+srW/2, y+5.5, {align:'center'});
+  doc.text('Particulars', mx+srW+ptW/2, y+5.5, {align:'center'});
+  doc.text('Amount', mx+srW+ptW+amtW/2, y+5.5, {align:'center'});
+  y+=hdrH; doc.setLineWidth(0.2);
+
   const itemM=MS[bill.month-1]+'-'+String(bill.year).slice(-2);
-  [{sr:1,l:'Maintenance Charges',x:itemM,a:bill.amount},{sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},{sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},{sr:14,l:''},{sr:15,l:''}].forEach((row,i)=>{
+  [{sr:1,l:'Maintenance Charges',x:itemM,a:bill.amount},{sr:2,l:'Entrance Fees'},
+   {sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},
+   {sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},
+   {sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},
+   {sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},
+   {sr:14,l:''},{sr:15,l:''}
+  ].forEach((row,i)=>{
     if(i%2===0){doc.setFillColor(252,250,246);doc.rect(mx,y,rw,rowH,'F');}
-    doc.setDrawColor(220,215,205);doc.rect(mx,y,srW,rowH);doc.rect(mx+srW,y,ptW,rowH);doc.rect(mx+srW+ptW,y,amtW,rowH);
-    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150,150,150);doc.text(String(row.sr),mx+srW/2,y+5,{align:'center'});
+    doc.setDrawColor(220,215,205);
+    doc.rect(mx,y,srW,rowH); doc.rect(mx+srW,y,ptW,rowH); doc.rect(mx+srW+ptW,y,amtW,rowH);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,200,200);
+    doc.text(String(row.sr), mx+srW/2, y+5, {align:'center'});
     if(row.l){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(30,30,30);doc.text(row.l,mx+srW+2,y+5);}
-    if(row.x){const lx=row.l?doc.getTextWidth(row.l)+2:2;doc.setFont('helvetica','bold');doc.setTextColor(15,32,64);doc.setFontSize(8.5);doc.text(row.x,mx+srW+lx+2,y+5);doc.setTextColor(30,30,30);}
-    if(row.a){doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(26,127,55);doc.text(row.a+'/-',mx+srW+ptW+amtW-2,y+5,{align:'right'});}
+    if(row.x){const lx=doc.getTextWidth(row.l)+2;doc.setFont('helvetica','bold');doc.setTextColor(15,32,64);doc.setFontSize(8.5);doc.text(row.x,mx+srW+lx+2,y+5);doc.setTextColor(30,30,30);}
+    if(row.a){doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(26,127,55);doc.text(row.a+'/-',mx+srW+ptW+amtW-2,y+5,{align:'right'});}
     y+=rowH;
   });
-  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,9,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(255,255,255);doc.text('Total',mx+srW+ptW-2,y+6.5,{align:'right'});
-  doc.setTextColor(201,147,42);doc.setFontSize(11);doc.text(bill.amount+'/-',mx+srW+ptW+amtW-2,y+6.5,{align:'right'});y+=11;
-  doc.setFillColor(252,250,246);doc.rect(mx,y,rw,9,'F');doc.setDrawColor(220,215,205);doc.rect(mx,y,rw,9);
-  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(80,80,80);doc.text('Rs. in words: ',mx+3,y+6);
-  const wlw=doc.getTextWidth('Rs. in words: ');
-  doc.setFont('helvetica','bold');doc.setTextColor(0,0,0);doc.text(numToWords(bill.amount),mx+3+wlw,y+6);
-  if(bill.paymentMode){doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(120,120,120);doc.text('Mode: '+bill.paymentMode,R-3,y+6,{align:'right'});}
+
+  // Total row
+  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,9,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(255,255,255);
+  doc.text('Total', mx+srW+ptW-2, y+6.5, {align:'right'});
+  doc.setTextColor(201,147,42); doc.setFontSize(11);
+  doc.text(bill.amount+'/-', mx+srW+ptW+amtW-2, y+6.5, {align:'right'}); y+=11;
+
+  // Rs in words
+  doc.setFillColor(252,250,246); doc.rect(mx,y,rw,9,'F');
+  doc.setDrawColor(220,215,205); doc.rect(mx,y,rw,9);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(80,80,80);
+  doc.text('Rs. in words:', mx+3, y+6);
+  const wlw=doc.getTextWidth('Rs. in words:  ');
+  doc.setFont('helvetica','bold'); doc.setTextColor(0,0,0);
+  doc.text(numToWords(bill.amount), mx+3+wlw, y+6);
+  if(bill.paymentMode){
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+    doc.text('Mode: '+bill.paymentMode, R-3, y+6, {align:'right'});
+  }
   y+=11;
-  doc.setFillColor(201,147,42);doc.rect(mx,y,rw,0.6,'F');y+=4;
-  doc.setFont('helvetica','italic');doc.setFontSize(7.5);doc.setTextColor(120,100,60);
-  doc.text('This is a computer generated receipt. No signature required.',W/2,y,{align:'center'});
-  y+=4;doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(150,150,150);
-  doc.text('Supreme Limra Society Management - '+new Date().getFullYear(),W/2,y,{align:'center'});
-  doc.saveGraphicsState();doc.setGState(new doc.GState({opacity:0.10}));
-  doc.setFont('helvetica','bold');doc.setFontSize(52);doc.setTextColor(26,127,55);
-  doc.text('PAID',W/2,110,{align:'center',angle:45});doc.restoreGraphicsState();
+
+  // Footer — navy bar with "Computer Generated"
+  doc.setFillColor(15,32,64); doc.rect(mx,y,rw,14,'F');
+  doc.setFont('helvetica','bolditalic'); doc.setFontSize(8); doc.setTextColor(201,147,42);
+  doc.text('This is a Computer Generated Receipt — No Signature Required', W/2, y+6, {align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(255,255,255,0.5);
+  doc.setTextColor(180,180,180);
+  doc.text('Supreme Limra Society Management  ·  '+new Date().getFullYear(), W/2, y+11, {align:'center'});
+
+  // PAID watermark
+  doc.saveGraphicsState();
+  doc.setGState(new doc.GState({opacity:0.08}));
+  doc.setFont('helvetica','bold'); doc.setFontSize(56); doc.setTextColor(26,127,55);
+  doc.text('PAID', W/2, 110, {align:'center', angle:40});
+  doc.restoreGraphicsState();
+
   return doc;
 }
 
@@ -992,22 +1046,93 @@ function renderPayment(bill){
 
 function renderReceipt(bill){
   const f=flatOf(bill);
-  const items=[{sr:1,l:'Maintenance Charges',x:MS[bill.month-1]+'-'+String(bill.year).slice(-2),a:bill.amount},{sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},{sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},{sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},{sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},{sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},{sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},{sr:14,l:''},{sr:15,l:''}];
-  const trs=items.map(i=>`<tr><td class="sr">${i.sr}</td><td>${esc(i.l||'')}${i.x?'&nbsp;&nbsp;<strong>'+i.x+'</strong>':''}</td><td class="am">${i.a?i.a+'/-':''}</td></tr>`).join('');
-  return`<div class="mttl">🧾 Payment Receipt</div>
-<div class="rct-p">
-  <div class="rp-h"><h2>SUPREME LIMRA</h2><p>${ADDR_P}</p></div>
-  <div class="rp-m"><div class="rp-mi"><div class="rp-ml"><div>Received from Mr./Mrs./Ms. <span class="rp-fv">${esc(f.ownerName)}</span></div><div>Flat/Garage/Shop No.: <span class="rp-fv">${esc(f.flatNo)}</span></div><div style="font-size:10px;color:#555;margin-top:3px">On account of the particulars stated below</div></div><div class="rp-mr"><div style="font-size:10px;color:#555">No.</div><div class="rno">${bill.receiptNo}</div><div style="font-size:10px;color:#555;margin-top:6px">Date:</div><div style="font-weight:700">${bill.paidDate}</div></div></div></div>
-  <table class="rp-t"><thead><tr><th style="width:22px">Sr</th><th>Particulars</th><th style="width:65px;text-align:right">Amount</th></tr></thead><tbody>${trs}<tr class="tr"><td class="sr"></td><td class="tlb">Total</td><td class="am">${bill.amount}/-</td></tr></tbody></table>
-  <div class="rp-w"><span>Rs.in word</span><span class="rp-wv">${numToWords(bill.amount)}</span></div>
-  <div class="rp-sg"><div><div class="rp-ln"></div>Name &amp; Signature</div><div><div class="rp-ln" style="margin-left:auto"></div>Hon. Secretary / Treasurer</div></div>
+  const items=[
+    {sr:1,l:'Maintenance Charges',x:MS[bill.month-1]+'-'+String(bill.year).slice(-2),a:bill.amount},
+    {sr:2,l:'Entrance Fees'},{sr:3,l:'Interest On Defaulted Dues'},
+    {sr:4,l:'Contribution Towards Construction'},{sr:5,l:'Lease Rent'},
+    {sr:6,l:'Municipal Taxes'},{sr:7,l:'Water Charges'},
+    {sr:8,l:'Electricity Charges'},{sr:9,l:'Parking Charges'},
+    {sr:10,l:'Lift Charges'},{sr:11,l:'Service Charges'},
+    {sr:12,l:'Miscellaneous'},{sr:13,l:'Terrace Charge'},
+    {sr:14,l:''},{sr:15,l:''}
+  ];
+  const trs=items.map(i=>`<tr>
+    <td class="sr">${i.sr}</td>
+    <td style="font-size:10px">${esc(i.l||'')}${i.x?`&nbsp;<strong style="color:#0f2040;font-size:10.5px">${i.x}</strong>`:''}</td>
+    <td class="am">${i.a?i.a+'/-':''}</td>
+  </tr>`).join('');
+
+  return`<div class="mttl" style="font-size:18px;margin-bottom:12px">🧾 Payment Receipt</div>
+<div class="rct-p" id="receipt-capture">
+  <div class="rp-paid-stamp">PAID</div>
+
+  <!-- ── Navy Header ── -->
+  <div class="rp-h">
+    <h2>SUPREME LIMRA</h2>
+    <p>${ADDR_P}</p>
+    <div class="rp-tag">✦ Maintenance Receipt ✦</div>
+  </div>
+  <div class="rp-gold-bar"></div>
+
+  <!-- ── Meta ── -->
+  <div class="rp-m">
+    <div class="rp-mi">
+      <div class="rp-ml">
+        <div>Received from Mr./Mrs./Ms.&nbsp;<span class="rp-fv">${esc(f.ownerName)}</span></div>
+        <div>Flat / Garage / Shop No.:&nbsp;<span class="rp-fv">${esc(f.flatNo)}</span></div>
+        <div class="rp-note">On account of the particulars stated below</div>
+      </div>
+      <div class="rp-mr">
+        <div class="rno-lbl">Receipt No.</div>
+        <div class="rno">${bill.receiptNo}</div>
+        <span class="rdate-lbl">Date</span>
+        <span class="rdate">${bill.paidDate}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Table ── -->
+  <table class="rp-t">
+    <thead><tr>
+      <th style="width:22px">Sr</th>
+      <th style="text-align:left;padding-left:6px">Particulars</th>
+      <th style="width:64px">Amount</th>
+    </tr></thead>
+    <tbody>
+      ${trs}
+      <tr class="tr">
+        <td class="sr" colspan="2" style="text-align:right;padding-right:12px;color:#fff;font-size:11px">Total</td>
+        <td class="am">${bill.amount}/-</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── Amount in words ── -->
+  <div class="rp-w">
+    <span style="color:#777;font-size:9px">Rs. in words:</span>
+    <span class="rp-wv">${numToWords(bill.amount)}</span>
+    ${bill.paymentMode?`<span class="rp-mode">${bill.paymentMode}</span>`:''}
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="rp-footer">
+    <div class="rp-footer-main">✦ This is a Computer Generated Receipt — No Signature Required ✦</div>
+    <div class="rp-footer-sub">Supreme Limra Society Management · ${new Date().getFullYear()}</div>
+  </div>
 </div>
+
+<!-- ── Buttons ── -->
 <div style="display:flex;gap:8px;margin-top:14px">
   <button class="btn bo" style="flex:1" data-action="close-modal">Close</button>
-  ${f.mobile?`<button class="btn bwa" style="flex:1;font-size:12px" data-action="wa-rcpt" data-id="${bill.id}">📎 Send via WhatsApp</button>`:''}
-  <button class="btn bpdf" style="flex:1" data-action="print-pdf" data-id="${bill.id}">PDF / Print 🖨️</button>
+  <button class="btn bpdf" style="flex:1;font-size:12px" data-action="print-pdf" data-id="${bill.id}">PDF / Print 🖨️</button>
+  ${f.mobile?`<button class="btn bwa" style="flex:1.2;font-size:12px" id="wa-send-btn"
+    data-action="wa-rcpt" data-id="${bill.id}">
+    ${S._pdfUploading?'⏳ Uploading...':S._pdfUrl?'WhatsApp + PDF 💬':'Send via WhatsApp 💬'}
+  </button>`:''}
 </div>
-<div style="background:#e8faf0;border:1px solid #b2dfca;border-radius:10px;padding:8px 12px;margin-top:10px;font-size:11px;color:#075e54">📎 <strong>Send via WhatsApp</strong>: Captures receipt as image → 1-tap share if online, or long-press image to save then share from Photos.</div>`;
+${f.mobile?`<div id="pdf-status-hint" style="margin-top:8px;background:#f0f8ff;border-radius:8px;padding:7px 10px;font-size:11px;color:#555;text-align:center">
+  💬 WhatsApp opens directly to ${esc(f.ownerName)}'s chat
+</div>`:''}`;
 }
 
 function renderWAFlow(data){
