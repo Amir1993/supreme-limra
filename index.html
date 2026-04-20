@@ -288,11 +288,35 @@ const S={
   expFilter:{month:now.getMonth()+1,year:now.getFullYear()},
 };
 
-function loadData(){
-  const f=LS.get('slimra_flats_v3');
-  S.flats=(f&&f.length>0)?f:JSON.parse(JSON.stringify(INIT_FLATS));
-  if(!f||!f.length)LS.set('slimra_flats_v3',S.flats);
-  S.bills=LS.get('slimra_bills_v2',[]); 
+async function loadData(){
+  // First sign into Firebase so Firestore rules (auth required) pass
+  if(FB_READY && _fbAuth && !_fbAuth.currentUser){
+    try{
+      await _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL, 'SocietySupreme@605606');
+    }catch(e){
+      // Try anonymous sign-in as fallback so we can read data
+      try{ await _fbAuth.signInAnonymously(); }catch(e2){}
+    }
+  }
+
+  const {flats, bills, expenses, source} = await DB.load();
+  S.flats   = flats  || JSON.parse(JSON.stringify(INIT_FLATS));
+  S.bills   = bills  || [];
+  S.expenses= expenses || [];
+
+  if(source === 'firebase' && FB_READY){
+    // If Firebase had no data, push local cache up
+    if(!flats || !flats.length){
+      const lf = DB.lget('slimra_flats_v3');
+      if(lf && lf.length){ DB.saveFlats(lf); S.flats = lf; }
+    }
+    // Subscribe to real-time updates
+    DB.subscribeChanges(
+      f => { if(f && f.length){ S.flats = f; } render(); },
+      b => { S.bills = b || []; render(); }
+    );
+  }
+  console.log('Loaded:', S.flats.length, 'flats,', S.bills.length, 'bills from', source);
 }
 function saveFlats(){DB.saveFlats(S.flats);}
 function saveBills(){DB.saveBills(S.bills);}
@@ -916,6 +940,10 @@ function renderModal(){
   else if(m.type==='changePin') body=renderChangePin();
   else if(m.type==='pdfGuide') body=renderPdfGuide(m.data);
   else if(m.type==='imgGuide') body=renderImgGuide(m.data);
+  else if(m.type==='waReady') body=renderWaReady(m.data);
+  else if(m.type==='yearEnd') body=renderYearEnd(m.data);
+  else if(m.type==='addExpense') body=renderAddExpense(m.data?.cat||'',m.data?.desc||'');
+  else if(m.type==='monthlyExcel') body=renderMonthlyExcelModal();
   return`<div class="mbox" id="modal-box"><div class="mdrag"></div>${body}</div>`;
 }
 
@@ -1528,9 +1556,17 @@ document.addEventListener('keydown',function(e){
 // INIT
 // ════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async function(){
-  render();
+  render(); // show loading spinner
   setTimeout(async function(){
     initFirebase();
+    // Wait for Firebase SDK to be ready
+    if(FB_READY && typeof firebase !== 'undefined'){
+      let waited = 0;
+      while(!_fbAuth && waited < 3000){ 
+        await new Promise(r=>setTimeout(r,100)); 
+        waited+=100; 
+      }
+    }
     await loadData();
     render();
     // Auto-show monthly Excel modal on 25th (once per day)
