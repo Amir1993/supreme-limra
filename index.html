@@ -196,8 +196,8 @@ const DB={
   saveExpenses(e){this.lset("slimra_expenses_v1",e);if(FB_READY&&_fbFS)_fbFS.collection("society").doc("expenses").set({list:e,updated:new Date().toISOString()}).catch(()=>{});},
   subscribeChanges(onF,onB){
     if(!FB_READY||!_fbFS)return;
-    _fbFS.collection("society").doc("flats").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);onF(d);}});
-    _fbFS.collection("society").doc("bills").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);onB(d);}});
+    _fbFS.collection("society").doc("flats").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);if(!S.modal)onF(d);}});
+    _fbFS.collection("society").doc("bills").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);if(!S.modal)onB(d);else S.bills=d;}});
   }
 };
 const LS=DB;
@@ -1579,6 +1579,17 @@ function generateFullDataExcel(){
   showToast('Full data Excel downloaded ✓','ok');
 }
 
+function updateReceiptHint(){
+  const el=document.getElementById("pdf-status-hint");
+  const btn=document.getElementById("wa-send-btn");
+  if(el){
+    if(S._pdfUploading)el.textContent="⏳ Preparing PDF link...";
+    else if(S._pdfUrl)el.textContent="✅ PDF ready — tap WhatsApp to send with link";
+    else el.textContent="💬 Tap WhatsApp to send receipt";
+  }
+  if(btn){btn.disabled=false;btn.style.background="#25d366";btn.textContent=S._pdfUrl?"WhatsApp + PDF 💬":"Send via WhatsApp 💬";}
+}
+
 function render(){
   document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
 }
@@ -1661,8 +1672,30 @@ document.addEventListener('click',function(e){
     const maxRcpt=S.bills.reduce((mx,b)=>Math.max(mx,+(b.receiptNo||0)),0);
     const newRcptNo=String(maxRcpt+1).padStart(4,'0');
     const updated={...b,status:'paid',amount:amt,paidDate:new Date(date).toLocaleDateString('en-IN'),paymentMode:mode,receiptNo:newRcptNo};
-    S.bills=S.bills.map(x=>x.id===id?updated:x);saveBills();
-    showToast('Payment recorded ✓');S.modal={type:'receipt',data:updated};render();return;
+    S.bills=S.bills.map(x=>x.id===id?updated:x);
+    // Set modal FIRST, render BEFORE saving to Firebase
+    // This prevents Firebase onSnapshot from firing mid-render and clearing modal
+    S.modal={type:'receipt',data:updated};
+    S._autoWA=!!(flatOf(updated).mobile);
+    S._pdfUrl=null;
+    S._pdfUploading=!!(FB_READY&&_fbST);
+    render();
+    showToast('Payment recorded ✓');
+    // Save to localStorage immediately (sync)
+    DB.lset('slimra_bills_v2',S.bills);
+    // Save to Firebase in background — don't await
+    if(FB_READY&&_fbFS&&_fbAuth?.currentUser){
+      _fbFS.collection('society').doc('bills')
+        .set({list:S.bills,updated:new Date().toISOString()})
+        .catch(e=>console.log('Bills save:',e));
+    }
+    // PDF upload in background
+    if(FB_READY&&_fbST){
+      uploadReceiptAndGetLink(updated,flatOf(updated))
+        .then(url=>{S._pdfUrl=url;S._pdfUploading=false;updateReceiptHint();})
+        .catch(()=>{S._pdfUploading=false;});
+    }
+    return;
   }
   if(a==='open-receipt'){const b=S.bills.find(x=>x.id===id);if(b){S.modal={type:'receipt',data:b};render();}return;}
   if(a==='print-pdf'){const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){printPDF(b,flatOf(b));showToast('Opening PDF…','pdf');}return;}
