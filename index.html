@@ -1,4 +1,9 @@
 <!--
+  Copyright © 2026 Amir Nazir Shaikh. All rights reserved.
+  Licensed exclusively to Supreme Limra Society, Pune.
+  Unauthorized use strictly prohibited.
+-->
+<!--
   ╔══════════════════════════════════════════════════════════════╗
   ║          SUPREME LIMRA SOCIETY MANAGEMENT APP               ║
   ║                                                              ║
@@ -162,6 +167,16 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 <body>
 <div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:14px"><div class="spin"></div><p style="color:#c9932a;font-size:13px;font-family:serif">Loading…</p></div></div>
 <script>
+
+// ─── DOMAIN LOCK ──────────────────────────────────────────────────────────────
+const _ALLOWED=['amir1993.github.io','localhost','127.0.0.1'];
+if(!_ALLOWED.some(d=>location.hostname===d||location.hostname.endsWith('.'+d))){
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('root').innerHTML='<div style="min-height:100vh;background:#0f2040;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center"><div style="font-size:52px;margin-bottom:16px">🔒</div><div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#c9932a;margin-bottom:8px">Not Authorized</div><div style="font-size:13px;color:rgba(255,255,255,.6);max-width:280px;line-height:1.7">This app is licensed to Supreme Limra Society only.</div><div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:16px">© 2026 Amir Nazir Shaikh</div></div>';
+  });
+  throw new Error('Unauthorized: '+location.hostname);
+}
+
 // ════════════════════════════════════════════════════
 // DOMAIN LOCK — App only runs on authorized domains
 // If someone clones and deploys elsewhere, it shows 
@@ -213,7 +228,7 @@ const DB={
   lget:(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}},
   lset:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},
   isAuth(){return sessionStorage.getItem('slimra_auth')==='1'||localStorage.getItem('slimra_skip_auth')==='1';},
-  doLogin(pin){const stored=localStorage.getItem('slimra_pin')||'1234';if(pin===stored){sessionStorage.setItem('slimra_auth','1');return true;}return false;},
+  doLogin(pin){const stored=localStorage.getItem('slimra_pin')||'605606';if(pin===stored){sessionStorage.setItem('slimra_auth','1');return true;}return false;},
   logout(){sessionStorage.removeItem('slimra_auth');},
   getPin:()=>localStorage.getItem("slimra_pin")||"605606",
   setPin:(v)=>localStorage.setItem("slimra_pin",v),
@@ -778,6 +793,10 @@ function renderDashboard(){
   const allPending=S.bills.filter(b=>b.status==='pending');
   const pending=allPending.reduce((s,b)=>s+b.amount,0);
   const pendC=allPending.length;
+  // Current month pending vs arrears split
+  const curPendBills=allPending.filter(b=>b.month===curM&&b.year===curY);
+  const arrearBills=allPending.filter(b=>!(b.month===curM&&b.year===curY));
+  const arrearFlats=[...new Set(arrearBills.map(b=>b.flatId))];
   
   // Current month stats
   const curBills=S.bills.filter(b=>b.month===curM&&b.year===curY);
@@ -812,7 +831,16 @@ function renderDashboard(){
   <div class="sc"><div class="sl">Pending Dues</div><div class="sv" style="color:var(--re);font-size:20px">${fmt(pending)}</div></div>
   <div class="sc"><div class="sl">Pending Bills</div><div class="sv">${pendC}</div></div>
 </div>
-${pendTop.length?`<div class="crd"><div class="stt">⏳ Pending Dues</div>${pRows}</div>`:''}
+${pendTop.length?`<div class="crd">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="stt" style="margin-bottom:0">⏳ Pending Dues</div>
+      <button class="btn bsm" style="background:#f0f4ff;color:var(--n);border:1px solid #dde4ff;font-size:11px" data-action="tab" data-tab="bills">View Bills →</button>
+    </div>
+    \${curPendBills.length?\`<div style="background:#fff3e0;border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:#c05000;font-weight:600">📅 \${MO[curM-1]} \${curY}: \${curPendBills.length} flats pending · \${fmt(curPendBills.reduce((s,b)=>s+b.amount,0))}</div>\`:\`<div style="background:#e8faf0;border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:var(--gr);font-weight:600">✅ All \${MO[curM-1]} bills cleared!</div>\`}
+    \${arrearFlats.length?\`<div style="background:#fee2e2;border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:11px;color:var(--re);font-weight:600">⚠️ Arrears: \${arrearFlats.length} flat\${arrearFlats.length>1?'s':''} from previous months · \${fmt(arrearBills.reduce((s,b)=>s+b.amount,0))}</div>\`:''}
+    \${pRows}
+    \${Object.keys(flatPendMap).length>10?\`<div style="text-align:center;padding:6px 0;font-size:11px;color:var(--mu)">+\${Object.keys(flatPendMap).length-10} more flats · See Bills tab</div>\`:''}
+  </div>`:''}
 ${recent.length?`<div class="crd"><div class="stt">✅ Recent Payments</div>${rRows}</div>`:''}
 ${!S.bills.length?`<div class="crd"><div class="emp"><div class="emp-icon">🏢</div><p>Go to <strong>Bills</strong> tab → tap <strong>+ Generate</strong> to create monthly bills.</p></div></div>`:''}`;
 }
@@ -919,12 +947,7 @@ function renderSettings(){
   <div class="set-row" data-action="import-trigger"><div class="set-icon" style="background:#fff3e0">📥</div><div class="set-info"><div class="set-title">Import / Restore Data</div><div class="set-sub">Restore from a backup JSON file</div></div><span style="color:var(--mu)">›</span></div>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
 </div>
-<div class="crd" style="background:linear-gradient(135deg,#0f2040,#1a3260);padding:16px">
-  <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px">About</div>
-  <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:#fff">Supreme Limra Society</div>
-  <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${ADDR_A}</div>
-  <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:10px">47 Flats · Version 2.0</div>
-</div>
+
 <div class="crd" style="background:linear-gradient(135deg,#0f2040,#1a3260);padding:18px;margin-bottom:0">
   <div style="text-align:center">
     <div style="font-size:28px;margin-bottom:8px">🏢</div>
@@ -1742,12 +1765,14 @@ document.addEventListener('click',function(e){
     const y=+(document.getElementById('gen-year')?.value||S.bf.year);
     const wa=document.getElementById('gen-wa')?.checked;
     const existing=S.bills.filter(b=>b.month===m&&b.year===y);
-    const nf=S.flats.filter(f=>!existing.find(b=>b.flatId===f.id));
-    if(!nf.length){showToast('Bills already generated for all flats','err');return;}
+    const existingFlatIds=new Set(existing.map(b=>b.flatId));
+    const nf=S.flats.filter(f=>!existingFlatIds.has(f.id));
+    if(!nf.length){showToast('Bills already generated for all flats this month','err');return;}
+    if(!confirm('Generate bills for '+nf.length+' flat'+(nf.length>1?'s':'')+' for '+MO[m-1]+' '+y+'?')){return;}
     const nb=nf.map(f=>({id:uid(),flatId:f.id,month:m,year:y,amount:f.maintenance,status:'pending',receiptNo:null,paidDate:null,paymentMode:null,generatedDate:new Date().toLocaleDateString('en-IN')}));
     S.bills=[...S.bills,...nb];saveBills();S.bf.month=m;S.bf.year=y;
-    if(wa){const eligible=nb.filter(b=>S.flats.find(f=>f.id===b.flatId)?.mobile);if(eligible.length){S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[]}};showToast(`${nb.length} bills generated ✓`);render();return;}}
-    showToast(`${nb.length} bills generated ✓`);S.modal=null;render();return;
+    if(wa){const eligible=nb.filter(b=>S.flats.find(f=>f.id===b.flatId)?.mobile);if(eligible.length){S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[]}};showToast(nb.length+' bills generated');render();return;}}
+    showToast(nb.length+' bills generated');S.modal=null;render();return;
   }
   if(a==='open-pay'){const b=S.bills.find(x=>x.id===id);if(b){S.modal={type:'payment',data:b};render();}return;}
   if(a==='do-pay'){
