@@ -1,3 +1,20 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║          SUPREME LIMRA SOCIETY MANAGEMENT APP               ║
+  ║                                                              ║
+  ║  Copyright © 2026 Amir Nazir Shaikh. All rights reserved.  ║
+  ║                                                              ║
+  ║  This software is proprietary and confidential.             ║
+  ║  Licensed exclusively to Supreme Limra Society,             ║
+  ║  Sr. No. 15/16, Inam Nagar, Kondhwa Khurd, Pune – 411048.  ║
+  ║                                                              ║
+  ║  Unauthorized copying, modification, distribution, or use  ║
+  ║  of this software is strictly prohibited.                   ║
+  ║                                                              ║
+  ║  Developed by: Amir Nazir Shaikh                           ║
+  ║  Contact: aamir2027@gmail.com                               ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -145,6 +162,35 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 <body>
 <div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:14px"><div class="spin"></div><p style="color:#c9932a;font-size:13px;font-family:serif">Loading…</p></div></div>
 <script>
+// ════════════════════════════════════════════════════
+// DOMAIN LOCK — App only runs on authorized domains
+// If someone clones and deploys elsewhere, it shows 
+// a "Not Authorized" screen instead of the app
+// ════════════════════════════════════════════════════
+const ALLOWED_DOMAINS = [
+  'amir1993.github.io',
+  'localhost',
+  '127.0.0.1',
+];
+const currentDomain = window.location.hostname;
+const IS_AUTHORIZED = ALLOWED_DOMAINS.some(d => currentDomain === d || currentDomain.endsWith('.'+d));
+
+if(!IS_AUTHORIZED){
+  document.addEventListener('DOMContentLoaded', function(){
+    document.getElementById('root').innerHTML = `
+      <div style="min-height:100vh;background:#0f2040;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+        <div style="font-size:52px;margin-bottom:16px">🔒</div>
+        <div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#c9932a;margin-bottom:8px">Not Authorized</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);max-width:280px;line-height:1.7;margin-bottom:20px">
+          This application is licensed to Supreme Limra Society only and cannot be used on unauthorized domains.
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,.3)">© 2026 Amir Nazir Shaikh. All rights reserved.</div>
+      </div>`;
+  });
+  throw new Error('Unauthorized domain: ' + currentDomain);
+}
+
+
 
 const FIREBASE_CFG={apiKey:"AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",authDomain:"supreme-limra.firebaseapp.com",projectId:"supreme-limra",storageBucket:"supreme-limra.firebasestorage.app",messagingSenderId:"765570470191",appId:"1:765570470191:web:fc13de371e46977eff91da"};
 const SOCIETY_EMAIL="aamir2027@gmail.com";
@@ -159,8 +205,7 @@ function initFirebase(){
     _fbAuth=firebase.auth();_fbFS=firebase.firestore();_fbST=firebase.storage();
     _fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
     // Auto sign-in so Firestore auth rules pass
-    _fbAuth.signInWithEmailAndPassword(SOCIETY_EMAIL,"SocietySupreme@605606")
-      .catch(()=>_fbAuth.signInAnonymously().catch(()=>{}));
+    _fbAuth.signInAnonymously().catch(()=>{});
   }catch(e){console.log("FB:",e);}
 }
 
@@ -170,7 +215,7 @@ const DB={
   isAuth(){return sessionStorage.getItem('slimra_auth')==='1'||localStorage.getItem('slimra_skip_auth')==='1';},
   doLogin(pin){const stored=localStorage.getItem('slimra_pin')||'1234';if(pin===stored){sessionStorage.setItem('slimra_auth','1');return true;}return false;},
   logout(){sessionStorage.removeItem('slimra_auth');},
-  getPin:()=>localStorage.getItem("slimra_pin")||"1234",
+  getPin:()=>localStorage.getItem("slimra_pin")||"605606",
   setPin:(v)=>localStorage.setItem("slimra_pin",v),
   async load(){
     if(FB_READY&&_fbFS){
@@ -433,7 +478,7 @@ function buildReceiptPDF(bill, flat) {
   doc.setFont('helvetica','bolditalic');doc.setFontSize(8);doc.setTextColor(201,147,42);
   doc.text('Computer Generated Receipt — No Signature Required',W/2,y+6,{align:'center'});
   doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(180,180,180);
-  doc.text('Supreme Limra Society Management  -  '+new Date().getFullYear(),W/2,y+11,{align:'center'});
+  doc.text('Supreme Limra Society Management  ·  '+new Date().getFullYear()+'  ·  Developed by Amir Nazir Shaikh',W/2,y+11,{align:'center'});
   // PAID watermark
   doc.saveGraphicsState();
   doc.setGState(new doc.GState({opacity:0.08}));
@@ -662,17 +707,23 @@ function importData(file){
 // RENDER — LOGIN
 // ════════════════════════════════════════════════════
 function renderLogin(){
-  return`<div class="login-wrap">
-  <div class="login-logo">Supreme Limra</div>
-  <div class="login-sub">${ADDR_A}</div>
+  return`<div class="login-wrap" style="position:relative;overflow:hidden">
+  <div style="position:absolute;width:300px;height:300px;border:1px solid rgba(201,147,42,.08);border-radius:50%;top:-100px;right:-100px;pointer-events:none"></div>
+  <div style="position:absolute;width:200px;height:200px;border:1px solid rgba(201,147,42,.05);border-radius:50%;bottom:-60px;left:-60px;pointer-events:none"></div>
+  <div style="text-align:center;margin-bottom:32px">
+    <div style="width:72px;height:72px;background:linear-gradient(135deg,#c9932a,#b8821e);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(201,147,42,.3)">🏢</div>
+    <div style="font-family:var(--serif);font-size:26px;font-weight:700;color:#fff">Supreme Limra</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">Society Management</div>
+  </div>
   <div class="login-card">
-    <div class="login-lock">🔐</div>
-    <div class="login-title">Society Management</div>
-    <div class="login-hint">Enter your PIN to continue</div>
-    <input id="pin-input" type="tel" class="pin-input" maxlength="6" placeholder="Enter PIN" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+    <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:#fff;text-align:center;margin-bottom:6px">Welcome Back</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.45);text-align:center;margin-bottom:22px">Enter your access code to continue</div>
+    <input id="pin-input" type="password" class="pin-input" maxlength="10" placeholder="••••••" autocomplete="current-password" inputmode="numeric">
     <div id="pin-err" class="login-err"></div>
-    <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="login">Unlock App 🔓</button>
-    <p style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.35)">Default PIN: 1234</p>
+    <button class="btn" style="width:100%;margin-top:16px;padding:14px;font-size:15px;font-weight:700;background:linear-gradient(135deg,#c9932a,#b8821e);color:#fff;border:none;border-radius:12px;cursor:pointer" data-action="do-pin-login">Unlock App 🔓</button>
+  </div>
+  <div style="position:absolute;bottom:20px;left:0;right:0;text-align:center">
+    <div style="font-size:10px;color:rgba(255,255,255,.25)">Developed by Amir Nazir Shaikh</div>
   </div>
 </div>`;
 }
@@ -718,23 +769,36 @@ function renderApp(){
 // RENDER — DASHBOARD
 // ════════════════════════════════════════════════════
 function renderDashboard(){
-  // 25th reminder banner
   const today25=now.getDate()===25;
   const mnthName=MO[now.getMonth()];
+  const curM=now.getMonth()+1, curY=now.getFullYear();
+  
+  // All-time stats
   const collected=S.bills.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
-  const pending=S.bills.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
-  const pendC=S.bills.filter(b=>b.status==='pending').length;
-  // Recent payments - last 5
-  const recent=[...S.bills].filter(b=>b.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate)).slice(0,5);
-  // Pending: show current month first, then oldest, max 10
-  const curM=now.getMonth()+1,curY=now.getFullYear();
   const allPending=S.bills.filter(b=>b.status==='pending');
-  // Deduplicate by flatId — show only the OLDEST pending per flat
+  const pending=allPending.reduce((s,b)=>s+b.amount,0);
+  const pendC=allPending.length;
+  
+  // Current month stats
+  const curBills=S.bills.filter(b=>b.month===curM&&b.year===curY);
+  const curCollected=curBills.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
+  const curPending=curBills.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
+  const curPendC=curBills.filter(b=>b.status==='pending').length;
+  const curPaidC=curBills.filter(b=>b.status==='paid').length;
+  const curPct=curBills.length?Math.round((curPaidC/curBills.length)*100):0;
+  
+  // Year expenses
+  const yearExp=(S.expenses||[]).filter(e=>new Date(e.date).getFullYear()===curY).reduce((s,e)=>s+e.amount,0);
+  
+  // Recent payments
+  const recent=[...S.bills].filter(b=>b.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate)).slice(0,5);
+  
+  // Pending per flat (deduplicated, oldest first)
   const flatPendMap={};
   allPending.sort((a,b)=>a.year-b.year||a.month-b.month).forEach(b=>{
     if(!flatPendMap[b.flatId])flatPendMap[b.flatId]=b;
   });
-  const pendTop=Object.values(flatPendMap).sort((a,b)=>a.year-b.year||a.month-b.month).slice(0,10);
+  const pendTop=Object.values(flatPendMap).sort((a,b)=>b.total-a.total||a.year-b.year).slice(0,10);
   const pRows=pendTop.map(b=>{
     const f=flatOf(b);
     const totalDue=allPending.filter(x=>x.flatId===b.flatId).reduce((s,x)=>s+x.amount,0);
@@ -809,7 +873,13 @@ function renderBills(){
     <select class="inp" style="flex:1;padding:8px 32px 8px 10px;font-size:14px" id="bf-year" onchange="S.bf.year=+this.value;render()">${yrOpts}</select>
     <select class="inp" style="flex:1.2;padding:8px 32px 8px 10px;font-size:14px" id="bf-status" onchange="S.bf.status=this.value;render()"><option value="all" ${bf.status==='all'?'selected':''}>All</option><option value="pending" ${bf.status==='pending'?'selected':''}>Pending</option><option value="paid" ${bf.status==='paid'?'selected':''}>Paid</option></select>
   </div>
-  ${(mp||md)?`<div style="display:flex;gap:8px;margin-top:10px"><div style="flex:1;font-size:11px;background:#e6f4ea;border-radius:8px;padding:6px 10px;color:var(--gr);font-weight:600">Collected: ${fmt(mp)}</div><div style="flex:1;font-size:11px;background:#fff3e0;border-radius:8px;padding:6px 10px;color:#c05000;font-weight:600">Pending: ${fmt(md)}</div></div>`:''}
+  ${(mp||md)?`<div style="margin-top:10px">
+    <div style="display:flex;gap:8px;margin-bottom:6px">
+      <div style="flex:1;font-size:11px;background:#e6f4ea;border-radius:8px;padding:6px 10px;color:var(--gr);font-weight:600">✅ ${fmt(mp)}</div>
+      <div style="flex:1;font-size:11px;background:#fff3e0;border-radius:8px;padding:6px 10px;color:#c05000;font-weight:600">⏳ ${fmt(md)}</div>
+    </div>
+    ${allBills.length?`<div style="background:#e8e2d4;border-radius:4px;height:5px"><div style="background:var(--gr);height:5px;border-radius:4px;width:${Math.round(S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&b.status==='paid').length/Math.max(allBills.length,1)*100)}%"></div></div>`:''}
+  </div>`:''}
 </div>
 ${banner}
 ${allBills.length?`<div class="crd">${rows}</div>`:`<div class="crd"><div class="emp"><div class="emp-icon">📄</div><p>No bills for ${MO[bf.month-1]} ${bf.year}.<br>Tap <strong>+ Generate</strong> to create.</p></div></div>`}`;
@@ -855,7 +925,19 @@ function renderSettings(){
   <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${ADDR_A}</div>
   <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:10px">47 Flats · Version 2.0</div>
 </div>
-<div class="crd">
+<div class="crd" style="background:linear-gradient(135deg,#0f2040,#1a3260);padding:18px;margin-bottom:0">
+  <div style="text-align:center">
+    <div style="font-size:28px;margin-bottom:8px">🏢</div>
+    <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:#fff;margin-bottom:3px">Supreme Limra Society</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:12px">${ADDR_A}</div>
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:12px">
+      <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px">Designed &amp; Developed by</div>
+      <div style="font-family:var(--serif);font-size:17px;font-weight:700;color:#c9932a">Amir Nazir Shaikh</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:3px">Society Management App · v4.0 · 2026</div>
+    </div>
+  </div>
+</div>
+<div class="crd" style="margin-top:12px">
   <button class="btn brd" style="width:100%;padding:12px" data-action="logout">🔒 Logout</button>
 </div>`;
 }
@@ -1219,17 +1301,23 @@ function renderMonthlyExcelModal(){
 }
 
 function renderLogin(){
-  return`<div class="login-wrap">
-  <div class="login-logo">Supreme Limra</div>
-  <div class="login-sub">${ADDR_A}</div>
+  return`<div class="login-wrap" style="position:relative;overflow:hidden">
+  <div style="position:absolute;width:300px;height:300px;border:1px solid rgba(201,147,42,.08);border-radius:50%;top:-100px;right:-100px;pointer-events:none"></div>
+  <div style="position:absolute;width:200px;height:200px;border:1px solid rgba(201,147,42,.05);border-radius:50%;bottom:-60px;left:-60px;pointer-events:none"></div>
+  <div style="text-align:center;margin-bottom:32px">
+    <div style="width:72px;height:72px;background:linear-gradient(135deg,#c9932a,#b8821e);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(201,147,42,.3)">🏢</div>
+    <div style="font-family:var(--serif);font-size:26px;font-weight:700;color:#fff">Supreme Limra</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">Society Management</div>
+  </div>
   <div class="login-card">
-    <div class="login-lock">🔐</div>
-    <div class="login-title">Society Management</div>
-    <div class="login-hint">Enter your PIN to continue</div>
-    <input id="pin-input" type="password" class="pin-input" maxlength="10" placeholder="Enter PIN" autocomplete="current-password" inputmode="numeric">
+    <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:#fff;text-align:center;margin-bottom:6px">Welcome Back</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.45);text-align:center;margin-bottom:22px">Enter your access code to continue</div>
+    <input id="pin-input" type="password" class="pin-input" maxlength="10" placeholder="••••••" autocomplete="current-password" inputmode="numeric">
     <div id="pin-err" class="login-err"></div>
-    <button class="btn bn" style="width:100%;margin-top:16px;padding:14px;font-size:15px" data-action="do-pin-login">Unlock 🔓</button>
-    <p style="text-align:center;margin-top:12px;font-size:11px;color:rgba(255,255,255,.35)">Default PIN: 1234</p>
+    <button class="btn" style="width:100%;margin-top:16px;padding:14px;font-size:15px;font-weight:700;background:linear-gradient(135deg,#c9932a,#b8821e);color:#fff;border:none;border-radius:12px;cursor:pointer" data-action="do-pin-login">Unlock App 🔓</button>
+  </div>
+  <div style="position:absolute;bottom:20px;left:0;right:0;text-align:center">
+    <div style="font-size:10px;color:rgba(255,255,255,.25)">Developed by Amir Nazir Shaikh</div>
   </div>
 </div>`;
 }
