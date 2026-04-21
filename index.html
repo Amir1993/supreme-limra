@@ -230,6 +230,11 @@ const DB={
   logout(){sessionStorage.removeItem('slimra_auth');},
   getPin:()=>localStorage.getItem("slimra_pin")||"605606",
   setPin:(v)=>localStorage.setItem("slimra_pin",v),
+  getAdminPin(){return localStorage.getItem("slimra_admin_pin")||"786786";},
+  setAdminPin(v){localStorage.setItem("slimra_admin_pin",v);},
+  isAdmin(){return sessionStorage.getItem("slimra_admin")==="1";},
+  adminLogin(pin){if(pin===this.getAdminPin()){sessionStorage.setItem("slimra_admin","1");return true;}return false;},
+  adminLogout(){sessionStorage.removeItem("slimra_admin");},
   async load(){
     if(FB_READY&&_fbFS){
       try{
@@ -938,10 +943,11 @@ function renderSettings(){
   <div class="set-row" data-action="show-install"><div class="set-icon" style="background:#e0f2fe">📲</div><div class="set-info"><div class="set-title">Install as App</div><div class="set-sub">Add to home screen — Android & iPhone</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="open-monthly-excel"><div class="set-icon" style="background:#dcfce7">📊</div><div class="set-info"><div class="set-title">Monthly Excel Report</div><div class="set-sub">Download this month's collection + expenses</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="export-full-excel"><div class="set-icon" style="background:#fef9c3">📁</div><div class="set-info"><div class="set-title">Full Data Excel Export</div><div class="set-sub">All months · all flats · all expenses</div></div><span style="color:var(--mu)">›</span></div>
-  <div class="set-row" data-action="change-pin"><div class="set-icon" style="background:#eef2ff">🔑</div><div class="set-info"><div class="set-title">Change PIN</div><div class="set-sub">Update your login PIN</div></div><span style="color:var(--mu)">›</span></div>
-  <div class="set-row" data-action="clear-all-bills"><div class="set-icon" style="background:#fee2e2">🗑️</div><div class="set-info"><div class="set-title" style="color:var(--re)">Clear All Bills Data</div><div class="set-sub">Delete all bills — start fresh</div></div><span style="color:var(--mu)">›</span></div>
-  <div class="set-row" data-action="export-data"><div class="set-icon" style="background:#e6f4ea">📦</div><div class="set-info"><div class="set-title">Backup Data (JSON)</div><div class="set-sub">Raw backup — for restore/migration</div></div><span style="color:var(--mu)">›</span></div>
-  <div class="set-row" data-action="import-trigger"><div class="set-icon" style="background:#fff3e0">📥</div><div class="set-info"><div class="set-title">Import / Restore Data</div><div class="set-sub">Restore from a backup JSON file</div></div><span style="color:var(--mu)">›</span></div>
+  ${DB.isAdmin()?`<div class="set-row" data-action="change-admin-pin-open"><div class="set-icon" style="background:#fff8ea">🛡️</div><div class="set-info"><div class="set-title">Change Admin PIN</div><div class="set-sub">Update the admin access code</div></div><span style="color:var(--mu)">›</span></div>`:''}
+  <div class="set-row" data-action="change-pin"><div class="set-icon" style="background:#eef2ff">🔑</div><div class="set-info"><div class="set-title">Change PIN <span style="background:#fee2e2;color:var(--re);font-size:9px;font-weight:700;padding:2px 5px;border-radius:6px;margin-left:4px">ADMIN</span></div><div class="set-sub">Update your login PIN</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="clear-all-bills"><div class="set-icon" style="background:#fee2e2">🗑️</div><div class="set-info"><div class="set-title" style="color:var(--re)">Clear All Bills Data <span style="background:#fee2e2;color:var(--re);font-size:9px;font-weight:700;padding:2px 5px;border-radius:6px;margin-left:4px">ADMIN</span></div><div class="set-sub">Delete all bills — start fresh</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="export-data"><div class="set-icon" style="background:#e6f4ea">📦</div><div class="set-info"><div class="set-title">Backup Data (JSON) <span style="background:#fee2e2;color:var(--re);font-size:9px;font-weight:700;padding:2px 5px;border-radius:6px;margin-left:4px">ADMIN</span></div><div class="set-sub">Raw backup — for restore/migration</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="import-trigger"><div class="set-icon" style="background:#fff3e0">📥</div><div class="set-info"><div class="set-title">Import / Restore Data <span style="background:#fee2e2;color:var(--re);font-size:9px;font-weight:700;padding:2px 5px;border-radius:6px;margin-left:4px">ADMIN</span></div><div class="set-sub">Restore from a backup JSON file</div></div><span style="color:var(--mu)">›</span></div>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
 </div>
 
@@ -982,6 +988,8 @@ function renderModal(){
   else if(m.type==='flatHistory') body=renderFlatHistory(m.data);
   else if(m.type==='installGuide') body=renderInstallGuide();
   else if(m.type==='monthlyExcel') body=renderMonthlyExcelModal();
+  else if(m.type==='adminAuth') body=renderAdminAuth(m.data?.next||'');
+  else if(m.type==='changeAdminPin') body=renderChangeAdminPin();
   return`<div class="mbox" id="modal-box"><div class="mdrag"></div>${body}</div>`;
 }
 
@@ -1707,6 +1715,37 @@ function updateReceiptHint(){
   if(btn){btn.disabled=false;btn.style.background="#25d366";btn.textContent=S._pdfUrl?"WhatsApp + PDF 💬":"Send via WhatsApp 💬";}
 }
 
+function renderAdminAuth(action){
+  return`<div class="mttl">🔐 Admin Access Required</div>
+<div style="background:#fff8ea;border:1.5px solid #f0c96a;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#7a5a10">
+  This action requires <strong>Admin PIN</strong>.<br>Only the society administrator can perform this.
+</div>
+<div class="ig">
+  <label class="il">Enter Admin PIN</label>
+  <input id="admin-pin-input" type="password" class="inp" placeholder="••••••" maxlength="10" inputmode="numeric" autocomplete="off" style="font-size:22px;letter-spacing:6px;text-align:center">
+</div>
+<div id="admin-pin-err" style="color:var(--re);font-size:12px;min-height:18px;margin-bottom:10px;text-align:center"></div>
+<div style="display:flex;gap:10px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
+  <button class="btn bn" style="flex:1.5" data-action="do-admin-auth" data-next="${action}">Confirm 🔐</button>
+</div>`;
+}
+
+function renderChangeAdminPin(){
+  return`<div class="mttl">🔐 Change Admin PIN</div>
+<div style="background:#fff8ea;border:1.5px solid #f0c96a;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#7a5a10">
+  Admin PIN protects sensitive settings. Keep it private.
+</div>
+<div class="ig"><label class="il">Current Admin PIN</label><input class="inp" id="adm-old" type="password" placeholder="Current admin PIN" style="text-align:center;letter-spacing:4px;font-size:18px"></div>
+<div class="ig"><label class="il">New Admin PIN</label><input class="inp" id="adm-new" type="password" placeholder="New PIN (min 4 digits)" style="text-align:center;letter-spacing:4px;font-size:18px"></div>
+<div class="ig"><label class="il">Confirm New PIN</label><input class="inp" id="adm-cfm" type="password" placeholder="Confirm new PIN" style="text-align:center;letter-spacing:4px;font-size:18px"></div>
+<div id="adm-err" style="color:var(--re);font-size:12px;min-height:18px;margin-bottom:8px"></div>
+<div style="display:flex;gap:10px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
+  <button class="btn bn" style="flex:1.5" data-action="do-change-admin-pin">Update Admin PIN</button>
+</div>`;
+}
+
 function render(){
   document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
 }
@@ -1742,6 +1781,40 @@ document.addEventListener('click',function(e){
     return;
   }
   if(a==='tab'){S.tab=el.dataset.tab;S.modal=null;render();return;}
+  if(a==='change-admin-pin-open'){
+    if(!DB.isAdmin()){S.modal={type:'adminAuth',data:{next:'change-admin-pin-open'}};render();return;}
+    S.modal={type:'changeAdminPin'};render();return;
+  }
+  if(a==='do-change-admin-pin'){
+    const old=document.getElementById('adm-old')?.value||'';
+    const nw=document.getElementById('adm-new')?.value||'';
+    const cfm=document.getElementById('adm-cfm')?.value||'';
+    const err=document.getElementById('adm-err');
+    if(old!==DB.getAdminPin()){if(err)err.textContent='Current admin PIN is wrong';return;}
+    if(!nw||nw.length<4){if(err)err.textContent='PIN must be at least 4 digits';return;}
+    if(nw!==cfm){if(err)err.textContent='PINs do not match';return;}
+    DB.setAdminPin(nw);showToast('Admin PIN updated ✓');S.modal=null;render();return;
+  }
+  if(a==='do-admin-auth'){
+    const pin=document.getElementById('admin-pin-input')?.value||'';
+    const next=el.dataset.next||'';
+    if(DB.adminLogin(pin)){
+      S.modal=null;render();
+      // Re-fire the original action now that admin is authenticated
+      setTimeout(()=>{
+        const fakeEl=document.querySelector('[data-action="'+next+'"]');
+        if(fakeEl)fakeEl.click();
+        else{
+          // For import-trigger, directly trigger file input
+          if(next==='import-trigger')document.getElementById('import-file')?.click();
+        }
+      },100);
+    } else {
+      const err=document.getElementById('admin-pin-err');
+      if(err){err.textContent='Wrong Admin PIN';setTimeout(()=>err.textContent='',2000);}
+    }
+    return;
+  }
   if(a==='close-modal'){S.modal=null;S._autoWA=false;render();return;}
   
   // Flat actions
@@ -1888,7 +1961,7 @@ document.addEventListener('click',function(e){
   }
   
   // Settings
-  if(a==='change-pin'){S.modal={type:'changePin'};render();return;}
+  if(a==='change-pin'){if(!DB.isAdmin()){S.modal={type:'adminAuth',data:{next:'change-pin'}};render();return;}S.modal={type:'changePin'};render();return;}
   if(a==='do-change-pin'){
     const old=document.getElementById('pin-old')?.value;
     const nw=document.getElementById('pin-new')?.value;
@@ -1932,7 +2005,7 @@ document.addEventListener('click',function(e){
   if(a==='export-full-excel'){generateFullDataExcel();return;}
   if(a==='gen-defaulter-pdf'){generateDefaulterPDF();return;}
   if(a==='do-gen-excel'){const m=+(document.getElementById('xls-month')?.value||new Date().getMonth()+1);const y=+(document.getElementById('xls-year')?.value||new Date().getFullYear());S.modal=null;render();setTimeout(()=>generateMonthlyExcel(m,y),200);return;}
-  if(a==='clear-all-bills'){
+  if(a==='clear-all-bills'){if(!DB.isAdmin()){S.modal={type:'adminAuth',data:{next:'clear-all-bills'}};render();return;}
     if(confirm('⚠️ This will DELETE ALL '+S.bills.length+' bills permanently.\n\nThis cannot be undone. Are you sure?')){
       if(confirm('FINAL WARNING: Delete all bills and start fresh from '+MO[now.getMonth()]+' '+now.getFullYear()+'?')){
         S.bills=[];saveBills();S.modal=null;
@@ -1942,8 +2015,8 @@ document.addEventListener('click',function(e){
     }
     return;
   }
-  if(a==='export-data'){exportData();return;}
-  if(a==='import-trigger'){document.getElementById('import-file')?.click();return;}
+  if(a==='export-data'){if(!DB.isAdmin()){S.modal={type:'adminAuth',data:{next:'export-data'}};render();return;}exportData();return;}
+  if(a==='import-trigger'){if(!DB.isAdmin()){S.modal={type:'adminAuth',data:{next:'import-trigger'}};render();return;}document.getElementById('import-file')?.click();return;}
 });
 
 // Handle Enter key in PIN input
