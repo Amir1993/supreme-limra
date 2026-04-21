@@ -714,12 +714,29 @@ function renderApp(){
 // RENDER — DASHBOARD
 // ════════════════════════════════════════════════════
 function renderDashboard(){
+  // 25th reminder banner
+  const today25=now.getDate()===25;
+  const mnthName=MO[now.getMonth()];
   const collected=S.bills.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
   const pending=S.bills.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
   const pendC=S.bills.filter(b=>b.status==='pending').length;
+  // Recent payments - last 5
   const recent=[...S.bills].filter(b=>b.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate)).slice(0,5);
-  const pendTop=S.bills.filter(b=>b.status==='pending').slice(0,5);
-  const pRows=pendTop.map(b=>{const f=flatOf(b);return`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${MO[b.month-1]} ${b.year}</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(b.amount)}</span><button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button></div></div>`;}).join('');
+  // Pending: show current month first, then oldest, max 10
+  const curM=now.getMonth()+1,curY=now.getFullYear();
+  const allPending=S.bills.filter(b=>b.status==='pending');
+  // Deduplicate by flatId — show only the OLDEST pending per flat
+  const flatPendMap={};
+  allPending.sort((a,b)=>a.year-b.year||a.month-b.month).forEach(b=>{
+    if(!flatPendMap[b.flatId])flatPendMap[b.flatId]=b;
+  });
+  const pendTop=Object.values(flatPendMap).sort((a,b)=>a.year-b.year||a.month-b.month).slice(0,10);
+  const pRows=pendTop.map(b=>{
+    const f=flatOf(b);
+    const totalDue=allPending.filter(x=>x.flatId===b.flatId).reduce((s,x)=>s+x.amount,0);
+    const months=allPending.filter(x=>x.flatId===b.flatId).length;
+    return`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${months>1?months+' months pending · since ':''} ${MO[b.month-1]} ${b.year}</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(totalDue)}</span><button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button></div></div>`;
+  }).join('');
   const rRows=recent.map(b=>{const f=flatOf(b);return`<div class="li" style="cursor:pointer" data-action="open-receipt" data-id="${b.id}"><div class="fb" style="background:var(--gr);font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${MO[b.month-1]} ${b.year} · ${b.paidDate}</div></div><div style="text-align:right"><div style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--gr)">${fmt(b.amount)}</div><div style="font-size:10px;color:var(--mu)">Tap receipt</div></div></div>`;}).join('');
   return`<div class="sg" style="margin-top:4px">
   <div class="sc" style="background:linear-gradient(135deg,#0f2040,#1a3260)"><div class="sl" style="color:rgba(255,255,255,.6)">Total Flats</div><div class="sv" style="color:#fff">${S.flats.length}</div></div>
