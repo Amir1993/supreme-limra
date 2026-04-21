@@ -939,6 +939,7 @@ function renderSettings(){
   <div class="set-row" data-action="open-monthly-excel"><div class="set-icon" style="background:#dcfce7">📊</div><div class="set-info"><div class="set-title">Monthly Excel Report</div><div class="set-sub">Download this month's collection + expenses</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="export-full-excel"><div class="set-icon" style="background:#fef9c3">📁</div><div class="set-info"><div class="set-title">Full Data Excel Export</div><div class="set-sub">All months · all flats · all expenses</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="change-pin"><div class="set-icon" style="background:#eef2ff">🔑</div><div class="set-info"><div class="set-title">Change PIN</div><div class="set-sub">Update your login PIN</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="clear-all-bills"><div class="set-icon" style="background:#fee2e2">🗑️</div><div class="set-info"><div class="set-title" style="color:var(--re)">Clear All Bills Data</div><div class="set-sub">Delete all bills — start fresh</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="export-data"><div class="set-icon" style="background:#e6f4ea">📦</div><div class="set-info"><div class="set-title">Backup Data (JSON)</div><div class="set-sub">Raw backup — for restore/migration</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="import-trigger"><div class="set-icon" style="background:#fff3e0">📥</div><div class="set-info"><div class="set-title">Import / Restore Data</div><div class="set-sub">Restore from a backup JSON file</div></div><span style="color:var(--mu)">›</span></div>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
@@ -999,20 +1000,29 @@ function renderFlatForm(flat){
 }
 
 function renderGenBills(){
-  const existing=S.bills.filter(b=>b.month===S.bf.month&&b.year===S.bf.year);
+  const curM=now.getMonth()+1, curY=now.getFullYear();
+  S.bf.month=curM; S.bf.year=curY; // always force current month
+  const existing=S.bills.filter(b=>b.month===curM&&b.year===curY);
   const nf=S.flats.filter(f=>!existing.find(b=>b.flatId===f.id));
   return`<div class="mttl">Generate Monthly Bills</div>
-<div style="display:flex;gap:10px">
-<div class="ig" style="flex:2"><label class="il">Month *</label><select class="inp" id="gen-month" onchange="S.bf.month=+this.value;S.modal={type:'genBills'};render()">${MO.map((m,i)=>`<option value="${i+1}" ${S.bf.month===i+1?'selected':''}>${m}</option>`).join('')}</select></div>
-<div class="ig" style="flex:1"><label class="il">Year *</label><input class="inp" id="gen-year" type="number" value="${S.bf.year}" onchange="S.bf.year=+this.value;S.modal={type:'genBills'};render()"></div>
+<div style="background:#f5f0e8;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+  <div style="font-weight:700;font-size:15px;color:var(--n)">${MO[curM-1]} ${curY}</div>
+  <div style="font-size:11px;color:var(--mu);margin-top:2px">Bills can only be generated for the current month</div>
 </div>
-<div class="ib" id="gen-info">${nf.length?`<strong>${nf.length} flat${nf.length>1?'s':''}</strong> will get bills for ${MO[S.bf.month-1]} ${S.bf.year}.${existing.length?` <span style="color:#c05000">(${existing.length} already generated.)</span>`:''}`:'<span style="color:var(--re)">⚠ Bills already generated for all flats this month.</span>'}</div>
+<div class="ib" id="gen-info">${nf.length?`<strong>${nf.length} flat${nf.length>1?'s':''}</strong> will get bills for ${MO[curM-1]} ${curY}.${existing.length?` <span style="color:#c05000">(${existing.length} already generated.)</span>`:''}`:'<span style="color:var(--re)">⚠ Bills already generated for all flats this month.</span>'}</div>
 <div style="background:#e8faf0;border:1.5px solid #b2dfca;border-radius:12px;padding:12px 14px;margin-bottom:16px">
-<label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
-<input type="checkbox" id="gen-wa" checked style="width:18px;height:18px;accent-color:#25d366">
-<div><div style="font-weight:600;font-size:13px;color:#075e54">📲 Send Bills on WhatsApp after generating</div><div style="font-size:11px;color:#4a7a60;margin-top:2px">${nf.filter(f=>f.mobile).length} of ${nf.length} owners have mobile numbers</div></div>
-</label></div>
-<div style="display:flex;gap:10px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bg" style="flex:1" data-action="do-gen" ${!nf.length?'disabled':''}>Generate Bills</button></div>`;
+  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+    <input type="checkbox" id="gen-wa" checked style="width:18px;height:18px;accent-color:#25d366">
+    <div>
+      <div style="font-weight:600;font-size:13px;color:#075e54">📲 Send Bills on WhatsApp after generating</div>
+      <div style="font-size:11px;color:#4a7a60;margin-top:2px">${nf.filter(f=>f.mobile).length} of ${nf.length} owners have mobile numbers</div>
+    </div>
+  </label>
+</div>
+<div style="display:flex;gap:10px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
+  <button class="btn bg" style="flex:1" data-action="do-gen" ${!nf.length?'disabled':''}>Generate Bills ✓</button>
+</div>`;
 }
 
 function renderPayment(bill){
@@ -1759,11 +1769,17 @@ document.addEventListener('click',function(e){
   if(a==='do-gen'){
     const m=+(document.getElementById('gen-month')?.value||S.bf.month);
     const y=+(document.getElementById('gen-year')?.value||S.bf.year);
+    const todayM=now.getMonth()+1, todayY=now.getFullYear();
+    // LOCK: only current month allowed
+    if(m!==todayM||y!==todayY){
+      alert('⚠️ Bills can only be generated for the current month ('+MO[todayM-1]+' '+todayY+').\n\nPrevious or future month bills are not allowed.');
+      return;
+    }
     const wa=document.getElementById('gen-wa')?.checked;
     const existingIds=new Set(S.bills.filter(b=>b.month===m&&b.year===y).map(b=>b.flatId));
     const nf=S.flats.filter(f=>!existingIds.has(f.id));
-    if(!nf.length){showToast('Bills already exist for all flats this month','err');return;}
-    if(!confirm('Generate bills for '+nf.length+' flat'+(nf.length>1?'s':'')+' for '+MO[m-1]+' '+y+'?')){return;}
+    if(!nf.length){showToast('Bills already generated for all flats this month','err');return;}
+    if(!confirm('Generate '+MO[m-1]+' '+y+' bills for '+nf.length+' flat'+(nf.length>1?'s':'')+' ?')){return;}
     const nb=nf.map(f=>({id:uid(),flatId:f.id,month:m,year:y,amount:f.maintenance,status:'pending',receiptNo:null,paidDate:null,paymentMode:null,generatedDate:new Date().toLocaleDateString('en-IN')}));
     S.bills=[...S.bills,...nb];saveBills();S.bf.month=m;S.bf.year=y;
     if(wa){const eligible=nb.filter(b=>flatOf(b).mobile);if(eligible.length){S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[]}};showToast(nb.length+' bills generated ✓');render();return;}}
@@ -1916,6 +1932,16 @@ document.addEventListener('click',function(e){
   if(a==='export-full-excel'){generateFullDataExcel();return;}
   if(a==='gen-defaulter-pdf'){generateDefaulterPDF();return;}
   if(a==='do-gen-excel'){const m=+(document.getElementById('xls-month')?.value||new Date().getMonth()+1);const y=+(document.getElementById('xls-year')?.value||new Date().getFullYear());S.modal=null;render();setTimeout(()=>generateMonthlyExcel(m,y),200);return;}
+  if(a==='clear-all-bills'){
+    if(confirm('⚠️ This will DELETE ALL '+S.bills.length+' bills permanently.\n\nThis cannot be undone. Are you sure?')){
+      if(confirm('FINAL WARNING: Delete all bills and start fresh from '+MO[now.getMonth()]+' '+now.getFullYear()+'?')){
+        S.bills=[];saveBills();S.modal=null;
+        showToast('All bills cleared. Generate fresh for '+MO[now.getMonth()]+' '+now.getFullYear(),'ok');
+        render();
+      }
+    }
+    return;
+  }
   if(a==='export-data'){exportData();return;}
   if(a==='import-trigger'){document.getElementById('import-file')?.click();return;}
 });
