@@ -1430,18 +1430,25 @@ document.addEventListener('click',function(e){
     if(b){
       const f=flatOf(b);
       if(!f.mobile){showToast('No mobile number for this flat','err');return;}
-      // Calculate days since generated
-      let daysLate=5;
-      if(b.generatedDate){
-        const parts=b.generatedDate.split('/');
-        if(parts.length===3){const genDt=new Date(parts[2],parts[1]-1,parts[0]);daysLate=Math.floor((new Date()-genDt)/(1000*60*60*24));}
-      }
+      // Use bill month to calculate days since bill start date
+      // If generatedDate exists, use it; else use 1st of bill month
+      let daysLate=0;
+      try{
+        let fromDate;
+        if(b.generatedDate){
+          const parts=b.generatedDate.split('/');
+          if(parts.length===3) fromDate=new Date(+parts[2],+parts[1]-1,+parts[0]);
+        }
+        if(!fromDate||isNaN(fromDate)) fromDate=new Date(b.year,b.month-1,1);
+        daysLate=Math.floor((new Date()-fromDate)/(1000*60*60*24));
+        if(daysLate<1)daysLate=1;
+      }catch(e){daysLate=1;}
       goToWA(f.mobile,waOverdueReminder(f,b,daysLate));
       showToast('Opening WhatsApp reminder…','wa');
     }
     return;
   }
-  if(a==='wa-bill'){const b=S.bills.find(x=>x.id===id);if(b){const f=flatOf(b);showToast('Opening WhatsApp…','wa');sendBillOnWA(b,f);}return;}
+  if(a==='wa-bill'){const b=S.bills.find(x=>x.id===id);if(b){const f=flatOf(b);goToWA(f.mobile,waMsg(f,b));showToast('Opening WhatsApp…','wa');}return;}
   if(a==='wa-open-now'){const b=S.bills.find(x=>x.id===id)||S.modal?.data?.bill;if(b){const f=flatOf(b);S.modal=null;render();setTimeout(()=>{openWA(f.mobile,waRcpt(f,b));},300);}return;}
   if(a==='wa-rcpt'){
     // Best quality: use Firebase PDF download link (no WhatsApp compression)
@@ -1459,7 +1466,9 @@ document.addEventListener('click',function(e){
     const d=S.modal?.data;if(!d)return;
     if(d.idx>=d.bills.length)return;
     const bill=d.bills[d.idx];const f=flatOf(bill);
-    sendBillOnWA(bill,f);
+    const msgFn=d.msgType==='reminder'?waReminder:waMsg;
+    // Use direct goToWA — opens WhatsApp straight to contact
+    goToWA(f.mobile,msgFn(f,bill));
     d.done=[...d.done,bill.id];d.idx++;
     render();return;
   }
