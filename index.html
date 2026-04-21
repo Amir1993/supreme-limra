@@ -837,8 +837,11 @@ ${def.length?`<div class="crd"><div class="stt">🔴 Outstanding Dues</div>${def
 function renderSettings(){
   return`<div class="stt">Settings</div>
 <div class="crd">
+  <div class="set-row" data-action="show-install"><div class="set-icon" style="background:#e0f2fe">📲</div><div class="set-info"><div class="set-title">Install as App</div><div class="set-sub">Add to home screen — Android & iPhone</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="open-monthly-excel"><div class="set-icon" style="background:#dcfce7">📊</div><div class="set-info"><div class="set-title">Monthly Excel Report</div><div class="set-sub">Download this month's collection + expenses</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="export-full-excel"><div class="set-icon" style="background:#fef9c3">📁</div><div class="set-info"><div class="set-title">Full Data Excel Export</div><div class="set-sub">All months · all flats · all expenses</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="change-pin"><div class="set-icon" style="background:#eef2ff">🔑</div><div class="set-info"><div class="set-title">Change PIN</div><div class="set-sub">Update your login PIN</div></div><span style="color:var(--mu)">›</span></div>
-  <div class="set-row" data-action="export-data"><div class="set-icon" style="background:#e6f4ea">📦</div><div class="set-info"><div class="set-title">Export / Backup Data</div><div class="set-sub">Download all data as JSON file</div></div><span style="color:var(--mu)">›</span></div>
+  <div class="set-row" data-action="export-data"><div class="set-icon" style="background:#e6f4ea">📦</div><div class="set-info"><div class="set-title">Backup Data (JSON)</div><div class="set-sub">Raw backup — for restore/migration</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="import-trigger"><div class="set-icon" style="background:#fff3e0">📥</div><div class="set-info"><div class="set-title">Import / Restore Data</div><div class="set-sub">Restore from a backup JSON file</div></div><span style="color:var(--mu)">›</span></div>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
 </div>
@@ -871,6 +874,7 @@ function renderModal(){
   else if(m.type==='yearEnd') body=renderYearEnd(m.data);
   else if(m.type==='addExpense') body=renderAddExpense(m.data?.cat||'',m.data?.desc||'');
   else if(m.type==='flatHistory') body=renderFlatHistory(m.data);
+  else if(m.type==='installGuide') body=renderInstallGuide();
   else if(m.type==='monthlyExcel') body=renderMonthlyExcelModal();
   return`<div class="mbox" id="modal-box"><div class="mdrag"></div>${body}</div>`;
 }
@@ -1346,6 +1350,226 @@ function generateDefaulterPDF(){
   showToast('Defaulter PDF downloaded ✓','ok');
 }
 
+function renderInstallGuide(){
+  const isAndroid=/Android/i.test(navigator.userAgent);
+  const isIOS=/iPhone|iPad/i.test(navigator.userAgent);
+  return`<div class="mttl">📲 Install as App</div>
+
+<!-- Android Section -->
+<div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:14px;padding:14px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <span style="font-size:24px">🤖</span>
+    <div style="font-weight:700;font-size:14px;color:#1b5e20">Android — Install as App</div>
+  </div>
+  <div style="font-size:12px;color:#2e7d32;line-height:2">
+    <strong>Step 1:</strong> Open this link in <strong>Chrome browser</strong><br>
+    <strong>Step 2:</strong> Tap the <strong>⋮ menu</strong> (3 dots, top right)<br>
+    <strong>Step 3:</strong> Tap <strong>"Add to Home screen"</strong><br>
+    <strong>Step 4:</strong> Tap <strong>"Install"</strong> → App appears on home screen<br>
+    <strong>Step 5:</strong> Open it like any normal app ✓
+  </div>
+  <div style="background:#fff;border-radius:8px;padding:8px 10px;margin-top:10px;font-size:11px;color:#555">
+    💡 Android PWA installs like a real app — works offline, no Play Store needed
+  </div>
+</div>
+
+<!-- iPhone Section -->
+<div style="background:#e3f2fd;border:1.5px solid #90caf9;border-radius:14px;padding:14px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <span style="font-size:24px">🍎</span>
+    <div style="font-weight:700;font-size:14px;color:#0d47a1">iPhone — Add to Home Screen</div>
+  </div>
+  <div style="font-size:12px;color:#1565c0;line-height:2">
+    <strong>Step 1:</strong> Open this link in <strong>Safari browser</strong> (not Chrome)<br>
+    <strong>Step 2:</strong> Tap the <strong>Share button</strong> <span style="background:#ddd;padding:1px 5px;border-radius:4px">□↑</span> at the bottom<br>
+    <strong>Step 3:</strong> Scroll down → tap <strong>"Add to Home Screen"</strong><br>
+    <strong>Step 4:</strong> Tap <strong>"Add"</strong> (top right)<br>
+    <strong>Step 5:</strong> App icon appears on your home screen ✓
+  </div>
+  <div style="background:#fff;border-radius:8px;padding:8px 10px;margin-top:10px;font-size:11px;color:#555">
+    💡 Must use Safari — Chrome on iPhone cannot add to home screen
+  </div>
+</div>
+
+<!-- App URL -->
+<div style="background:#f5f0e8;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+  <div style="font-size:11px;font-weight:600;color:var(--mu);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">App URL</div>
+  <div style="font-size:13px;font-weight:700;color:var(--n);word-break:break-all">https://amir1993.github.io/supreme-limra/</div>
+  <button class="btn bn bsm" style="margin-top:8px;width:100%" onclick="navigator.clipboard.writeText('https://amir1993.github.io/supreme-limra/').then(()=>showToast('URL copied!','ok'))">📋 Copy App URL</button>
+</div>
+
+<div style="background:#fff8ea;border:1px solid #f0c96a;border-radius:10px;padding:10px 12px;font-size:11px;color:#7a5a10;margin-bottom:14px">
+  ⚠️ <strong>Note:</strong> There is no APK file to download. This is a Progressive Web App (PWA) — it installs directly from the browser and works exactly like a native app. No Play Store or App Store required.
+</div>
+
+<button class="btn bo" style="width:100%" data-action="close-modal">Close</button>`;
+}
+
+function generateFullDataExcel(){
+  if(typeof XLSX==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>generateFullDataExcel();
+    s.onerror=()=>showToast('Excel library failed','err');
+    document.head.appendChild(s);showToast('Loading Excel library...','ok');return;
+  }
+
+  const wb=XLSX.utils.book_new();
+  const sortedFlats=[...S.flats].sort((a,b)=>a.flatNo.localeCompare(b.flatNo,undefined,{numeric:true}));
+
+  // ── Sheet 1: Summary Dashboard ─────────────────────────────────────────────
+  const totalCollected=S.bills.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amount,0);
+  const totalPending=S.bills.filter(b=>b.status==='pending').reduce((s,b)=>s+b.amount,0);
+  const totalExp=(S.expenses||[]).reduce((s,e)=>s+e.amount,0);
+  const s0=[
+    ['SUPREME LIMRA SOCIETY — COMPLETE DATA EXPORT'],
+    ['Sr. No. 15/16, Inam Nagar, Kondhwa Khurd, Pune – 411048'],
+    [`Export Date: ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}`],
+    [],
+    ['SUMMARY','',''],
+    ['Total Flats',S.flats.length,''],
+    ['Total Bills Generated',S.bills.length,''],
+    ['Total Collected (all time)','',totalCollected],
+    ['Total Pending (all time)','',totalPending],
+    ['Total Expenses (all time)','',totalExp],
+    ['Net Balance (Collected - Expenses)','',totalCollected-totalExp],
+  ];
+  const ws0=XLSX.utils.aoa_to_sheet(s0);
+  ws0['!cols']=[{wch:35},{wch:20},{wch:18}];
+  ws0['!merges']=[{s:{r:0,c:0},e:{r:0,c:2}},{s:{r:1,c:0},e:{r:1,c:2}},{s:{r:2,c:0},e:{r:2,c:2}}];
+  XLSX.utils.book_append_sheet(wb,ws0,'Summary');
+
+  // ── Sheet 2: All Flats ──────────────────────────────────────────────────────
+  const s1=[
+    ['FLAT OWNERS LIST'],
+    [`Total: ${S.flats.length} flats`],
+    [],
+    ['Flat No.','Owner Name','Mobile','Floor','Monthly (₹)','Type','Notes']
+  ];
+  sortedFlats.forEach(f=>{
+    s1.push([f.flatNo,f.ownerName,f.mobile||'',f.floor||'',f.maintenance,f.maintenance===2000?'2BHK':'1BHK',f.notes||'']);
+  });
+  const ws1=XLSX.utils.aoa_to_sheet(s1);
+  ws1['!cols']=[{wch:10},{wch:28},{wch:14},{wch:10},{wch:12},{wch:8},{wch:30}];
+  ws1['!merges']=[{s:{r:0,c:0},e:{r:0,c:6}}];
+  XLSX.utils.book_append_sheet(wb,ws1,'Flat Owners');
+
+  // ── Sheet 3: Month-wise Collection Register ─────────────────────────────────
+  // Get all unique year-months from bills
+  const periods=[...new Set(S.bills.map(b=>`${b.year}-${String(b.month).padStart(2,'0')}`))].sort();
+  const s2=[];
+  s2.push(['MONTH-WISE COLLECTION REGISTER']);
+  s2.push([]);
+  // Header row: Flat | Name | [Month1 | Month2 | ...]
+  const hdr=['Flat No.','Owner Name',...periods.map(p=>{const[y,m]=p.split('-');return MO[+m-1].slice(0,3)+'-'+y.slice(-2);}),'Total Paid','Pending'];
+  s2.push(hdr);
+
+  sortedFlats.forEach(f=>{
+    const row=[f.flatNo,f.ownerName];
+    let totalPaid=0,totalPend=0;
+    periods.forEach(p=>{
+      const[y,m]=p.split('-');
+      const b=S.bills.find(x=>x.flatId===f.id&&x.year===+y&&x.month===+m);
+      if(!b){row.push('');}
+      else if(b.status==='paid'){row.push(b.amount);totalPaid+=b.amount;}
+      else{row.push('PENDING');totalPend+=b.amount;}
+    });
+    row.push(totalPaid,totalPend);
+    s2.push(row);
+  });
+
+  // Totals row
+  const totalRow=['','TOTAL COLLECTED'];
+  periods.forEach(p=>{
+    const[y,m]=p.split('-');
+    const col=S.bills.filter(b=>b.year===+y&&b.month===+m&&b.status==='paid').reduce((s,b)=>s+b.amount,0);
+    totalRow.push(col);
+  });
+  totalRow.push(totalCollected,totalPending);
+  s2.push([]);s2.push(totalRow);
+
+  const ws2=XLSX.utils.aoa_to_sheet(s2);
+  const colWidths=[{wch:10},{wch:28},...periods.map(()=>({wch:10})),{wch:12},{wch:12}];
+  ws2['!cols']=colWidths;
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:periods.length+3}}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Monthly Collections');
+
+  // ── Sheet 4: All Payments Detail ─────────────────────────────────────────────
+  const s3=[
+    ['ALL PAYMENT TRANSACTIONS'],
+    [],
+    ['Receipt No.','Flat No.','Owner Name','Month','Year','Amount (₹)','Payment Date','Mode','Generated Date']
+  ];
+  const paidBills=[...S.bills].filter(b=>b.status==='paid')
+    .sort((a,b)=>a.year-b.year||a.month-b.month||+(a.receiptNo||0)-+(b.receiptNo||0));
+  paidBills.forEach(b=>{
+    const f=flatOf(b);
+    s3.push(['#'+b.receiptNo,f.flatNo,f.ownerName,MO[b.month-1],b.year,b.amount,b.paidDate,b.paymentMode||'',b.generatedDate||'']);
+  });
+  s3.push([]);s3.push(['','','TOTAL','','',totalCollected,'','','']);
+  const ws3=XLSX.utils.aoa_to_sheet(s3);
+  ws3['!cols']=[{wch:12},{wch:10},{wch:28},{wch:12},{wch:8},{wch:12},{wch:14},{wch:14},{wch:14}];
+  ws3['!merges']=[{s:{r:0,c:0},e:{r:0,c:8}}];
+  XLSX.utils.book_append_sheet(wb,ws3,'All Payments');
+
+  // ── Sheet 5: Outstanding Dues ─────────────────────────────────────────────
+  const s4=[
+    ['OUTSTANDING DUES REPORT'],
+    [`As of: ${new Date().toLocaleDateString('en-IN')}`],
+    [],
+    ['Flat No.','Owner Name','Mobile','Months Pending','Oldest Due','Total Due (₹)']
+  ];
+  const defaulters=sortedFlats.map(f=>{
+    const pb=S.bills.filter(b=>b.flatId===f.id&&b.status==='pending');
+    const oldest=pb.sort((a,b)=>a.year-b.year||a.month-b.month)[0];
+    return{f,months:pb.length,oldest,total:pb.reduce((s,b)=>s+b.amount,0)};
+  }).filter(x=>x.months>0);
+
+  if(defaulters.length===0){
+    s4.push(['No outstanding dues — All cleared!','','','','','']);
+  } else {
+    defaulters.sort((a,b)=>b.total-a.total).forEach(d=>{
+      s4.push([d.f.flatNo,d.f.ownerName,d.f.mobile||'',d.months,d.oldest?MO[d.oldest.month-1]+' '+d.oldest.year:'',d.total]);
+    });
+    s4.push([]);
+    s4.push(['','TOTAL OUTSTANDING','','',`${defaulters.length} flats`,defaulters.reduce((s,d)=>s+d.total,0)]);
+  }
+  const ws4=XLSX.utils.aoa_to_sheet(s4);
+  ws4['!cols']=[{wch:10},{wch:28},{wch:14},{wch:14},{wch:14},{wch:14}];
+  ws4['!merges']=[{s:{r:0,c:0},e:{r:0,c:5}},{s:{r:1,c:0},e:{r:1,c:5}}];
+  XLSX.utils.book_append_sheet(wb,ws4,'Outstanding Dues');
+
+  // ── Sheet 6: All Expenses ─────────────────────────────────────────────────
+  const s5=[
+    ['ALL SOCIETY EXPENSES'],
+    [],
+    ['Sr.','Date','Month','Year','Category','Description','Amount (₹)','Notes']
+  ];
+  const sortedExp=[...(S.expenses||[])].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  sortedExp.forEach((e,i)=>{
+    const d=new Date(e.date);
+    s5.push([i+1,d.toLocaleDateString('en-IN'),MO[d.getMonth()],d.getFullYear(),e.category,e.description,e.amount,e.notes||'']);
+  });
+  s5.push([]);s5.push(['','','','','','TOTAL',totalExp,'']);
+
+  // Category breakdown
+  s5.push([]);s5.push(['Category Breakdown','','','','','','','']);
+  const cats={};sortedExp.forEach(e=>{cats[e.category]=(cats[e.category]||0)+e.amount;});
+  Object.entries(cats).sort((a,b)=>b[1]-a[1]).forEach(([c,a])=>{
+    s5.push(['',c,'','','','',a,'']);
+  });
+
+  const ws5=XLSX.utils.aoa_to_sheet(s5);
+  ws5['!cols']=[{wch:6},{wch:14},{wch:12},{wch:8},{wch:18},{wch:35},{wch:12},{wch:30}];
+  ws5['!merges']=[{s:{r:0,c:0},e:{r:0,c:7}}];
+  XLSX.utils.book_append_sheet(wb,ws5,'All Expenses');
+
+  // ── Download ──────────────────────────────────────────────────────────────
+  const fname=`SupremeLimra_FullExport_${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.xlsx`;
+  XLSX.writeFile(wb,fname);
+  showToast('Full data Excel downloaded ✓','ok');
+}
+
 function render(){
   document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
 }
@@ -1519,6 +1743,8 @@ document.addEventListener('click',function(e){
   }
   if(a==='del-expense'){if(!confirm('Delete this expense?'))return;S.expenses=(S.expenses||[]).filter(e=>e.id!==id);saveExpenses();showToast('Expense deleted');render();return;}
   if(a==='gen-monthly-excel'||a==='open-monthly-excel'){openMonthlyExcelModal();return;}
+  if(a==='show-install'){S.modal={type:'installGuide'};render();return;}
+  if(a==='export-full-excel'){generateFullDataExcel();return;}
   if(a==='gen-defaulter-pdf'){generateDefaulterPDF();return;}
   if(a==='do-gen-excel'){const m=+(document.getElementById('xls-month')?.value||new Date().getMonth()+1);const y=+(document.getElementById('xls-year')?.value||new Date().getFullYear());S.modal=null;render();setTimeout(()=>generateMonthlyExcel(m,y),200);return;}
   if(a==='export-data'){exportData();return;}
