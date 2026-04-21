@@ -1,7 +1,6 @@
 <!--
   Copyright © 2026 Amir Nazir Shaikh. All rights reserved.
   Licensed exclusively to Supreme Limra Society, Pune.
-  Unauthorized use strictly prohibited.
 -->
 <!--
   ╔══════════════════════════════════════════════════════════════╗
@@ -168,7 +167,7 @@ select.inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 <div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:14px"><div class="spin"></div><p style="color:#c9932a;font-size:13px;font-family:serif">Loading…</p></div></div>
 <script>
 
-// ─── DOMAIN LOCK ──────────────────────────────────────────────────────────────
+// ─── DOMAIN LOCK ─────────────────────────────────────────────
 const _ALLOWED=['amir1993.github.io','localhost','127.0.0.1'];
 if(!_ALLOWED.some(d=>location.hostname===d||location.hostname.endsWith('.'+d))){
   document.addEventListener('DOMContentLoaded',()=>{
@@ -176,7 +175,6 @@ if(!_ALLOWED.some(d=>location.hostname===d||location.hostname.endsWith('.'+d))){
   });
   throw new Error('Unauthorized: '+location.hostname);
 }
-
 // ════════════════════════════════════════════════════
 // DOMAIN LOCK — App only runs on authorized domains
 // If someone clones and deploys elsewhere, it shows 
@@ -793,10 +791,9 @@ function renderDashboard(){
   const allPending=S.bills.filter(b=>b.status==='pending');
   const pending=allPending.reduce((s,b)=>s+b.amount,0);
   const pendC=allPending.length;
-  // Current month pending vs arrears split
-  const curPendBills=allPending.filter(b=>b.month===curM&&b.year===curY);
-  const arrearBills=allPending.filter(b=>!(b.month===curM&&b.year===curY));
-  const arrearFlats=[...new Set(arrearBills.map(b=>b.flatId))];
+  const cpBills=allPending.filter(b=>b.month===curM&&b.year===curY);
+  const arrBills=allPending.filter(b=>!(b.month===curM&&b.year===curY));
+  const arrFlatCnt=[...new Set(arrBills.map(b=>b.flatId))].length;
   
   // Current month stats
   const curBills=S.bills.filter(b=>b.month===curM&&b.year===curY);
@@ -832,14 +829,13 @@ function renderDashboard(){
   <div class="sc"><div class="sl">Pending Bills</div><div class="sv">${pendC}</div></div>
 </div>
 ${pendTop.length?`<div class="crd">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="stt" style="margin-bottom:0">⏳ Pending Dues</div>
-      <button class="btn bsm" style="background:#f0f4ff;color:var(--n);border:1px solid #dde4ff;font-size:11px" data-action="tab" data-tab="bills">View Bills →</button>
+      <button class="btn bsm" style="background:#f0f4ff;color:var(--n);border:1px solid #dde4ff;font-size:11px" data-action="tab" data-tab="bills">View All →</button>
     </div>
-    \${curPendBills.length?\`<div style="background:#fff3e0;border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:#c05000;font-weight:600">📅 \${MO[curM-1]} \${curY}: \${curPendBills.length} flats pending · \${fmt(curPendBills.reduce((s,b)=>s+b.amount,0))}</div>\`:\`<div style="background:#e8faf0;border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:var(--gr);font-weight:600">✅ All \${MO[curM-1]} bills cleared!</div>\`}
-    \${arrearFlats.length?\`<div style="background:#fee2e2;border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:11px;color:var(--re);font-weight:600">⚠️ Arrears: \${arrearFlats.length} flat\${arrearFlats.length>1?'s':''} from previous months · \${fmt(arrearBills.reduce((s,b)=>s+b.amount,0))}</div>\`:''}
-    \${pRows}
-    \${Object.keys(flatPendMap).length>10?\`<div style="text-align:center;padding:6px 0;font-size:11px;color:var(--mu)">+\${Object.keys(flatPendMap).length-10} more flats · See Bills tab</div>\`:''}
+    <div style="background:${cpBills.length?'#fff3e0':'#e8faf0'};border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:${cpBills.length?'#c05000':'#1a7f37'};font-weight:600">${cpBills.length?('📅 '+MO[curM-1]+' '+curY+': '+cpBills.length+' flat'+(cpBills.length>1?'s':'')+' pending · '+fmt(cpBills.reduce((s,b)=>s+b.amount,0))):('✅ All '+MO[curM-1]+' bills cleared!')}</div>
+    ${arrFlatCnt?('<div style="background:#fee2e2;border-radius:8px;padding:7px 10px;margin-bottom:8px;font-size:11px;color:#c0392b;font-weight:600">⚠️ Arrears: '+arrFlatCnt+' flat'+(arrFlatCnt>1?'s':'')+' from previous months · '+fmt(arrBills.reduce((s,b)=>s+b.amount,0))+'</div>'):''}
+    ${pRows}
   </div>`:''}
 ${recent.length?`<div class="crd"><div class="stt">✅ Recent Payments</div>${rRows}</div>`:''}
 ${!S.bills.length?`<div class="crd"><div class="emp"><div class="emp-icon">🏢</div><p>Go to <strong>Bills</strong> tab → tap <strong>+ Generate</strong> to create monthly bills.</p></div></div>`:''}`;
@@ -1764,15 +1760,14 @@ document.addEventListener('click',function(e){
     const m=+(document.getElementById('gen-month')?.value||S.bf.month);
     const y=+(document.getElementById('gen-year')?.value||S.bf.year);
     const wa=document.getElementById('gen-wa')?.checked;
-    const existing=S.bills.filter(b=>b.month===m&&b.year===y);
-    const existingFlatIds=new Set(existing.map(b=>b.flatId));
-    const nf=S.flats.filter(f=>!existingFlatIds.has(f.id));
-    if(!nf.length){showToast('Bills already generated for all flats this month','err');return;}
+    const existingIds=new Set(S.bills.filter(b=>b.month===m&&b.year===y).map(b=>b.flatId));
+    const nf=S.flats.filter(f=>!existingIds.has(f.id));
+    if(!nf.length){showToast('Bills already exist for all flats this month','err');return;}
     if(!confirm('Generate bills for '+nf.length+' flat'+(nf.length>1?'s':'')+' for '+MO[m-1]+' '+y+'?')){return;}
     const nb=nf.map(f=>({id:uid(),flatId:f.id,month:m,year:y,amount:f.maintenance,status:'pending',receiptNo:null,paidDate:null,paymentMode:null,generatedDate:new Date().toLocaleDateString('en-IN')}));
     S.bills=[...S.bills,...nb];saveBills();S.bf.month=m;S.bf.year=y;
-    if(wa){const eligible=nb.filter(b=>S.flats.find(f=>f.id===b.flatId)?.mobile);if(eligible.length){S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[]}};showToast(nb.length+' bills generated');render();return;}}
-    showToast(nb.length+' bills generated');S.modal=null;render();return;
+    if(wa){const eligible=nb.filter(b=>flatOf(b).mobile);if(eligible.length){S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[]}};showToast(nb.length+' bills generated ✓');render();return;}}
+    showToast(nb.length+' bills generated ✓');S.modal=null;render();return;
   }
   if(a==='open-pay'){const b=S.bills.find(x=>x.id===id);if(b){S.modal={type:'payment',data:b};render();}return;}
   if(a==='do-pay'){
