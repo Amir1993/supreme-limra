@@ -781,7 +781,7 @@ function renderBills(){
   const rows=allBills.map(b=>{
     const f=flatOf(b);
     const paid=b.status==='paid';
-    return`<div class="li"><div class="fb" style="background:${paid?'var(--gr)':'var(--n)'};font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'Unknown')}</div><div class="isub">${paid?`Paid ${b.paidDate} · ${b.paymentMode}`:'Pending'}${b.receiptNo?' · #'+b.receiptNo:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:${paid?'var(--gr)':'var(--re)'}">${fmt(b.amount)}</span>${paid?`<button class="btn bge bsm" data-action="open-receipt" data-id="${b.id}">🧾</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-rcpt" data-id="${b.id}">💬</button>`:''}`:`<button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-bill" data-id="${b.id}">💬</button><button class="btn bsm" style="background:#fff8ea;color:#c9932a;border:1px solid #f0c96a" data-action="wa-remind" data-id="${b.id}">🔔</button>`:''}`}</div></div>`;
+    return`<div class="li"><div class="fb" style="background:${paid?'var(--gr)':'var(--n)'};font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'Unknown')}</div><div class="isub">${paid?`Paid ${b.paidDate} · ${b.paymentMode}`:'Pending'}${b.receiptNo?' · #'+b.receiptNo:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:${paid?'var(--gr)':'var(--re)'}">${fmt(b.amount)}</span>${paid?`<button class="btn bge bsm" data-action="open-receipt" data-id="${b.id}">🧾</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-rcpt" data-id="${b.id}">💬</button>`:''}<button class="btn bsm" style="background:#fff8ea;color:#b45309;border:1px solid #f0c96a;font-size:10px" data-action="undo-payment" data-id="${b.id}">↩️</button>`:`<button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-bill" data-id="${b.id}">💬</button><button class="btn bsm" style="background:#fff8ea;color:#c9932a;border:1px solid #f0c96a" data-action="wa-remind" data-id="${b.id}">🔔</button>`:''}`}</div></div>`;
   }).join('');
   const banner=pendBills.length&&(bf.status==='all'||bf.status==='pending')?`<div class="wa-banner"><p style="margin:0"><strong>💬 WhatsApp — ${pendBills.length} pending owner${pendBills.length>1?'s':''}</strong><br><span style="font-size:11px;opacity:.8">Send bill reminders in one go</span></p><button class="btn" style="background:#fff;color:#075e54;font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;flex-shrink:0" data-action="bulk-wa">Send All 💬</button></div>`:'';
   const isFirst = now.getDate()===1;
@@ -992,12 +992,21 @@ ${S._autoWA?`<div style="background:#e8faf0;border:1.5px solid #b2dfca;border-ra
   <div style="font-size:12px;color:#075e54"><strong>Send receipt via WhatsApp?</strong><br><span style="font-size:11px;opacity:.8">Owner will receive PDF receipt link</span></div>
   <button class="btn bwa bsm" data-action="wa-rcpt" data-id="${bill.id}" style="flex-shrink:0">Send Now 💬</button>
 </div>`:''}
+${S._autoWA?`<div style="background:#e8faf0;border:1.5px solid #b2dfca;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+  <div style="font-size:12px;color:#075e54"><strong>Send receipt via WhatsApp?</strong><br><span style="font-size:11px;opacity:.8">Owner will receive PDF receipt link</span></div>
+  <button class="btn bwa bsm" data-action="wa-rcpt" data-id="${bill.id}" style="flex-shrink:0">Send Now 💬</button>
+</div>`:''}
 <div style="display:flex;gap:8px;margin-top:14px">
   <button class="btn bo" style="flex:1" data-action="close-modal">Close</button>
   <button class="btn bpdf" style="flex:1;font-size:12px" data-action="print-pdf" data-id="${bill.id}">PDF / Print 🖨️</button>
   ${f.mobile?`<button class="btn bwa" id="wa-send-btn" style="flex:1.2;font-size:12px" data-action="wa-rcpt" data-id="${bill.id}">${S._pdfUploading?'⏳ Uploading...':S._pdfUrl?'WhatsApp + PDF 💬':'Send via WhatsApp 💬'}</button>`:''}
 </div>
-${f.mobile?`<div id="pdf-status-hint" style="margin-top:8px;background:#f0f8ff;border-radius:8px;padding:7px 10px;font-size:11px;color:#555;text-align:center">💬 WhatsApp opens directly to ${esc(f.ownerName)}'s chat</div>`:''}`;
+${f.mobile?`<div id="pdf-status-hint" style="margin-top:8px;background:#f0f8ff;border-radius:8px;padding:7px 10px;font-size:11px;color:#555;text-align:center">💬 WhatsApp opens directly to ${esc(f.ownerName)}'s chat</div>`:''}
+<div style="margin-top:10px;border-top:1px solid #f0ebe0;padding-top:10px">
+  <button class="btn bsm" style="width:100%;background:#fff8ea;color:#b45309;border:1.5px solid #f0c96a;font-size:12px;padding:9px" data-action="undo-payment" data-id="${bill.id}">
+    ↩️ Marked paid by mistake? Undo Payment
+  </button>
+</div>`;
 }
 
 function renderWAFlow(data){
@@ -1740,6 +1749,18 @@ document.addEventListener('click',function(e){
     if(!S.expenses)S.expenses=[];
     S.expenses.push({id:uid(),description:desc,amount:amt,date,category:cat,notes:note,addedDate:new Date().toISOString()});
     saveExpenses();showToast('Expense saved ✓');S.modal=null;render();return;
+  }
+  if(a==='undo-payment'){
+    const b=S.bills.find(x=>x.id===id);
+    if(!b||b.status!=='paid'){showToast('Bill not found or already pending','err');return;}
+    const f=flatOf(b);
+    if(!confirm('Undo payment for '+f.ownerName+' — Flat '+f.flatNo+'\n'+MO[b.month-1]+' '+b.year+' · ₹'+b.amount+'/-?\n\nThis will remove the receipt and mark it as pending again.')){return;}
+    const reverted={...b,status:'pending',amount:f.maintenance||b.amount,paidDate:null,paymentMode:null,receiptNo:null};
+    S.bills=S.bills.map(x=>x.id===id?reverted:x);
+    saveBills();
+    S.modal=null;S._autoWA=false;
+    showToast('Payment undone — marked as pending ✓','ok');
+    render();return;
   }
   if(a==='del-expense'){if(!confirm('Delete this expense?'))return;S.expenses=(S.expenses||[]).filter(e=>e.id!==id);saveExpenses();showToast('Expense deleted');render();return;}
   if(a==='gen-monthly-excel'||a==='open-monthly-excel'){openMonthlyExcelModal();return;}
