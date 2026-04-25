@@ -465,9 +465,11 @@ function buildReceiptPDF(bill, flat) {
   const itemM=MS[bill.month-1]+'-'+String(bill.year).slice(-2);
   const pdfExtras=flat?bill.extras||[]:[];
   const pdfBase=bill.maintenance_base||(pdfExtras.length?bill.amount-pdfExtras.reduce((s,e)=>s+e.amount,0):bill.amount);
+  const pdfDefaultLabels=['','Entrance Fees','Interest On Defaulted Dues','Contribution Towards Construction','Lease Rent','Municipal Taxes','Water Charges','Electricity Charges','Parking Charges','Lift Charges','Service Charges','Miscellaneous','Terrace Charge','',''];
   const pdfRows=[{sr:1,l:'Maintenance Charges',x:itemM,a:pdfBase},...pdfExtras.map((e,i)=>({sr:i+2,l:e.description,a:e.amount}))];
-  const blankLabels=['','Entrance Fees','Interest On Defaulted Dues','Contribution Towards Construction','Lease Rent','Municipal Taxes','Water Charges','Electricity Charges','Parking Charges','Lift Charges','Service Charges','Miscellaneous','Terrace Charge','',''];
-  for(let i=pdfRows.length;i<15;i++)pdfRows.push({sr:i+1,l:blankLabels[i]||''});
+  for(let i=pdfRows.length;i<15;i++){
+    pdfRows.push({sr:i+1,l:pdfExtras.length?'':(pdfDefaultLabels[i]||'')});
+  }
   pdfRows.slice(0,15).forEach((row,i)=>{
     if(i%2===0){doc.setFillColor(252,250,246);doc.rect(mx,y,rw,rowH,'F');}
     doc.setDrawColor(180,175,165);
@@ -1055,13 +1057,16 @@ function renderReceipt(bill){
   const f=flatOf(bill);
   const extras=bill.extras||[];
   const base=bill.maintenance_base||(extras.length?bill.amount-extras.reduce((s,e)=>s+e.amount,0):bill.amount);
-  // Build item rows: row 1 = base maintenance, then extras in order, then blank rows
+  // Default labels shown ONLY when no extras exist
+  const defaultLabels=['','Entrance Fees','Interest On Defaulted Dues','Contribution Towards Construction','Lease Rent','Municipal Taxes','Water Charges','Electricity Charges','Parking Charges','Lift Charges','Service Charges','Miscellaneous','Terrace Charge','',''];
   const itemList=[
     {sr:1,l:'Maintenance Charges',x:MS[bill.month-1]+'-'+String(bill.year).slice(-2),a:base},
     ...extras.map((e,i)=>({sr:i+2,l:e.description,a:e.amount})),
   ];
-  // Fill remaining slots up to 15
-  for(let i=itemList.length+1;i<=15;i++) itemList.push({sr:i,l:i===2&&!extras.length?'Entrance Fees':i===3?'Interest On Defaulted Dues':i===4?'Contribution Towards Construction':i===5?'Lease Rent':i===6?'Municipal Taxes':i===7?'Water Charges':i===8?'Electricity Charges':i===9?'Parking Charges':i===10?'Lift Charges':i===11?'Service Charges':i===12?'Miscellaneous':i===13?'Terrace Charge':'',a:undefined});
+  // Fill remaining blank rows — only show default labels if NO extras
+  for(let i=itemList.length;i<15;i++){
+    itemList.push({sr:i+1,l:extras.length?'':(defaultLabels[i]||''),a:undefined});
+  }
   const items=itemList.slice(0,15);
   const trs=items.map(i=>`<tr>
     <td class="sr">${i.sr}</td>
