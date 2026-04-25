@@ -833,7 +833,33 @@ function renderDashboard(){
     return`<div class="li"><div class="fb" style="font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${months>1?months+' months pending · since ':''} ${MO[b.month-1]} ${b.year}</div></div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--re)">${fmt(totalDue)}</span><button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button></div></div>`;
   }).join('');
   const rRows=recent.map(b=>{const f=flatOf(b);return`<div class="li" style="cursor:pointer" data-action="open-receipt" data-id="${b.id}"><div class="fb" style="background:var(--gr);font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'—')}</div><div class="isub">${MO[b.month-1]} ${b.year} · ${b.paidDate}</div></div><div style="text-align:right"><div style="font-family:var(--serif);font-weight:700;font-size:16px;color:var(--gr)">${fmt(b.amount)}</div><div style="font-size:10px;color:var(--mu)">Tap receipt</div></div></div>`;}).join('');
-  return`<div class="sg" style="margin-top:4px">
+  return`
+<!-- Current month progress card -->
+<div style="background:linear-gradient(135deg,#0f2040,#1a3260);border-radius:16px;padding:14px 16px;margin-bottom:12px;margin-top:4px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:1px;text-transform:uppercase">${MO[curM-1]} ${curY}</div>
+      <div style="font-family:var(--serif);font-size:26px;font-weight:700;color:#fff;margin-top:2px">${fmt(curCollected)}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:2px">collected this month</div>
+    </div>
+    <div style="text-align:right">
+      <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:7px 12px">
+        <div style="font-size:9px;color:rgba(255,255,255,.5)">Paid</div>
+        <div style="font-size:18px;font-weight:700;color:#5dff9a">${curPaidC}<span style="font-size:10px;color:rgba(255,255,255,.4)">/${curBills.length}</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:10px">
+    <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px">
+      <span style="color:rgba(255,255,255,.45)">${curPendC} flats pending · ${fmt(curPending)}</span>
+      <span style="color:${curPct>=75?'#5dff9a':curPct>=50?'#ffd082':'#ff8080'};font-weight:700">${curPct}% collected</span>
+    </div>
+    <div style="background:rgba(255,255,255,.12);border-radius:4px;height:6px">
+      <div style="background:linear-gradient(90deg,#c9932a,#e8b84b);height:6px;border-radius:4px;width:${curPct}%;transition:width .5s"></div>
+    </div>
+  </div>
+</div>
+<div class="sg" style="margin-top:0">
   <div class="sc" style="background:linear-gradient(135deg,#0f2040,#1a3260)"><div class="sl" style="color:rgba(255,255,255,.6)">Total Flats</div><div class="sv" style="color:#fff">${S.flats.length}</div></div>
   <div class="sc" style="background:linear-gradient(135deg,#c9932a,#b8821e)"><div class="sl" style="color:rgba(255,255,255,.7)">Collected</div><div class="sv" style="color:#fff;font-size:20px">${fmt(collected)}</div></div>
   <div class="sc"><div class="sl">Pending Dues</div><div class="sv" style="color:var(--re);font-size:20px">${fmt(pending)}</div></div>
@@ -875,7 +901,13 @@ function renderPart(id,fn){const el=document.getElementById(id);if(el)el.innerHT
 // ════════════════════════════════════════════════════
 function renderBills(){
   const bf=S.bf;
-  const allBills=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&(bf.status==='all'||b.status===bf.status));
+  const bfSearch=(S.bf.search||'').toLowerCase().trim();
+  const allBills=S.bills.filter(b=>{
+    if(b.month!==bf.month||b.year!==bf.year)return false;
+    if(bf.status!=='all'&&b.status!==bf.status)return false;
+    if(bfSearch){const f=flatOf(b);return f.flatNo.toLowerCase().includes(bfSearch)||f.ownerName.toLowerCase().includes(bfSearch);}
+    return true;
+  });
   const mp=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&b.status==='paid').reduce((s,b)=>s+b.amount,0);
   const md=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&b.status==='pending').reduce((s,b)=>s+b.amount,0);
   const pendBills=S.bills.filter(b=>b.month===bf.month&&b.year===bf.year&&b.status==='pending');
@@ -883,8 +915,8 @@ function renderBills(){
   const yrOpts=yrs.map(y=>`<option value="${y}" ${bf.year===y?'selected':''}>${y}</option>`).join('');
   const rows=allBills.map(b=>{
     const f=flatOf(b);
-    const paid=b.status==='paid';
-    return`<div class="li"><div class="fb" style="background:${paid?'var(--gr)':'var(--n)'};font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'Unknown')}</div><div class="isub">${paid?`Paid ${b.paidDate} · ${b.paymentMode}`:'Pending'}${b.receiptNo?' · #'+b.receiptNo:''}${b.extras&&b.extras.length?` · <span style="color:#c9932a;font-weight:600">${b.extras.length} extra charge${b.extras.length>1?'s':''}</span>`:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:${paid?'var(--gr)':'var(--re)'}">${fmt(b.amount)}</span>${paid?`<button class="btn bge bsm" data-action="open-receipt" data-id="${b.id}">🧾</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-rcpt" data-id="${b.id}">💬</button>`:''}<button class="btn bsm" style="background:#fff8ea;color:#b45309;border:1px solid #f0c96a;font-size:10px" data-action="undo-payment" data-id="${b.id}">↩️</button>`:`<button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button><button class="btn bsm" style="background:#f0f4ff;color:var(--n);border:1px solid #dde4ff" data-action="edit-bill-charges" data-id="${b.id}" title="Add/edit charges">✏️</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-bill" data-id="${b.id}">💬</button><button class="btn bsm" style="background:#fff8ea;color:#c9932a;border:1px solid #f0c96a" data-action="wa-remind" data-id="${b.id}">🔔</button>`:''}`}</div></div>`;
+    const paid=b.status==='paid'||b.status==='partial';const isPartial=b.status==='partial';
+    return`<div class="li"><div class="fb" style="background:${b.status==='partial'?'#c9932a':paid?'var(--gr)':'var(--n)'};font-size:11px">${esc(f.flatNo||'?')}</div><div class="ii"><div class="iname">${esc(f.ownerName||'Unknown')}</div><div class="isub">${b.status==='partial'?`Partial ₹${(b.amountPaid||b.amount).toLocaleString('en-IN')} · Balance ₹${(b.balance||0).toLocaleString('en-IN')} · ${b.paidDate}`:paid?`Paid ${b.paidDate} · ${b.paymentMode}`:'Pending'}${b.receiptNo?' · #'+b.receiptNo:''}${b.payNotes?' · '+esc(b.payNotes):''}${b.balance>0?` <span style="color:var(--re);font-weight:600">⚠ Balance ₹${b.balance.toLocaleString('en-IN')} due</span>`:''}${b.extras&&b.extras.length?` · <span style="color:#c9932a;font-weight:600">${b.extras.length} extra charge${b.extras.length>1?'s':''}</span>`:''}</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:var(--serif);font-weight:700;font-size:15px;color:${paid?'var(--gr)':'var(--re)'}">${fmt(b.amount)}</span>${paid?`<button class="btn bge bsm" data-action="open-receipt" data-id="${b.id}">🧾</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-rcpt" data-id="${b.id}">💬</button>`:''}<button class="btn bsm" style="background:#fff8ea;color:#b45309;border:1px solid #f0c96a;font-size:10px" data-action="undo-payment" data-id="${b.id}">↩️</button>`:`<button class="btn bn bsm" data-action="open-pay" data-id="${b.id}">Pay</button><button class="btn bsm" style="background:#f0f4ff;color:var(--n);border:1px solid #dde4ff" data-action="edit-bill-charges" data-id="${b.id}" title="Add/edit charges">✏️</button>${f.mobile?`<button class="btn bwa bsm" data-action="wa-bill" data-id="${b.id}">💬</button><button class="btn bsm" style="background:#fff8ea;color:#c9932a;border:1px solid #f0c96a" data-action="wa-remind" data-id="${b.id}">🔔</button>`:''}`}</div></div>`;
   }).join('');
   const banner=pendBills.length&&(bf.status==='all'||bf.status==='pending')?`<div class="wa-banner"><p style="margin:0"><strong>💬 WhatsApp — ${pendBills.length} pending owner${pendBills.length>1?'s':''}</strong><br><span style="font-size:11px;opacity:.8">Send bill reminders in one go</span></p><button class="btn" style="background:#fff;color:#075e54;font-weight:700;font-size:12px;padding:8px 12px;border-radius:10px;flex-shrink:0" data-action="bulk-wa">Send All 💬</button></div>`:'';
   const isFirst = now.getDate()===1;
@@ -907,6 +939,11 @@ function renderBills(){
     <select class="inp" style="flex:2;padding:8px 32px 8px 10px;font-size:14px" id="bf-month" onchange="S.bf.month=+this.value;render()">${MO.map((m,i)=>`<option value="${i+1}" ${bf.month===i+1?'selected':''}>${m}</option>`).join('')}</select>
     <select class="inp" style="flex:1;padding:8px 32px 8px 10px;font-size:14px" id="bf-year" onchange="S.bf.year=+this.value;render()">${yrOpts}</select>
     <select class="inp" style="flex:1.2;padding:8px 32px 8px 10px;font-size:14px" id="bf-status" onchange="S.bf.status=this.value;render()"><option value="all" ${bf.status==='all'?'selected':''}>All</option><option value="pending" ${bf.status==='pending'?'selected':''}>Pending</option><option value="paid" ${bf.status==='paid'?'selected':''}>Paid</option></select>
+  </div>
+  <div style="margin-top:8px">
+    <input class="inp" style="padding:7px 12px;font-size:14px" placeholder="🔍 Search owner name or flat..." 
+      value="${esc(S.bf.search||'')}" 
+      oninput="S.bf.search=this.value;render()" autocomplete="off">
   </div>
   ${(mp||md)?`<div style="margin-top:10px">
     <div style="display:flex;gap:8px;margin-bottom:6px">
@@ -996,6 +1033,7 @@ function renderModal(){
   else if(m.type==='monthlyExcel') body=renderMonthlyExcelModal();
   else if(m.type==='adminAuth') body=renderAdminAuth(m.data?.next||'');
   else if(m.type==='billCharges') body=renderBillCharges(m.data);
+  else if(m.type==='payAllDues') body=renderPayAllDues(m.data);
   else if(m.type==='changeAdminPin') body=renderChangeAdminPin();
   return`<div class="mbox" id="modal-box"><div class="mdrag"></div>${body}</div>`;
 }
@@ -1049,6 +1087,16 @@ function renderPayment(bill){
 <div style="display:flex;gap:10px">
 <div class="ig" style="flex:1.2"><label class="il">Payment Date *</label><input class="inp" id="pay-date" type="date" value="${today}"></div>
 <div class="ig" style="flex:1"><label class="il">Mode *</label><select class="inp" id="pay-mode"><option>Cash</option><option>UPI / GPay</option><option>NEFT / IMPS</option><option>Cheque</option></select></div>
+</div>
+<div class="ig"><label class="il">Notes (optional)</label><input class="inp" id="pay-notes" placeholder="e.g. Paid by son, Cheque no. 123456, Paid at door"></div>
+<div style="background:#f0f4ff;border:1.5px solid #dde4ff;border-radius:10px;padding:10px 14px;margin-bottom:14px">
+  <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+    <input type="checkbox" id="pay-partial" style="width:16px;height:16px;accent-color:var(--n)">
+    <div>
+      <div style="font-weight:600;font-size:13px;color:var(--n)">Partial Payment</div>
+      <div style="font-size:11px;color:var(--mu)">Owner paid less than full amount — bill stays pending for balance</div>
+    </div>
+  </label>
 </div>
 <div style="display:flex;gap:10px;margin-top:4px"><button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button><button class="btn bn" style="flex:1.5" data-action="do-pay" data-id="${bill.id}">Confirm & Get Receipt</button></div>`;
 }
@@ -1116,6 +1164,8 @@ function renderReceipt(bill){
     <span class="rp-wv">${numToWords(bill.amount)}</span>
     ${bill.paymentMode?`<span class="rp-mode">${bill.paymentMode}</span>`:''}
   </div>
+  ${bill.isPartial?`<div style="padding:5px 11px;font-size:10px;background:#fff3e0;border-top:1px solid #f0c96a;color:#7a5a10"><strong>Partial Payment</strong> — Paid: ₹${(bill.amountPaid||bill.amount).toLocaleString('en-IN')} · Balance remaining: ₹${(bill.balance||0).toLocaleString('en-IN')}</div>`:''}
+  ${bill.payNotes?`<div style="padding:5px 11px 6px;font-size:10px;color:#888;background:#faf8f4;border-top:1px solid #e0d9cc"><em>Note: ${esc(bill.payNotes)}</em></div>`:''}
   <div class="rp-footer">
     <div class="rp-footer-main">✦ Computer Generated Receipt — No Signature Required ✦</div>
     <div class="rp-footer-sub">Supreme Limra Society Management · ${new Date().getFullYear()}</div>
@@ -1385,7 +1435,9 @@ function renderFlatHistory(flat){
       ${b.status==='pending'&&flat.mobile?`<button class="btn bsm" style="background:#e8faf0;color:#075e54;border:1px solid #b2dfca;font-size:10px;padding:3px 7px;margin-top:3px" data-action="wa-remind" data-id="${b.id}">🔔</button>`:''}
     </div>
   </div>`).join('');
+  const ownerHistory=flat.ownerHistory||[];
   return`<div class="mttl" style="font-size:18px">📋 Payment History</div>
+${ownerHistory.length?`<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;margin-bottom:4px">Previous Owners</div>${ownerHistory.map(o=>`<div style="font-size:11px;color:var(--mu);padding:3px 0">📋 ${esc(o.name)} · ${esc(o.to||'')}</div>`).join('')}</div>`:''}
 <div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px">
   <div style="font-weight:700;font-size:15px;color:var(--n)">${esc(flat.ownerName)}</div>
   <div style="font-size:12px;color:var(--mu);margin-top:2px">Flat ${esc(flat.flatNo)} · ${flat.floor} Floor · ₹${flat.maintenance}/mo${flat.notes?'<br>📝 '+esc(flat.notes):''}</div>
@@ -1401,7 +1453,15 @@ function renderFlatHistory(flat){
   </div>
 </div>
 ${rows||`<div class="emp"><div class="emp-icon">📄</div><p>No bills yet for this flat.</p></div>`}
-<button class="btn bo" style="width:100%;margin-top:12px" data-action="close-modal">Close</button>`;
+${totalPending>0?`<div style="background:var(--n);border-radius:12px;padding:12px 14px;margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+  <div><div style="color:#fff;font-weight:700;font-size:13px">Total Outstanding</div><div style="color:rgba(255,255,255,.6);font-size:11px">${allBills.filter(b=>b.status==='pending'||b.status==='partial').length} bill${allBills.filter(b=>b.status==='pending'||b.status==='partial').length>1?'s':''} pending</div></div>
+  <div style="text-align:right"><div style="font-family:var(--serif);font-size:20px;font-weight:700;color:#c9932a">₹${totalPending.toLocaleString('en-IN')}</div>
+  <button class="btn bsm" style="background:#c9932a;color:#fff;font-size:11px;margin-top:4px" data-action="pay-all-dues" data-flatid="${flat.id}">Pay All ₹${totalPending.toLocaleString('en-IN')}</button></div>
+</div>`:''}
+<div style="display:flex;gap:8px;margin-top:12px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Close</button>
+  <button class="btn bsm" style="flex:1;background:#f0f4ff;color:var(--n);border:1px solid #dde4ff;font-size:12px" data-action="flat-year-stmt" data-flatid="${flat.id}">📄 Year Statement</button>
+</div>`;
 }
 
 function generateDefaulterPDF(){
@@ -1831,6 +1891,132 @@ function renderBillCharges(bill){
 </div>`;
 }
 
+function renderPayAllDues(data){
+  const{flat,bills,total}=data;
+  const today=new Date().toISOString().slice(0,10);
+  const billSummary=bills.map(b=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f0ebe0"><span>${MO[b.month-1]} ${b.year}</span><span style="font-weight:600;color:var(--re)">₹${(b.status==='partial'?b.balance||b.amount:b.amount).toLocaleString('en-IN')}</span></div>`).join('');
+  return`<div class="mttl">💰 Pay All Outstanding Dues</div>
+<div style="background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:12px">
+  <div style="font-weight:700;color:var(--n);font-size:14px">${esc(flat.ownerName)} — Flat ${esc(flat.flatNo)}</div>
+</div>
+<div style="margin-bottom:12px">${billSummary}</div>
+<div style="display:flex;justify-content:space-between;align-items:center;background:var(--n);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+  <span style="color:rgba(255,255,255,.7);font-size:13px">Total Due</span>
+  <span style="font-family:var(--serif);font-size:20px;font-weight:700;color:#c9932a">₹${total.toLocaleString('en-IN')}</span>
+</div>
+<div class="ig"><label class="il">Amount Received (₹)</label><input class="inp" id="pa-amt" type="number" value="${total}" inputmode="numeric"></div>
+<div style="display:flex;gap:10px">
+  <div class="ig" style="flex:1.2"><label class="il">Date</label><input class="inp" id="pa-date" type="date" value="${today}"></div>
+  <div class="ig" style="flex:1"><label class="il">Mode</label><select class="inp" id="pa-mode"><option>Cash</option><option>UPI / GPay</option><option>NEFT / IMPS</option><option>Cheque</option></select></div>
+</div>
+<div class="ig"><label class="il">Notes (optional)</label><input class="inp" id="pa-notes" placeholder="e.g. Settled all dues"></div>
+<div style="display:flex;gap:10px;margin-top:4px">
+  <button class="btn bo" style="flex:1" data-action="close-modal">Cancel</button>
+  <button class="btn bn" style="flex:1.5" data-action="do-pay-all" data-flatid="${flat.id}">Confirm & Get Receipts</button>
+</div>`;
+}
+
+function generateFlatYearStatement(flat,bills,year){
+  if(!window.jspdf)return null;
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  const W=210,mx=15,rw=180;let y=15;
+
+  // Header
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,28,'F');
+  doc.setFillColor(201,147,42);doc.rect(mx,y+28,rw,1.5,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(255,255,255);
+  doc.text('SUPREME LIMRA SOCIETY',W/2,y+10,{align:'center'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(201,147,42);
+  doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+18,{align:'center'});
+  doc.setFontSize(8);doc.setTextColor(180,160,100);
+  doc.text('ANNUAL MAINTENANCE STATEMENT — '+year,W/2,y+25,{align:'center'});
+  y+=34;
+
+  // Flat info box
+  doc.setFillColor(242,237,227);doc.rect(mx,y,rw,18,'F');
+  doc.setDrawColor(201,147,42);doc.setLineWidth(0.5);doc.rect(mx,y,rw,18);
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(15,32,64);
+  doc.text('Flat No. '+flat.flatNo+' — '+flat.ownerName,mx+6,y+8);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,80,80);
+  doc.text(flat.floor+' Floor   |   Monthly: Rs.'+flat.maintenance+'/-   |   '+(flat.maintenance===2000?'2BHK':'1BHK'),mx+6,y+14);
+  y+=24;
+
+  // Table header
+  const colW=[30,80,30,35,25];
+  ['Month','Status','Paid (₹)','Balance (₹)','Receipt'].forEach((h2,i)=>{
+    const cx=mx+colW.slice(0,i).reduce((s,v)=>s+v,0);
+    doc.setFillColor(15,32,64);doc.rect(cx,y,colW[i],9,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
+    doc.text(h2,cx+colW[i]/2,y+6.5,{align:'center'});
+  });
+  y+=9;
+
+  let totalPaid=0,totalPending=0,totalBalance=0;
+  MO.forEach((mon,mi)=>{
+    const b=bills.find(x=>x.flatId===flat.id&&x.month===mi+1&&x.year===year);
+    const rowH=9;
+    if(mi%2===0){doc.setFillColor(252,250,246);doc.rect(mx,y,rw,rowH,'F');}
+    let cx=mx;
+    colW.forEach(w=>{doc.setDrawColor(220,215,205);doc.setLineWidth(0.2);doc.rect(cx,y,w,rowH);cx+=w;});
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(30,30,30);
+    doc.text(mon.slice(0,3)+' '+year,mx+colW[0]/2,y+6,{align:'center'});
+    if(!b){
+      doc.setTextColor(180,180,180);doc.text('—',mx+colW[0]+colW[1]/2,y+6,{align:'center'});
+    } else if(b.status==='paid'){
+      totalPaid+=b.amountPaid||b.amount;
+      doc.setTextColor(26,127,55);doc.setFont('helvetica','bold');
+      doc.text('PAID',mx+colW[0]+colW[1]/2,y+6,{align:'center'});
+      doc.setFont('helvetica','normal');
+      doc.text(String(b.amountPaid||b.amount),mx+colW[0]+colW[1]+colW[2]/2,y+6,{align:'center'});
+      doc.setTextColor(160,160,160);doc.text('—',mx+colW[0]+colW[1]+colW[2]+colW[3]/2,y+6,{align:'center'});
+      doc.setTextColor(80,80,80);doc.text('#'+(b.receiptNo||''),mx+colW[0]+colW[1]+colW[2]+colW[3]+colW[4]/2,y+6,{align:'center'});
+    } else if(b.status==='partial'){
+      totalPaid+=b.amountPaid||0;totalBalance+=b.balance||0;
+      doc.setFillColor(255,248,235);doc.rect(mx,y,rw,rowH,'F');
+      colW.forEach((w,ci)=>{const cx2=mx+colW.slice(0,ci).reduce((s,v)=>s+v,0);doc.setDrawColor(220,215,205);doc.rect(cx2,y,w,rowH);});
+      doc.setTextColor(201,147,42);doc.setFont('helvetica','bold');
+      doc.text('PARTIAL',mx+colW[0]+colW[1]/2,y+6,{align:'center'});
+      doc.setFont('helvetica','normal');
+      doc.text(String(b.amountPaid||0),mx+colW[0]+colW[1]+colW[2]/2,y+6,{align:'center'});
+      doc.setTextColor(192,57,43);
+      doc.text(String(b.balance||0),mx+colW[0]+colW[1]+colW[2]+colW[3]/2,y+6,{align:'center'});
+      doc.setTextColor(80,80,80);doc.text('#'+(b.receiptNo||''),mx+colW[0]+colW[1]+colW[2]+colW[3]+colW[4]/2,y+6,{align:'center'});
+    } else {
+      totalPending+=b.amount;
+      doc.setFillColor(255,245,245);doc.rect(mx,y,rw,rowH,'F');
+      colW.forEach((w,ci)=>{const cx2=mx+colW.slice(0,ci).reduce((s,v)=>s+v,0);doc.setDrawColor(220,215,205);doc.rect(cx2,y,w,rowH);});
+      doc.setTextColor(192,57,43);doc.setFont('helvetica','bold');
+      doc.text('PENDING',mx+colW[0]+colW[1]/2,y+6,{align:'center'});
+      doc.setFont('helvetica','normal');doc.setTextColor(160,160,160);
+      doc.text('—',mx+colW[0]+colW[1]+colW[2]/2,y+6,{align:'center'});
+      doc.text(String(b.amount),mx+colW[0]+colW[1]+colW[2]+colW[3]/2,y+6,{align:'center'});
+      doc.text('—',mx+colW[0]+colW[1]+colW[2]+colW[3]+colW[4]/2,y+6,{align:'center'});
+    }
+    y+=rowH;
+  });
+
+  // Summary
+  y+=3;
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,12,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(255,255,255);
+  doc.text('Total Paid: Rs.'+totalPaid+'/-',mx+6,y+8);
+  if(totalPending>0||totalBalance>0){
+    doc.setTextColor(255,150,80);
+    doc.text('Outstanding: Rs.'+(totalPending+totalBalance)+'/-',W/2,y+8,{align:'center'});
+  } else {
+    doc.setTextColor(100,255,150);doc.text('All dues cleared ✓',W/2,y+8,{align:'center'});
+  }
+  doc.setTextColor(201,147,42);doc.text('Year: '+year,mx+rw-6,y+8,{align:'right'});
+  y+=18;
+
+  // Footer
+  doc.setFillColor(201,147,42);doc.rect(mx,y,rw,0.6,'F');y+=5;
+  doc.setFont('helvetica','italic');doc.setFontSize(8);doc.setTextColor(120,100,60);
+  doc.text('Computer Generated Statement — Supreme Limra Society — '+year,W/2,y,{align:'center'});
+  return doc;
+}
+
 function render(){
   document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
 }
@@ -1917,7 +2103,20 @@ document.addEventListener('click',function(e){
     if(!name){alert('Owner name required');return;}
     const notes=document.getElementById('ff-notes')?.value.trim();
     const data={flatNo:no,ownerName:name,mobile:mob,floor,maintenance:maint,notes};
-    if(id){S.flats=S.flats.map(f=>f.id===id?{...data,id}:f);showToast('Flat updated ✓');}
+    if(id){
+      const oldFlat=S.flats.find(f=>f.id===id);
+      // If owner name changed, save transfer history
+      if(oldFlat&&oldFlat.ownerName!==name){
+        const history=oldFlat.ownerHistory||[];
+        history.push({name:oldFlat.ownerName,mobile:oldFlat.mobile||'',from:oldFlat.ownerSince||oldFlat.id,to:new Date().toLocaleDateString('en-IN')});
+        data.ownerHistory=history;
+        data.ownerSince=new Date().toLocaleDateString('en-IN');
+      } else if(oldFlat){
+        data.ownerHistory=oldFlat.ownerHistory||[];
+        data.ownerSince=oldFlat.ownerSince||'';
+      }
+      S.flats=S.flats.map(f=>f.id===id?{...data,id}:f);showToast('Flat updated ✓');
+    }
     else{S.flats.push({...data,id:uid()});showToast('Flat added ✓');}
     saveFlats();S.modal=null;render();return;
   }
@@ -1942,6 +2141,68 @@ document.addEventListener('click',function(e){
     S.bills=[...S.bills,...nb];saveBills();S.bf.month=m;S.bf.year=y;
     if(wa){const eligible=nb.filter(b=>flatOf(b).mobile);if(eligible.length){S.modal={type:'waFlow',data:{bills:eligible,step:'send',idx:0,done:[]}};showToast(nb.length+' bills generated ✓');render();return;}}
     showToast(nb.length+' bills generated ✓');S.modal=null;render();return;
+  }
+  if(a==='flat-year-stmt'){
+    const flatId=el.dataset.flatid;
+    const flat=S.flats.find(f=>f.id===flatId);
+    if(!flat)return;
+    const yr=now.getFullYear();
+    ensureJsPDF().then(ok=>{
+      if(!ok){showToast('PDF library not loaded','err');return;}
+      const doc=generateFlatYearStatement(flat,S.bills,yr);
+      if(doc){doc.save('Statement_'+yr+'_Flat'+flat.flatNo.replace('/','_')+'.pdf');showToast('Statement downloaded ✓');}
+    });
+    return;
+  }
+  if(a==='do-pay-all'){
+    const flatId=el.dataset.flatid;
+    const amt=+(document.getElementById('pa-amt')?.value||0);
+    const date=document.getElementById('pa-date')?.value;
+    const mode=document.getElementById('pa-mode')?.value||'Cash';
+    const notes=document.getElementById('pa-notes')?.value.trim()||'';
+    if(!amt){alert('Enter amount');return;}
+    const pendBills=S.bills.filter(b=>b.flatId===flatId&&(b.status==='pending'||b.status==='partial'));
+    let remaining=amt;
+    const maxRcpt=S.bills.reduce((mx,b)=>Math.max(mx,+(b.receiptNo||0)),0);
+    let rcptNum=maxRcpt+1;
+    const updatedBills=[];
+    for(const b of pendBills){
+      const due=b.status==='partial'?b.balance||b.amount:b.amount;
+      if(remaining<=0){break;}
+      const paying=Math.min(remaining,due);
+      const newBalance=due-paying;
+      remaining-=paying;
+      updatedBills.push({...b,
+        status:newBalance>0?'partial':'paid',
+        amountPaid:(b.amountPaid||0)+paying,
+        balance:newBalance,
+        paidDate:new Date(date).toLocaleDateString('en-IN'),
+        paymentMode:mode,
+        receiptNo:String(rcptNum).padStart(4,'0'),
+        payNotes:notes,
+        isPartial:newBalance>0
+      });
+      rcptNum++;
+    }
+    S.bills=S.bills.map(b=>{const ub=updatedBills.find(u=>u.id===b.id);return ub||b;});
+    saveBills();
+    const paidCount=updatedBills.filter(b=>b.status==='paid').length;
+    showToast(paidCount+' bill'+(paidCount>1?'s':'')+' marked paid ✓');
+    S.modal=null;render();return;
+  }
+  if(a==='pay-all-dues'){
+    const flatId=el.dataset.flatid;
+    const pendingBills=S.bills.filter(b=>b.flatId===flatId&&(b.status==='pending'||b.status==='partial'));
+    if(!pendingBills.length)return;
+    const flat2=S.flats.find(f=>f.id===flatId);
+    const totalDue=pendingBills.reduce((s,b)=>s+(b.status==='partial'?b.balance||b.amount:b.amount),0);
+    // Open a single consolidated payment modal
+    S.modal={type:'payAllDues',data:{flatId,flat:flat2,bills:pendingBills,total:totalDue}};render();return;
+  }
+  if(a==='pay-balance'){
+    const b=S.bills.find(x=>x.id===id);
+    if(b){S.modal={type:'payment',data:{...b,amount:b.balance||0,_isBalance:true}};render();}
+    return;
   }
   if(a==='edit-bill-charges'){
     const b=S.bills.find(x=>x.id===id);
@@ -2013,7 +2274,19 @@ document.addEventListener('click',function(e){
     // Safe receipt number — use max existing + 1, padded
     const maxRcpt=S.bills.reduce((mx,b)=>Math.max(mx,+(b.receiptNo||0)),0);
     const newRcptNo=String(maxRcpt+1).padStart(4,'0');
-    const updated={...b,status:'paid',amount:amt,paidDate:new Date(date).toLocaleDateString('en-IN'),paymentMode:mode,receiptNo:newRcptNo};
+    const payNotes=document.getElementById('pay-notes')?.value.trim()||'';
+    const isPartial=document.getElementById('pay-partial')?.checked||false;
+    const fullAmt=b.amount; // original bill amount
+    const balance=isPartial?(fullAmt-amt):0;
+    const updated={...b,
+      status:isPartial?'partial':'paid',
+      amountPaid:amt,
+      amount:isPartial?fullAmt:amt, // keep original for balance tracking
+      balance:isPartial?balance:0,
+      paidDate:new Date(date).toLocaleDateString('en-IN'),
+      paymentMode:mode,receiptNo:newRcptNo,payNotes,
+      isPartial
+    };
     S.bills=S.bills.map(x=>x.id===id?updated:x);
     // Set modal FIRST, render BEFORE saving to Firebase
     // This prevents Firebase onSnapshot from firing mid-render and clearing modal
@@ -2189,6 +2462,15 @@ window.addEventListener('DOMContentLoaded',async function(){
     }
     render();
     if(new Date().getDate()===25&&!sessionStorage.getItem('excel25shown')&&DB.isAuth()){sessionStorage.setItem('excel25shown','1');setTimeout(()=>{S.modal={type:'monthlyExcel'};render();},1500);}
+    // Auto-backup on 1st of month (saves to localStorage)
+    if(new Date().getDate()===1&&DB.isAuth()){
+      const bKey='slimra_bk_'+new Date().getFullYear()+'-'+(new Date().getMonth()+1);
+      if(!localStorage.getItem(bKey)){
+        localStorage.setItem(bKey,JSON.stringify({flats:S.flats,bills:S.bills,expenses:S.expenses||[],ts:new Date().toISOString()}));
+        localStorage.setItem('slimra_last_backup',new Date().toLocaleDateString('en-IN'));
+        console.log('Auto-backup saved for',bKey);
+      }
+    }
   },300);
   // Register as PWA if supported
   if('serviceWorker' in navigator){
