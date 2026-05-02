@@ -1053,16 +1053,23 @@ function renderFlatForm(flat){
 }
 
 function renderGenBills(){
-  const curM=now.getMonth()+1, curY=now.getFullYear();
-  S.bf.month=curM; S.bf.year=curY; // always force current month
-  const existing=S.bills.filter(b=>b.month===curM&&b.year===curY);
+  const existing=S.bills.filter(b=>b.month===S.bf.month&&b.year===S.bf.year);
   const nf=S.flats.filter(f=>!existing.find(b=>b.flatId===f.id));
+  const yrs=[...new Set([...S.bills.map(b=>b.year),now.getFullYear(),now.getFullYear()+1])].sort((a,b)=>b-a);
   return`<div class="mttl">Generate Monthly Bills</div>
-<div style="background:#f5f0e8;border-radius:12px;padding:12px 14px;margin-bottom:14px">
-  <div style="font-weight:700;font-size:15px;color:var(--n)">${MO[curM-1]} ${curY}</div>
-  <div style="font-size:11px;color:var(--mu);margin-top:2px">Bills can only be generated for the current month</div>
+<div style="display:flex;gap:10px">
+  <div class="ig" style="flex:2"><label class="il">Month</label>
+    <select class="inp" id="gen-month" onchange="S.bf.month=+this.value;S.modal={type:'genBills'};render()">
+      ${MO.map((m,i)=>`<option value="${i+1}" ${S.bf.month===i+1?'selected':''}>${m}</option>`).join('')}
+    </select>
+  </div>
+  <div class="ig" style="flex:1"><label class="il">Year</label>
+    <select class="inp" id="gen-year" onchange="S.bf.year=+this.value;S.modal={type:'genBills'};render()">
+      ${yrs.map(y=>`<option value="${y}" ${S.bf.year===y?'selected':''}>${y}</option>`).join('')}
+    </select>
+  </div>
 </div>
-<div class="ib" id="gen-info">${nf.length?`<strong>${nf.length} flat${nf.length>1?'s':''}</strong> will get bills for ${MO[curM-1]} ${curY}.${existing.length?` <span style="color:#c05000">(${existing.length} already generated.)</span>`:''}`:'<span style="color:var(--re)">⚠ Bills already generated for all flats this month.</span>'}</div>
+<div class="ib" id="gen-info">${nf.length?`<strong>${nf.length} flat${nf.length>1?'s':''}</strong> will get bills for ${MO[S.bf.month-1]} ${S.bf.year}.${existing.length?` <span style="color:#c05000">(${existing.length} already generated.)</span>`:''}`:'<span style="color:var(--re)">⚠ Bills already generated for all flats this month.</span>'}</div>
 <div style="background:#e8faf0;border:1.5px solid #b2dfca;border-radius:12px;padding:12px 14px;margin-bottom:16px">
   <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
     <input type="checkbox" id="gen-wa" checked style="width:18px;height:18px;accent-color:#25d366">
@@ -2126,12 +2133,6 @@ document.addEventListener('click',function(e){
   if(a==='do-gen'){
     const m=+(document.getElementById('gen-month')?.value||S.bf.month);
     const y=+(document.getElementById('gen-year')?.value||S.bf.year);
-    const todayM=now.getMonth()+1, todayY=now.getFullYear();
-    // LOCK: only current month allowed
-    if(m!==todayM||y!==todayY){
-      alert('⚠️ Bills can only be generated for the current month ('+MO[todayM-1]+' '+todayY+').\n\nPrevious or future month bills are not allowed.');
-      return;
-    }
     const wa=document.getElementById('gen-wa')?.checked;
     const existingIds=new Set(S.bills.filter(b=>b.month===m&&b.year===y).map(b=>b.flatId));
     const nf=S.flats.filter(f=>!existingIds.has(f.id));
