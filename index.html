@@ -219,6 +219,13 @@ function initFirebase(){
     _fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
     // Auto sign-in so Firestore auth rules pass
     _fbAuth.signInAnonymously().catch(()=>{});
+    _fbAuth.onAuthStateChanged(user=>{
+      updateSyncBadge();
+      if(user&&DB.isAuth()){
+        // Re-attach listeners when auth state changes
+        DB.subscribeChanges();
+      }
+    });
   }catch(e){console.log("FB:",e);}
 }
 
@@ -254,13 +261,22 @@ const DB={
     }
     return{flats:this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:this.lget("slimra_bills_v2")||[],expenses:this.lget("slimra_expenses_v1")||[],source:"local"};
   },
-  saveFlats(f){this.lset("slimra_flats_v3",f);if(FB_READY&&_fbFS)_fbFS.collection("society").doc("flats").set({list:f,updated:new Date().toISOString()}).catch(()=>{});},
-  saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS)_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
-  saveExpenses(e){this.lset("slimra_expenses_v1",e);if(FB_READY&&_fbFS)_fbFS.collection("society").doc("expenses").set({list:e,updated:new Date().toISOString()}).catch(()=>{});},
+  saveFlats(f){this.lset("slimra_flats_v3",f);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("flats").set({list:f,updated:new Date().toISOString()}).catch(()=>{});},
+  saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
+  saveExpenses(e){this.lset("slimra_expenses_v1",e);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("expenses").set({list:e,updated:new Date().toISOString()}).catch(()=>{});},
   subscribeChanges(onF,onB){
     if(!FB_READY||!_fbFS)return;
-    _fbFS.collection("society").doc("flats").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);if(!S.modal)onF(d);}});
-    _fbFS.collection("society").doc("bills").onSnapshot(s=>{if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);if(!S.modal)onB(d);else S.bills=d;}});
+    // Real-time listeners — always update data, only render when no modal open
+    _fbFS.collection("society").doc("flats").onSnapshot(s=>{
+      if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);S.flats=d;if(!S.modal)render();}
+    });
+    _fbFS.collection("society").doc("bills").onSnapshot(s=>{
+      if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);S.bills=d;if(!S.modal)render();}
+    });
+    _fbFS.collection("society").doc("expenses").onSnapshot(s=>{
+      if(s.exists){const d=s.data().list;this.lset("slimra_expenses_v1",d);S.expenses=d;if(!S.modal)render();}
+    });
+    console.log("Real-time listeners attached ✓");
   }
 };
 const LS=DB;
@@ -364,14 +380,43 @@ const S={
 
 async function loadData(){
   initFirebase();
-  if(FB_READY&&_fbAuth){let w=0;while(!_fbAuth.currentUser&&w<4000){await new Promise(r=>setTimeout(r,300));w+=300;}}
+  // Wait for Firebase anonymous auth (up to 5 seconds)
+  if(FB_READY&&_fbAuth){
+    let w=0;
+    while(!_fbAuth.currentUser&&w<5000){
+      await new Promise(r=>setTimeout(r,300));w+=300;
+    }
+  }
   const{flats,bills,expenses,source}=await DB.load();
   S.flats=flats||JSON.parse(JSON.stringify(INIT_FLATS));
   S.bills=bills||[];S.expenses=expenses||[];
   if(source==="firebase"&&FB_READY){
-    if(!flats||!flats.length){const lf=DB.lget("slimra_flats_v3");if(lf&&lf.length){DB.saveFlats(lf);S.flats=lf;}}
-    DB.subscribeChanges(f=>{if(f&&f.length){S.flats=f;}render();},b=>{S.bills=b||[];render();});
+    if(!flats||!flats.length){
+      const lf=DB.lget("slimra_flats_v3");
+      if(lf&&lf.length){DB.saveFlats(lf);S.flats=lf;}
+    }
+    // Attach real-time listeners for live sync between devices
+    DB.subscribeChanges(()=>{},()=>{});
+    // Polling fallback — refresh from Firebase every 60s in case listener missed something
+    if(!window._syncPoll){
+      window._syncPoll=setInterval(async()=>{
+        if(!DB.isAuth()||!FB_READY||!_fbFS||!_fbAuth?.currentUser)return;
+        try{
+          const[fd,bd]=await Promise.all([
+            _fbFS.collection('society').doc('flats').get(),
+            _fbFS.collection('society').doc('bills').get()
+          ]);
+          let changed=false;
+          if(fd.exists){const d=fd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.flats)){S.flats=d;DB.lset('slimra_flats_v3',d);changed=true;}}
+          if(bd.exists){const d=bd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.bills)){S.bills=d;DB.lset('slimra_bills_v2',d);changed=true;}}
+          if(changed&&!S.modal)render();
+        }catch(e){}
+      },60000);
+    }
+  } else {
+    console.warn('Firebase unavailable — using local data');
   }
+  console.log('Loaded:',S.flats.length,'flats',S.bills.length,'bills from',source);
 }
 function saveFlats(){DB.saveFlats(S.flats);}
 function saveBills(){DB.saveBills(S.bills);}
@@ -779,7 +824,7 @@ function renderApp(){
     <div class="hdr-row">
       <div><h1>Supreme Limra Society</h1><p>${ADDR_A}</p></div>
       <div class="hdr-icons">
-        <button class="icon-btn" data-action="tab" data-tab="settings" title="Settings">⚙️</button>
+        <button class="icon-btn" data-action="manual-sync" title="Sync from cloud" style="font-size:13px">🔄</button><button class="icon-btn" data-action="tab" data-tab="settings" title="Settings">⚙️</button>
         <button class="icon-btn" data-action="logout" title="Logout">🔒</button>
       </div>
     </div>
@@ -2022,6 +2067,24 @@ function generateFlatYearStatement(flat,bills,year){
   doc.setFont('helvetica','italic');doc.setFontSize(8);doc.setTextColor(120,100,60);
   doc.text('Computer Generated Statement — Supreme Limra Society — '+year,W/2,y,{align:'center'});
   return doc;
+}
+
+function updateSyncBadge(){
+  const el=document.getElementById('sync-badge');
+  if(!el)return;
+  if(FB_READY&&_fbAuth&&_fbAuth.currentUser){
+    el.innerHTML='🟢 Live';
+    el.style.background='rgba(26,127,55,.3)';
+    el.style.color='#5dff9a';
+  } else if(FB_READY){
+    el.innerHTML='🟡 Syncing...';
+    el.style.background='rgba(201,147,42,.2)';
+    el.style.color='#ffd082';
+  } else {
+    el.innerHTML='🔴 Offline';
+    el.style.background='rgba(192,57,43,.2)';
+    el.style.color='#ff8080';
+  }
 }
 
 function render(){
