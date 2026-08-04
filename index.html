@@ -2314,7 +2314,9 @@ document.addEventListener('click',function(e){
     const pin=document.getElementById('pin-input')?.value||'';
     const btn=e.target.closest('[data-action="do-pin-login"]');
     if(DB.doLogin(pin)){
-      if(btn){btn.textContent='Loading…';btn.disabled=true;}
+      // Show app immediately with cached local data
+      render();
+      // Load Firebase data in background
       (async()=>{await loadData();render();})();
     } else {
       const err=document.getElementById('pin-err');
