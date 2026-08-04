@@ -265,18 +265,35 @@ const DB={
   saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
   saveExpenses(e){this.lset("slimra_expenses_v1",e);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("expenses").set({list:e,updated:new Date().toISOString()}).catch(()=>{});},
   subscribeChanges(onF,onB){
-    if(!FB_READY||!_fbFS)return;
-    // Real-time listeners — always update data, only render when no modal open
-    _fbFS.collection("society").doc("flats").onSnapshot(s=>{
-      if(s.exists){const d=s.data().list;this.lset("slimra_flats_v3",d);S.flats=d;if(!S.modal)render();}
-    });
-    _fbFS.collection("society").doc("bills").onSnapshot(s=>{
-      if(s.exists){const d=s.data().list;this.lset("slimra_bills_v2",d);S.bills=d;if(!S.modal)render();}
-    });
-    _fbFS.collection("society").doc("expenses").onSnapshot(s=>{
-      if(s.exists){const d=s.data().list;this.lset("slimra_expenses_v1",d);S.expenses=d;if(!S.modal)render();}
-    });
-    console.log("Real-time listeners attached ✓");
+    // Keep onSnapshot as primary real-time sync
+    if(!FB_READY||!_fbFS||!_fbAuth?.currentUser)return;
+    try{
+      _fbFS.collection("society").doc("flats").onSnapshot(s=>{
+        if(!s||!s.exists)return;
+        const d=s.data().list;
+        if(JSON.stringify(d)!==JSON.stringify(S.flats)){
+          this.lset("slimra_flats_v3",d);S.flats=d;
+          if(!S.modal){render();updateSyncBadge();}
+        }
+      },err=>console.log("Flats listener err:",err));
+      _fbFS.collection("society").doc("bills").onSnapshot(s=>{
+        if(!s||!s.exists)return;
+        const d=s.data().list;
+        if(JSON.stringify(d)!==JSON.stringify(S.bills)){
+          this.lset("slimra_bills_v2",d);S.bills=d;
+          if(!S.modal){render();updateSyncBadge();}
+        }
+      },err=>console.log("Bills listener err:",err));
+      _fbFS.collection("society").doc("expenses").onSnapshot(s=>{
+        if(!s||!s.exists)return;
+        const d=s.data().list;
+        if(JSON.stringify(d)!==JSON.stringify(S.expenses||[])){
+          this.lset("slimra_expenses_v1",d);S.expenses=d;
+          if(!S.modal){render();updateSyncBadge();}
+        }
+      },err=>console.log("Expenses listener err:",err));
+      console.log("onSnapshot listeners attached ✓");
+    }catch(e){console.log("Listener setup failed:",e);}
   }
 };
 const LS=DB;
@@ -379,44 +396,81 @@ const S={
 };
 
 async function loadData(){
+  // 1. Show localStorage data immediately (instant)
+  const lf=DB.lget("slimra_flats_v3");
+  const lb=DB.lget("slimra_bills_v2");
+  const le=DB.lget("slimra_expenses_v1");
+  if(lf&&lf.length){S.flats=lf;S.bills=lb||[];S.expenses=le||[];render();}
+
+  // 2. Init Firebase
   initFirebase();
-  // Wait for Firebase anonymous auth (up to 5 seconds)
-  if(FB_READY&&_fbAuth){
-    let w=0;
-    while(!_fbAuth.currentUser&&w<5000){
-      await new Promise(r=>setTimeout(r,300));w+=300;
-    }
+
+  // 3. Wait for Firebase SDK to be ready (max 4 sec)
+  let waited=0;
+  while((!FB_READY||typeof firebase==='undefined')&&waited<4000){
+    await new Promise(r=>setTimeout(r,200));waited+=200;
   }
-  const{flats,bills,expenses,source}=await DB.load();
-  S.flats=flats||JSON.parse(JSON.stringify(INIT_FLATS));
-  S.bills=bills||[];S.expenses=expenses||[];
-  if(source==="firebase"&&FB_READY){
-    if(!flats||!flats.length){
-      const lf=DB.lget("slimra_flats_v3");
-      if(lf&&lf.length){DB.saveFlats(lf);S.flats=lf;}
-    }
-    // Attach real-time listeners for live sync between devices
-    DB.subscribeChanges(()=>{},()=>{});
-    // Polling fallback — refresh from Firebase every 60s in case listener missed something
-    if(!window._syncPoll){
-      window._syncPoll=setInterval(async()=>{
-        if(!DB.isAuth()||!FB_READY||!_fbFS||!_fbAuth?.currentUser)return;
-        try{
-          const[fd,bd]=await Promise.all([
-            _fbFS.collection('society').doc('flats').get(),
-            _fbFS.collection('society').doc('bills').get()
-          ]);
-          let changed=false;
-          if(fd.exists){const d=fd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.flats)){S.flats=d;DB.lset('slimra_flats_v3',d);changed=true;}}
-          if(bd.exists){const d=bd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.bills)){S.bills=d;DB.lset('slimra_bills_v2',d);changed=true;}}
-          if(changed&&!S.modal)render();
-        }catch(e){}
-      },60000);
-    }
-  } else {
-    console.warn('Firebase unavailable — using local data');
+  if(!FB_READY){console.warn("Firebase not ready — using local data");return;}
+
+  // 4. Sign in anonymously (retry up to 5 times)
+  let authOk=false;
+  for(let attempt=0;attempt<5;attempt++){
+    if(_fbAuth?.currentUser){authOk=true;break;}
+    try{await _fbAuth.signInAnonymously();authOk=true;break;}
+    catch(e){await new Promise(r=>setTimeout(r,800));}
   }
-  console.log('Loaded:',S.flats.length,'flats',S.bills.length,'bills from',source);
+  if(!authOk){console.warn("Anonymous auth failed — using local data");return;}
+  updateSyncBadge();
+
+  // 5. Fetch fresh data from Firestore
+  try{
+    const[fd,bd,ed]=await Promise.all([
+      _fbFS.collection("society").doc("flats").get(),
+      _fbFS.collection("society").doc("bills").get(),
+      _fbFS.collection("society").doc("expenses").get().catch(()=>({exists:false}))
+    ]);
+    if(fd.exists){const d=fd.data().list;DB.lset("slimra_flats_v3",d);S.flats=d;}
+    if(bd.exists){const d=bd.data().list;DB.lset("slimra_bills_v2",d);S.bills=d;}
+    if(ed.exists){const d=ed.data().list;DB.lset("slimra_expenses_v1",d);S.expenses=d||[];}
+    render();
+    updateSyncBadge();
+    console.log("Firebase load OK:",S.flats.length,"flats",S.bills.length,"bills");
+  }catch(e){console.log("Firebase fetch error:",e);}
+
+  // 6. Attach real-time listeners
+  DB.subscribeChanges(()=>{},()=>{});
+
+  // 7. Poll every 10 seconds as reliable fallback
+  if(window._syncPoll)clearInterval(window._syncPoll);
+  window._syncPoll=setInterval(async()=>{
+    if(!DB.isAuth()||!_fbFS||!_fbAuth?.currentUser||S.modal)return;
+    try{
+      const[fd,bd]=await Promise.all([
+        _fbFS.collection("society").doc("flats").get(),
+        _fbFS.collection("society").doc("bills").get()
+      ]);
+      let changed=false;
+      if(fd.exists){const d=fd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.flats)){S.flats=d;DB.lset("slimra_flats_v3",d);changed=true;}}
+      if(bd.exists){const d=bd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.bills)){S.bills=d;DB.lset("slimra_bills_v2",d);changed=true;}}
+      if(changed){render();updateSyncBadge();console.log("Polled: changes detected ✓");}
+    }catch(e){}
+  },10000);
+
+  // 8. Refresh when app comes back to foreground
+  document.addEventListener("visibilitychange",async()=>{
+    if(document.visibilityState==="visible"&&DB.isAuth()&&_fbFS&&_fbAuth?.currentUser){
+      try{
+        const[fd,bd]=await Promise.all([
+          _fbFS.collection("society").doc("flats").get(),
+          _fbFS.collection("society").doc("bills").get()
+        ]);
+        let changed=false;
+        if(fd.exists){const d=fd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.flats)){S.flats=d;DB.lset("slimra_flats_v3",d);changed=true;}}
+        if(bd.exists){const d=bd.data().list;if(JSON.stringify(d)!==JSON.stringify(S.bills)){S.bills=d;DB.lset("slimra_bills_v2",d);changed=true;}}
+        if(changed&&!S.modal){render();updateSyncBadge();}
+      }catch(e){}
+    }
+  },{once:false});
 }
 function saveFlats(){DB.saveFlats(S.flats);}
 function saveBills(){DB.saveBills(S.bills);}
@@ -1028,6 +1082,8 @@ ${def.length?`<div class="crd"><div class="stt">🔴 Outstanding Dues</div>${def
 function renderSettings(){
   return`<div class="stt">Settings</div>
 <div class="crd">
+  <div id="firebase-status-row" class="set-row" style="cursor:default"><div class="set-icon" style="background:#e0f2fe" id="fb-status-icon">⏳</div><div class="set-info"><div class="set-title" id="fb-status-title">Firebase Sync</div><div class="set-sub" id="fb-status-sub">Checking connection...</div></div><div id="fb-status-badge" style="font-size:10px;padding:2px 7px;border-radius:10px;background:#f0f0f0;color:#888">—</div></div>
+  <div class="set-row" data-action="run-diagnostics"><div class="set-icon" style="background:#eef2ff">🔬</div><div class="set-info"><div class="set-title">Firebase Diagnostics</div><div class="set-sub">Test connection, auth & sync</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="show-install"><div class="set-icon" style="background:#e0f2fe">📲</div><div class="set-info"><div class="set-title">Install as App</div><div class="set-sub">Add to home screen — Android & iPhone</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="open-monthly-excel"><div class="set-icon" style="background:#dcfce7">📊</div><div class="set-info"><div class="set-title">Monthly Excel Report</div><div class="set-sub">Download this month's collection + expenses</div></div><span style="color:var(--mu)">›</span></div>
   <div class="set-row" data-action="export-full-excel"><div class="set-icon" style="background:#fef9c3">📁</div><div class="set-info"><div class="set-title">Full Data Excel Export</div><div class="set-sub">All months · all flats · all expenses</div></div><span style="color:var(--mu)">›</span></div>
@@ -2070,21 +2126,108 @@ function generateFlatYearStatement(flat,bills,year){
 }
 
 function updateSyncBadge(){
+  const ok=FB_READY&&_fbAuth&&_fbAuth.currentUser;
   const el=document.getElementById('sync-badge');
-  if(!el)return;
-  if(FB_READY&&_fbAuth&&_fbAuth.currentUser){
-    el.innerHTML='🟢 Live';
-    el.style.background='rgba(26,127,55,.3)';
-    el.style.color='#5dff9a';
-  } else if(FB_READY){
-    el.innerHTML='🟡 Syncing...';
-    el.style.background='rgba(201,147,42,.2)';
-    el.style.color='#ffd082';
-  } else {
-    el.innerHTML='🔴 Offline';
-    el.style.background='rgba(192,57,43,.2)';
-    el.style.color='#ff8080';
+  if(el){
+    if(ok){el.innerHTML='🟢 Live';el.style.background='rgba(26,127,55,.3)';el.style.color='#5dff9a';}
+    else if(FB_READY){el.innerHTML='🟡 Sync...';el.style.background='rgba(201,147,42,.2)';el.style.color='#ffd082';}
+    else{el.innerHTML='🔴 Offline';el.style.background='rgba(192,57,43,.2)';el.style.color='#ff8080';}
   }
+  const icon=document.getElementById('fb-status-icon');
+  const title=document.getElementById('fb-status-title');
+  const sub=document.getElementById('fb-status-sub');
+  const badge=document.getElementById('fb-status-badge');
+  if(icon&&title&&sub&&badge){
+    if(ok){
+      icon.textContent='🟢';title.textContent='Firebase Sync — Connected';
+      sub.textContent='Real-time sync active · '+new Date().toLocaleTimeString('en-IN');
+      badge.textContent='LIVE';badge.style.background='#e6f4ea';badge.style.color='#1a7f37';
+    }else if(FB_READY){
+      icon.textContent='🟡';title.textContent='Firebase Sync — Connecting';
+      sub.textContent='Waiting for anonymous authentication...';
+      badge.textContent='...';badge.style.background='#fff8ea';badge.style.color='#c9932a';
+    }else{
+      icon.textContent='🔴';title.textContent='Firebase Sync — Offline';
+      sub.textContent='No internet. Using local data.';
+      badge.textContent='OFFLINE';badge.style.background='#fee2e2';badge.style.color='#c0392b';
+    }
+  }
+}
+
+async function runFirebaseDiagnostics(){
+  const results=[];
+  const add=(label,ok,detail)=>results.push({label,ok,detail});
+
+  // Test 1: Firebase SDK loaded?
+  add('Firebase SDK',typeof firebase!=='undefined','CDN script loaded');
+
+  // Test 2: Firebase App initialized?
+  add('Firebase App',!!_fbApp,'firebase.initializeApp() called');
+
+  // Test 3: Firebase Auth ready?
+  add('Firebase Auth',!!_fbAuth,'firebase.auth() ready');
+
+  // Test 4: Firestore ready?
+  add('Firestore',!!_fbFS,'firebase.firestore() ready');
+
+  // Test 5: Anonymous auth working?
+  let user=null;
+  try{
+    const cred=await _fbAuth.signInAnonymously();
+    user=cred.user;
+    add('Anonymous Auth',!!user,'UID: '+(user?.uid||'none'));
+  }catch(e){
+    add('Anonymous Auth',false,'ERROR: '+e.code+' — '+e.message);
+  }
+
+  // Test 6: Can we READ from Firestore?
+  try{
+    const doc=await _fbFS.collection('society').doc('flats').get();
+    add('Firestore READ',true,'Exists: '+doc.exists+(doc.exists?' · '+((doc.data()?.list)||[]).length+' flats':''));
+  }catch(e){
+    add('Firestore READ',false,'ERROR: '+e.code+' — '+e.message);
+  }
+
+  // Test 7: Can we WRITE to Firestore?
+  try{
+    await _fbFS.collection('society').doc('_test').set({ts:new Date().toISOString(),test:true});
+    add('Firestore WRITE',true,'Test document written ✓');
+    // Clean up
+    await _fbFS.collection('society').doc('_test').delete().catch(()=>{});
+  }catch(e){
+    add('Firestore WRITE',false,'ERROR: '+e.code+' — '+e.message);
+  }
+
+  // Test 8: Bills data in Firebase?
+  try{
+    const doc=await _fbFS.collection('society').doc('bills').get();
+    const count=doc.exists?(doc.data()?.list||[]).length:0;
+    add('Bills in Firebase',doc.exists,'Count: '+count+' bills');
+  }catch(e){
+    add('Bills in Firebase',false,'ERROR: '+e.code);
+  }
+
+  // Show results in modal
+  const rows=results.map(r=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f0ebe0">
+      <span style="font-size:16px;flex-shrink:0">${r.ok?'✅':'❌'}</span>
+      <div>
+        <div style="font-weight:600;font-size:13px;color:${r.ok?'var(--gr)':'var(--re)'}">${r.label}</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:2px">${r.detail}</div>
+      </div>
+    </div>`).join('');
+
+  const allOk=results.every(r=>r.ok);
+  document.getElementById('root').innerHTML+=`
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:flex-end">
+      <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:80vh;overflow-y:auto">
+        <div style="font-family:var(--serif);font-size:20px;font-weight:700;color:var(--n);margin-bottom:4px">🔬 Firebase Diagnostics</div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:14px">${allOk?'✅ All tests passed — sync should work':'❌ Some tests failed — see details below'}</div>
+        ${rows}
+        <button onclick="this.parentElement.parentElement.remove()" 
+          style="width:100%;margin-top:14px;padding:12px;background:var(--n);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">Close</button>
+      </div>
+    </div>`;
 }
 
 function render(){
@@ -2483,6 +2626,7 @@ document.addEventListener('click',function(e){
   }
   if(a==='del-expense'){if(!confirm('Delete this expense?'))return;S.expenses=(S.expenses||[]).filter(e=>e.id!==id);saveExpenses();showToast('Expense deleted');render();return;}
   if(a==='gen-monthly-excel'||a==='open-monthly-excel'){openMonthlyExcelModal();return;}
+  if(a==='run-diagnostics'){runFirebaseDiagnostics();return;}
   if(a==='show-install'){S.modal={type:'installGuide'};render();return;}
   if(a==='export-full-excel'){generateFullDataExcel();return;}
   if(a==='gen-defaulter-pdf'){generateDefaulterPDF();return;}
