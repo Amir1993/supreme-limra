@@ -34,6 +34,7 @@
 <title>Supreme Limra Society</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -205,10 +206,10 @@ if(!IS_AUTHORIZED){
 
 
 
-const FIREBASE_CFG={apiKey:"AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",authDomain:"supreme-limra.firebaseapp.com",projectId:"supreme-limra",storageBucket:"supreme-limra.firebasestorage.app",messagingSenderId:"765570470191",appId:"1:765570470191:web:fc13de371e46977eff91da"};
+const FIREBASE_CFG={apiKey:"AIzaSyA0FDifdrv627cD4Sg1-BerrxJ1ytn0xHg",authDomain:"supreme-limra.firebaseapp.com",projectId:"supreme-limra",storageBucket:"supreme-limra.firebasestorage.app",messagingSenderId:"765570470191",appId:"1:765570470191:web:fc13de371e46977eff91da",databaseURL:"https://supreme-limra-default-rtdb.firebaseio.com"};
 const SOCIETY_EMAIL="aamir2027@gmail.com";
 const FB_READY=FIREBASE_CFG.apiKey&&FIREBASE_CFG.apiKey.length>5;
-let _fbApp=null,_fbAuth=null,_fbFS=null,_fbST=null;
+let _fbApp=null,_fbAuth=null,_fbFS=null,_fbST=null,_fbDB=null;
 
 function initFirebase(){
   if(!FB_READY||_fbApp)return;
@@ -216,6 +217,7 @@ function initFirebase(){
   try{
     _fbApp=firebase.initializeApp(FIREBASE_CFG);
     _fbAuth=firebase.auth();_fbFS=firebase.firestore();_fbST=firebase.storage();
+    if(typeof firebase.database!=='undefined'){try{_fbDB=firebase.database();}catch(e){}}
     _fbFS.enablePersistence({synchronizeTabs:true}).catch(()=>{});
     // Auto sign-in so Firestore auth rules pass
     _fbAuth.signInAnonymously().catch(()=>{});
@@ -261,9 +263,9 @@ const DB={
     }
     return{flats:this.lget("slimra_flats_v3")||JSON.parse(JSON.stringify(INIT_FLATS)),bills:this.lget("slimra_bills_v2")||[],expenses:this.lget("slimra_expenses_v1")||[],source:"local"};
   },
-  saveFlats(f){this.lset("slimra_flats_v3",f);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("flats").set({list:f,updated:new Date().toISOString()}).catch(()=>{});},
-  saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(()=>{});},
-  saveExpenses(e){this.lset("slimra_expenses_v1",e);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("expenses").set({list:e,updated:new Date().toISOString()}).catch(()=>{});},
+  saveFlats(f){this.lset("slimra_flats_v3",f);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("flats").set({list:f,updated:new Date().toISOString()}).catch(e=>{}).catch(()=>{});},
+  saveBills(b){this.lset("slimra_bills_v2",b);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("bills").set({list:b,updated:new Date().toISOString()}).catch(e=>{}).catch(()=>{});},
+  saveExpenses(e){this.lset("slimra_expenses_v1",e);if(FB_READY&&_fbFS&&_fbAuth?.currentUser)_fbFS.collection("society").doc("expenses").set({list:e,updated:new Date().toISOString()}).catch(e2=>{}).catch(()=>{});},
   subscribeChanges(onF,onB){
     // Keep onSnapshot as primary real-time sync
     if(!FB_READY||!_fbFS||!_fbAuth?.currentUser)return;
@@ -292,10 +294,41 @@ const DB={
           if(!S.modal){render();updateSyncBadge();}
         }
       },err=>console.log("Expenses listener err:",err));
-      console.log("onSnapshot listeners attached ✓");
-    }catch(e){console.log("Listener setup failed:",e);}
+      console.log("Firestore onSnapshot listeners attached ✓");
+    }catch(e){console.log("Firestore listener setup failed:",e);}
   }
 };
+// RTDB real-time listeners (works without Firestore rules)
+function subscribeRTDB(){
+    if(!_fbDB)return;
+    try{
+      _fbDB.ref("society/flats").on("value",s=>{
+        if(!s.exists())return;
+        const d=s.val().list;
+        if(JSON.stringify(d)!==JSON.stringify(S.flats)){
+          DB.lset("slimra_flats_v3",d);S.flats=d;
+          if(!S.modal){render();updateSyncBadge();}
+        }
+      });
+      _fbDB.ref("society/bills").on("value",s=>{
+        if(!s.exists())return;
+        const d=s.val().list;
+        if(JSON.stringify(d)!==JSON.stringify(S.bills)){
+          DB.lset("slimra_bills_v2",d);S.bills=d;
+          if(!S.modal){render();updateSyncBadge();}
+        }
+      });
+      _fbDB.ref("society/expenses").on("value",s=>{
+        if(!s.exists())return;
+        const d=s.val()?.list;
+        if(d&&JSON.stringify(d)!==JSON.stringify(S.expenses||[])){
+          DB.lset("slimra_expenses_v1",d);S.expenses=d;
+          if(!S.modal){render();updateSyncBadge();}
+        }
+      });
+      console.log("RTDB real-time listeners attached ✓");
+    }catch(e){console.log("RTDB listener error:",e);}
+  }
 const LS=DB;
 
 // ════════════════════════════════════════════════════
@@ -422,20 +455,36 @@ async function loadData(){
   if(!authOk){console.warn("Anonymous auth failed — using local data");return;}
   updateSyncBadge();
 
-  // 5. Fetch fresh data from Firestore
-  try{
-    const[fd,bd,ed]=await Promise.all([
-      _fbFS.collection("society").doc("flats").get(),
-      _fbFS.collection("society").doc("bills").get(),
-      _fbFS.collection("society").doc("expenses").get().catch(()=>({exists:false}))
-    ]);
-    if(fd.exists){const d=fd.data().list;DB.lset("slimra_flats_v3",d);S.flats=d;}
-    if(bd.exists){const d=bd.data().list;DB.lset("slimra_bills_v2",d);S.bills=d;}
-    if(ed.exists){const d=ed.data().list;DB.lset("slimra_expenses_v1",d);S.expenses=d||[];}
-    render();
-    updateSyncBadge();
-    console.log("Firebase load OK:",S.flats.length,"flats",S.bills.length,"bills");
-  }catch(e){console.log("Firebase fetch error:",e);}
+  // 5. Try Realtime Database first (open rules by default), then Firestore
+  let loaded=false;
+  if(_fbDB){
+    try{
+      const[fs,bs,es]=await Promise.all([
+        _fbDB.ref("society/flats").get(),
+        _fbDB.ref("society/bills").get(),
+        _fbDB.ref("society/expenses").get().catch(()=>({exists:()=>false,val:()=>null}))
+      ]);
+      if(fs.exists()){const d=fs.val().list;DB.lset("slimra_flats_v3",d);S.flats=d;loaded=true;}
+      if(bs.exists()){const d=bs.val().list;DB.lset("slimra_bills_v2",d);S.bills=d;loaded=true;}
+      if(es&&es.exists&&es.exists()){const d=es.val()?.list;if(d){DB.lset("slimra_expenses_v1",d);S.expenses=d;}}
+      if(loaded){render();updateSyncBadge();console.log("RTDB load OK ✓");}
+    }catch(e){console.log("RTDB load error:",e);}
+  }
+  if(!loaded){
+    // Fallback: try Firestore
+    try{
+      const[fd,bd,ed]=await Promise.all([
+        _fbFS.collection("society").doc("flats").get(),
+        _fbFS.collection("society").doc("bills").get(),
+        _fbFS.collection("society").doc("expenses").get().catch(()=>({exists:false}))
+      ]);
+      if(fd.exists){const d=fd.data().list;DB.lset("slimra_flats_v3",d);S.flats=d;}
+      if(bd.exists){const d=bd.data().list;DB.lset("slimra_bills_v2",d);S.bills=d;}
+      if(ed.exists){const d=ed.data().list;DB.lset("slimra_expenses_v1",d);S.expenses=d||[];}
+      render();updateSyncBadge();
+      console.log("Firestore load OK ✓");
+    }catch(e){console.log("Firestore also failed:",e);}
+  }
 
   // 6. Attach real-time listeners
   DB.subscribeChanges(()=>{},()=>{});
@@ -2198,6 +2247,15 @@ async function runFirebaseDiagnostics(){
     add('Firestore WRITE',false,'ERROR: '+e.code+' — '+e.message);
   }
 
+  // Test 7b: Realtime Database
+  try{
+    if(_fbDB){
+      const snap=await _fbDB.ref("society/bills").get();
+      add('Realtime DB READ',true,'Exists: '+snap.exists()+' · '+(snap.exists()?(snap.val()?.list||[]).length+' bills':'no data'));
+    } else {
+      add('Realtime DB',false,'Not initialized — check databaseURL config');
+    }
+  }catch(e){add('Realtime DB READ',false,'ERROR: '+e.code+' — '+e.message);}
   // Test 8: Bills data in Firebase?
   try{
     const doc=await _fbFS.collection('society').doc('bills').get();
