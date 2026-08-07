@@ -2627,32 +2627,10 @@ document.addEventListener('click',function(e){
     const b=S.bills.find(x=>x.id===id)||S.modal?.data;
     if(!b)return;
     const f=flatOf(b);
-
-    // Option 1: Already have Firebase PDF link → best quality (no compression)
-    if(S._pdfUrl){
-      goToWA(f.mobile,waRcptWithLink(f,b,S._pdfUrl));
-      showToast('Opening WhatsApp with PDF link ✓','wa');
-      return;
-    }
-
-    // Option 2: Upload PDF to Firebase Storage → get link → send link
-    if(FB_READY&&_fbST&&_fbAuth?.currentUser){
-      showToast('Preparing PDF link...','ok');
-      uploadReceiptAndGetLink(b,f).then(url=>{
-        if(url){
-          S._pdfUrl=url;
-          goToWA(f.mobile,waRcptWithLink(f,b,url));
-          showToast('Opening WhatsApp with PDF link ✓','wa');
-        } else {
-          // Option 3: Share PDF file via share sheet
-          shareReceiptOnWA(b,f);
-        }
-      }).catch(()=>shareReceiptOnWA(b,f));
-      return;
-    }
-
-    // Option 3: Share PDF file directly via share sheet
-    shareReceiptOnWA(b,f);
+    if(!f.mobile){showToast('No mobile number for this flat','err');return;}
+    // Send receipt details as WhatsApp text message — instant & reliable
+    goToWA(f.mobile,waRcpt(f,b));
+    showToast('Opening WhatsApp…','wa');
     return;
   }
   if(a==='bulk-wa'){
