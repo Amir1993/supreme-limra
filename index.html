@@ -39,7 +39,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -678,68 +677,39 @@ function ensureJsPDF(){
 
 async function shareReceiptOnWA(bill, flat) {
   const text = waRcpt(flat, bill);
-  showToast('Preparing receipt image…','wa');
 
-  // ── Capture receipt preview as PNG image ──────────────────────────────
-  // The .rct-p element is currently visible in the receipt modal
-  const receiptEl = document.querySelector('.rct-p');
-
-  if(receiptEl && typeof html2canvas === 'function'){
-    try{
-      // Capture the receipt HTML element as a high-quality PNG
-      const canvas = await html2canvas(receiptEl,{
-        scale:2,                     // 2x for crisp quality
-        useCORS:true,
-        backgroundColor:'#ffffff',
-        logging:false,
-        removeContainer:true
-      });
-
-      // Convert canvas to PNG blob
-      const blob = await new Promise(r=>canvas.toBlob(r,'image/png',0.97));
-      const imgDataUrl = canvas.toDataURL('image/png',0.97);
-      const imgFile = new File([blob],'Receipt_'+bill.receiptNo+'_Flat_'+flat.flatNo+'.png',{type:'image/png'});
-
-      // ── Try 1: Web Share API with image file (1-tap on HTTPS / some local setups)
-      if(navigator.canShare && navigator.canShare({files:[imgFile]})){
-        try{
-          await navigator.share({files:[imgFile],title:'Receipt #'+bill.receiptNo,text});
-          return; // SUCCESS — share sheet opened with image
-        }catch(e){
-          if(e.name==='AbortError')return; // user cancelled share sheet
-        }
-      }
-
-      // ── Try 2: Also try PDF alongside (belt & suspenders on HTTPS)
-      const pdfLoaded = await ensureJsPDF();
-      if(pdfLoaded){
-        const doc = buildReceiptPDF(bill,flat);
+  // Priority 1: Send PDF file (best quality, no WhatsApp compression)
+  ensureJsPDF().then(loaded=>{
+    if(loaded){
+      try{
+        const doc = buildReceiptPDF(bill, flat);
         if(doc){
-          const pdfBlob = doc.output('blob');
-          const pdfFile = new File([pdfBlob],'Receipt_'+bill.receiptNo+'.pdf',{type:'application/pdf'});
-          if(navigator.canShare && navigator.canShare({files:[pdfFile]})){
-            try{
-              await navigator.share({files:[pdfFile],title:'Receipt #'+bill.receiptNo,text});
-              return;
-            }catch(e){if(e.name==='AbortError')return;}
+          const blob = doc.output('blob');
+          const file = new File([blob],
+            'Receipt_'+bill.receiptNo+'_Flat'+String(flat.flatNo).replace(/[/]/g,'_')+'.pdf',
+            {type:'application/pdf'}
+          );
+          // Try native share with PDF
+          if(navigator.canShare && navigator.canShare({files:[file]})){
+            navigator.share({
+              files:[file],
+              title:'Receipt #'+bill.receiptNo+' — '+flat.ownerName,
+              text
+            }).then(()=>showToast('Receipt shared ✓','wa'))
+             .catch(e=>{
+               if(e.name==='AbortError')return;
+               // User didn't pick WhatsApp — fallback to direct WA
+               openWA(flat.mobile, text);
+             });
+            return;
           }
         }
-      }
-
-      // ── Fallback: Show image in modal — user long-presses to save then shares
-      if(S._lastImgUrl) try{URL.revokeObjectURL(S._lastImgUrl);}catch(err){}
-      S._lastImgUrl = URL.createObjectURL(blob);
-      S.modal = {type:'imgGuide', data:{bill,flat,imgDataUrl,text}};
-      render();
-      return;
-
-    }catch(err){
-      console.log('html2canvas error:',err);
+      }catch(e){console.log('PDF share error:',e);}
     }
-  }
-
-  // ── Ultimate fallback: text-only WhatsApp ─────────────────────────────
-  if(flat.mobile) openWA(flat.mobile, text);
+    // Fallback: WhatsApp text message
+    if(flat.mobile) openWA(flat.mobile, text);
+    else showToast('No mobile number for this flat','err');
+  });
 }
 
 async function sendBillOnWA(bill, flat) {
@@ -2288,6 +2258,20 @@ async function runFirebaseDiagnostics(){
     </div>`;
 }
 
+async function uploadReceiptAndGetLink(bill, flat){
+  if(!FB_READY||!_fbST||!_fbAuth?.currentUser)return null;
+  try{
+    const doc=buildReceiptPDF(bill,flat);
+    if(!doc)return null;
+    const blob=doc.output('blob');
+    const path='receipts/Receipt_'+bill.receiptNo+'_Flat'+String(flat.flatNo).replace(/[/]/g,'_')+'.pdf';
+    const ref=_fbST.ref(path);
+    await ref.put(blob,{contentType:'application/pdf'});
+    const url=await ref.getDownloadURL();
+    return url;
+  }catch(e){console.log('Upload error:',e);return null;}
+}
+
 function render(){
   document.getElementById('root').innerHTML=LS.isAuth()?renderApp():renderLogin();
 }
@@ -2640,11 +2624,37 @@ document.addEventListener('click',function(e){
   if(a==='wa-bill'){const b=S.bills.find(x=>x.id===id);if(b){const f=flatOf(b);goToWA(f.mobile,waMsg(f,b));showToast('Opening WhatsApp…','wa');}return;}
   if(a==='wa-open-now'){const b=S.bills.find(x=>x.id===id)||S.modal?.data?.bill;if(b){const f=flatOf(b);S.modal=null;render();setTimeout(()=>{openWA(f.mobile,waRcpt(f,b));},300);}return;}
   if(a==='wa-rcpt'){
-    // Best quality: use Firebase PDF download link (no WhatsApp compression)
+    const b=S.bills.find(x=>x.id===id)||S.modal?.data;
+    if(!b)return;
+    const f=flatOf(b);
+
+    // Option 1: Already have Firebase PDF link → best quality (no compression)
     if(S._pdfUrl){
-      const b2=S.bills.find(x=>x.id===id)||S.modal?.data;
-      if(b2){const f2=flatOf(b2);goToWA(f2.mobile,waRcptWithLink(f2,b2,S._pdfUrl));showToast('Opening WhatsApp with PDF link ✓','wa');return;}
-    }const b=S.bills.find(x=>x.id===id)||S.modal?.data;if(b){const f=flatOf(b);shareReceiptOnWA(b,f);}return;}
+      goToWA(f.mobile,waRcptWithLink(f,b,S._pdfUrl));
+      showToast('Opening WhatsApp with PDF link ✓','wa');
+      return;
+    }
+
+    // Option 2: Upload PDF to Firebase Storage → get link → send link
+    if(FB_READY&&_fbST&&_fbAuth?.currentUser){
+      showToast('Preparing PDF link...','ok');
+      uploadReceiptAndGetLink(b,f).then(url=>{
+        if(url){
+          S._pdfUrl=url;
+          goToWA(f.mobile,waRcptWithLink(f,b,url));
+          showToast('Opening WhatsApp with PDF link ✓','wa');
+        } else {
+          // Option 3: Share PDF file via share sheet
+          shareReceiptOnWA(b,f);
+        }
+      }).catch(()=>shareReceiptOnWA(b,f));
+      return;
+    }
+
+    // Option 3: Share PDF file directly via share sheet
+    shareReceiptOnWA(b,f);
+    return;
+  }
   if(a==='bulk-wa'){
     const pend=S.bills.filter(b=>b.month===S.bf.month&&b.year===S.bf.year&&b.status==='pending'&&flatOf(b).mobile);
     if(!pend.length){showToast('No pending bills with mobile numbers','err');return;}
