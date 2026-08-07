@@ -2316,8 +2316,25 @@ document.addEventListener('click',function(e){
     if(DB.doLogin(pin)){
       // Show app immediately with cached local data
       render();
-      // Load Firebase data in background
-      (async()=>{await loadData();render();})();
+      // Fetch fresh data from Firebase quickly (already initialized)
+      (async()=>{
+        try{
+          if(FB_READY&&_fbFS&&_fbAuth?.currentUser){
+            // Already connected — just fetch
+            const[fd,bd]=await Promise.all([
+              _fbFS.collection('society').doc('flats').get(),
+              _fbFS.collection('society').doc('bills').get()
+            ]);
+            if(fd.exists){S.flats=fd.data().list;DB.lset('slimra_flats_v3',S.flats);}
+            if(bd.exists){S.bills=bd.data().list;DB.lset('slimra_bills_v2',S.bills);}
+            render();
+          } else {
+            // Not yet connected — run full loadData
+            await loadData();
+            render();
+          }
+        }catch(e){console.log('Post-login fetch:',e);}
+      })();
     } else {
       const err=document.getElementById('pin-err');
       if(err){err.textContent='Wrong PIN. Try again.';setTimeout(()=>{err.textContent='';},2000);}
