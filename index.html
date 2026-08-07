@@ -556,85 +556,122 @@ function buildReceiptPDF(bill, flat) {
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'p',unit:'mm',format:[148,210]});
   const W=148,mx=6,rw=136;let y=6;
+
+  // Outer border
   doc.setLineWidth(1.2);doc.setDrawColor(15,32,64);doc.rect(mx,y,rw,196);
-  // Inner accent border
+  // Inner gold accent border
   doc.setLineWidth(0.3);doc.setDrawColor(201,147,42);doc.rect(mx+2,y+2,rw-4,192);
-  // Navy header
-  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,26,'F');
+
+  // ── Navy header ──────────────────────────────────────────────────────────
+  doc.setFillColor(15,32,64);doc.rect(mx,y,rw,28,'F');
+  // Society name
   doc.setFont('helvetica','bold');doc.setFontSize(20);doc.setTextColor(255,255,255);
   doc.text('SUPREME LIMRA',W/2,y+10,{align:'center'});
+  // Address
   doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(201,147,42);
   doc.text('Sr. No. 15, Inaam Nagar, Kondhwa Khurd, Pune - 411048',W/2,y+17,{align:'center'});
-  doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setCharSpace(1.5);
-  doc.text('MAINTENANCE RECEIPT',W/2,y+23,{align:'center'});doc.setCharSpace(0);
-  doc.setFillColor(201,147,42);doc.rect(mx,y+26,rw,1.5,'F');y+=29;
-  // Right boxes — ALL backgrounds first
-  const R=mx+rw,bx=R-30,bw=29;
+  // "MAINTENANCE RECEIPT" — no charSpace, centered properly
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(201,147,42);
+  doc.setCharSpace(0);
+  doc.text('✦  MAINTENANCE RECEIPT  ✦',W/2,y+24,{align:'center'});
+
+  // Gold bar
+  doc.setFillColor(201,147,42);doc.rect(mx,y+28,rw,1.5,'F');
+  y+=31;
+
+  // ── Receipt No. + Date boxes (right side) ────────────────────────────────
+  const R=mx+rw,bx=R-32,bw=31;
+
+  // Receipt No box (height 18)
   doc.setFillColor(245,240,230);doc.setDrawColor(200,190,170);doc.setLineWidth(0.3);
-  doc.rect(bx,y,bw,17,'F');doc.rect(bx,y,bw,17);
-  doc.rect(bx,y+19,bw,13,'F');doc.rect(bx,y+19,bw,13);
+  doc.rect(bx,y,bw,18,'FD');
   doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(130,130,130);
-  doc.text('RECEIPT NO.',bx+bw/2,y+4.5,{align:'center'});
-  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(15,32,64);
-  doc.text(String(bill.receiptNo||''),bx+bw/2,y+13,{align:'center'});
+  doc.text('RECEIPT NO.',bx+bw/2,y+5,{align:'center'});
+  doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(15,32,64);
+  doc.text(String(bill.receiptNo||'0001'),bx+bw/2,y+14,{align:'center'});
+
+  // Date box (height 15, gap of 2)
+  doc.setFillColor(245,240,230);doc.setDrawColor(200,190,170);doc.setLineWidth(0.3);
+  doc.rect(bx,y+20,bw,15,'FD');
   doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(130,130,130);
-  doc.text('DATE',bx+bw/2,y+23,{align:'center'});
+  doc.text('DATE',bx+bw/2,y+25,{align:'center'});
   doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(15,32,64);
-  doc.text(bill.paidDate||'',bx+bw/2,y+30,{align:'center'});
-  // Left — Name
+  // Format date properly
+  const dateStr=bill.paidDate||new Date().toLocaleDateString('en-IN');
+  doc.text(dateStr,bx+bw/2,y+32,{align:'center'});
+
+  // ── Left — Received from ─────────────────────────────────────────────────
   doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,90,90);
-  doc.text('Received from Mr./Mrs./Ms.',mx+3,y+6);
+  doc.text('Received from Mr./Mrs./Ms.',mx+3,y+7);
   const nw=doc.getTextWidth('Received from Mr./Mrs./Ms. ');
   doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(10,10,10);
-  doc.text(flat.ownerName||'',mx+3+nw,y+6);
-  doc.setLineWidth(0.3);doc.setDrawColor(15,32,64);doc.line(mx+3+nw,y+7.2,bx-2,y+7.2);
-  y+=11;
-  // Left — Flat
+  const ownerName=flat.ownerName||'';
+  doc.text(ownerName,mx+3+nw,y+7);
+  doc.setLineWidth(0.3);doc.setDrawColor(15,32,64);
+  doc.line(mx+3+nw,y+8.5,bx-2,y+8.5);
+
+  // Flat No
   doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(90,90,90);
-  doc.text('Flat No. :',mx+3,y+5);
+  doc.text('Flat No. :',mx+3,y+18);
   const fw=doc.getTextWidth('Flat No. :  ');
   doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(10,10,10);
-  doc.text(flat.flatNo||'',mx+3+fw,y+5);
-  doc.setLineWidth(0.3);doc.setDrawColor(15,32,64);doc.line(mx+3+fw,y+6.2,bx-2,y+6.2);
-  y+=10;
+  doc.text(flat.flatNo||'',mx+3+fw,y+18);
+  doc.setLineWidth(0.3);doc.setDrawColor(15,32,64);
+  doc.line(mx+3+fw,y+19.5,bx-2,y+19.5);
+
+  // On account note
   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(160,160,160);
-  doc.text('On account of the particulars stated below',mx+3,y+2);y+=5;
+  doc.text('On account of the particulars stated below',mx+3,y+27);
+  y+=37;
+
   // Gold divider
   doc.setFillColor(201,147,42);doc.rect(mx,y,rw,0.8,'F');y+=1.5;
-  // Table
+
+  // ── Table ────────────────────────────────────────────────────────────────
   const srW=11,amtW=28,ptW=rw-srW-amtW,hdrH=8,rowH=7;
+
+  // Table header
   doc.setFillColor(15,32,64);doc.rect(mx,y,rw,hdrH,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(255,255,255);
   doc.text('Sr',mx+srW/2,y+5.5,{align:'center'});
   doc.text('Particulars',mx+srW+ptW/2,y+5.5,{align:'center'});
   doc.text('Amount',mx+srW+ptW+amtW/2,y+5.5,{align:'center'});
   y+=hdrH;doc.setLineWidth(0.2);
+
+  // Build item rows
+  const extras=bill.extras||[];
+  const pdfBase=bill.maintenance_base||(extras.length?bill.amount-extras.reduce((s,e)=>s+e.amount,0):bill.amount);
   const itemM=MS[bill.month-1]+'-'+String(bill.year).slice(-2);
-  const pdfExtras=flat?bill.extras||[]:[];
-  const pdfBase=bill.maintenance_base||(pdfExtras.length?bill.amount-pdfExtras.reduce((s,e)=>s+e.amount,0):bill.amount);
   const pdfDefaultLabels=['','Entrance Fees','Interest On Defaulted Dues','Contribution Towards Construction','Lease Rent','Municipal Taxes','Water Charges','Electricity Charges','Parking Charges','Lift Charges','Service Charges','Miscellaneous','Terrace Charge','',''];
-  const pdfRows=[{sr:1,l:'Maintenance Charges',x:itemM,a:pdfBase},...pdfExtras.map((e,i)=>({sr:i+2,l:e.description,a:e.amount}))];
+  const pdfRows=[{sr:1,l:'Maintenance Charges',x:itemM,a:pdfBase},...extras.map((e,i)=>({sr:i+2,l:e.description,a:e.amount}))];
   for(let i=pdfRows.length;i<15;i++){
-    pdfRows.push({sr:i+1,l:pdfExtras.length?'':(pdfDefaultLabels[i]||'')});
+    pdfRows.push({sr:i+1,l:extras.length?'':(pdfDefaultLabels[i]||'')});
   }
+
   pdfRows.slice(0,15).forEach((row,i)=>{
     if(i%2===0){doc.setFillColor(252,250,246);doc.rect(mx,y,rw,rowH,'F');}
-    doc.setDrawColor(180,175,165);
+    doc.setDrawColor(220,215,205);
     doc.rect(mx,y,srW,rowH);doc.rect(mx+srW,y,ptW,rowH);doc.rect(mx+srW+ptW,y,amtW,rowH);
-    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(200,200,200);
+    // Sr number
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(180,180,180);
     doc.text(String(row.sr),mx+srW/2,y+5,{align:'center'});
+    // Description
     if(row.l){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(30,30,30);doc.text(row.l,mx+srW+2,y+5);}
-    if(row.x){const lx=doc.getTextWidth(row.l)+2;doc.setFont('helvetica','bold');doc.setTextColor(15,32,64);doc.setFontSize(8.5);doc.text(row.x,mx+srW+lx+2,y+5);doc.setTextColor(30,30,30);}
+    // Month label (bold, navy)
+    if(row.x){const lx=doc.getTextWidth((row.l||'')+' ');doc.setFont('helvetica','bold');doc.setTextColor(15,32,64);doc.text(row.x,mx+srW+lx+2,y+5);}
+    // Amount
     if(row.a){doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(26,127,55);doc.text(row.a+'/-',mx+srW+ptW+amtW-2,y+5,{align:'right'});}
     y+=rowH;
   });
-  // Total
+
+  // Total row
   doc.setFillColor(15,32,64);doc.rect(mx,y,rw,9,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(255,255,255);
   doc.text('Total',mx+srW+ptW-2,y+6.5,{align:'right'});
   doc.setTextColor(201,147,42);doc.setFontSize(11);
   doc.text(bill.amount+'/-',mx+srW+ptW+amtW-2,y+6.5,{align:'right'});y+=11;
-  // Rs in words
+
+  // Amount in words
   doc.setFillColor(252,250,246);doc.rect(mx,y,rw,9,'F');
   doc.setDrawColor(220,215,205);doc.rect(mx,y,rw,9);
   doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(80,80,80);
@@ -644,18 +681,35 @@ function buildReceiptPDF(bill, flat) {
   doc.text(numToWords(bill.amount),mx+3+wlw,y+6);
   if(bill.paymentMode){doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(100,100,100);doc.text('Mode: '+bill.paymentMode,R-3,y+6,{align:'right'});}
   y+=11;
-  // Footer — navy
+  // Partial payment notice in PDF
+  if(bill.isPartial){
+    doc.setFillColor(255,248,235);doc.rect(mx,y,rw,14,'F');
+    doc.setDrawColor(240,201,106);doc.setLineWidth(0.5);doc.rect(mx,y,rw,14);
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(122,90,16);
+    doc.text('⚠ PARTIAL PAYMENT',mx+3,y+5);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);
+    const paid=bill.amountPaid||bill.amount;
+    const bal=bill.balance||0;
+    doc.setTextColor(26,127,55);doc.text('Paid: Rs.'+paid+'/-',mx+3,y+11);
+    doc.setTextColor(192,57,43);doc.text('Balance Due: Rs.'+bal+'/-',W/2,y+11,{align:'center'});
+    doc.setTextColor(15,32,64);doc.text('Total Bill: Rs.'+bill.amount+'/-',R-3,y+11,{align:'right'});
+    y+=16;
+  }
+
+  // Footer
   doc.setFillColor(15,32,64);doc.rect(mx,y,rw,14,'F');
   doc.setFont('helvetica','bolditalic');doc.setFontSize(8);doc.setTextColor(201,147,42);
-  doc.text('Computer Generated Receipt — No Signature Required',W/2,y+6,{align:'center'});
+  doc.text('✦ Computer Generated Receipt — No Signature Required ✦',W/2,y+6,{align:'center'});
   doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(180,180,180);
-  doc.text('Supreme Limra Society Management  ·  '+new Date().getFullYear()+'  ·  Developed by Amir Nazir Shaikh',W/2,y+11,{align:'center'});
+  doc.text('Supreme Limra Society Management · Developed by Amir Nazir Shaikh',W/2,y+11,{align:'center'});
+
   // PAID watermark
   doc.saveGraphicsState();
-  doc.setGState(new doc.GState({opacity:0.08}));
+  doc.setGState(new doc.GState({opacity:0.07}));
   doc.setFont('helvetica','bold');doc.setFontSize(56);doc.setTextColor(26,127,55);
   doc.text('PAID',W/2,110,{align:'center',angle:40});
   doc.restoreGraphicsState();
+
   return doc;
 }
 
@@ -1291,8 +1345,28 @@ function renderReceipt(bill){
     <span class="rp-wv">${numToWords(bill.amount)}</span>
     ${bill.paymentMode?`<span class="rp-mode">${bill.paymentMode}</span>`:''}
   </div>
-  ${bill.isPartial?`<div style="padding:5px 11px;font-size:10px;background:#fff3e0;border-top:1px solid #f0c96a;color:#7a5a10"><strong>Partial Payment</strong> — Paid: ₹${(bill.amountPaid||bill.amount).toLocaleString('en-IN')} · Balance remaining: ₹${(bill.balance||0).toLocaleString('en-IN')}</div>`:''}
-  ${bill.payNotes?`<div style="padding:5px 11px 6px;font-size:10px;color:#888;background:#faf8f4;border-top:1px solid #e0d9cc"><em>Note: ${esc(bill.payNotes)}</em></div>`:''}
+  ${bill.isPartial?`<div style="background:#fff8ea;border-top:2px solid #f0c96a;padding:10px 14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:10px;font-weight:700;color:#7a5a10;text-transform:uppercase;letter-spacing:.5px">⚠️ Partial Payment</span>
+      <span style="font-size:9px;color:#aaa">Balance pending</span>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <div style="text-align:center;flex:1">
+        <div style="font-size:9px;color:#7a5a10">Amount Paid</div>
+        <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--gr)">₹${(bill.amountPaid||bill.amount).toLocaleString('en-IN')}</div>
+      </div>
+      <div style="width:1px;background:#f0c96a;margin:2px 8px"></div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:9px;color:#7a5a10">Balance Due</div>
+        <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--re)">₹${(bill.balance||0).toLocaleString('en-IN')}</div>
+      </div>
+      <div style="width:1px;background:#f0c96a;margin:2px 8px"></div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:9px;color:#7a5a10">Total Bill</div>
+        <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--n)">₹${bill.amount.toLocaleString('en-IN')}</div>
+      </div>
+    </div>
+  </div>`:''}  ${bill.payNotes?`<div style="padding:5px 11px 6px;font-size:10px;color:#888;background:#faf8f4;border-top:1px solid #e0d9cc"><em>Note: ${esc(bill.payNotes)}</em></div>`:''}
   <div class="rp-footer">
     <div class="rp-footer-main">✦ Computer Generated Receipt — No Signature Required ✦</div>
     <div class="rp-footer-sub">Supreme Limra Society Management · ${new Date().getFullYear()}</div>
