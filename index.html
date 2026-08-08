@@ -681,19 +681,38 @@ function buildReceiptPDF(bill, flat) {
   doc.text(numToWords(bill.amount),mx+3+wlw,y+6);
   if(bill.paymentMode){doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(100,100,100);doc.text('Mode: '+bill.paymentMode,R-3,y+6,{align:'right'});}
   y+=11;
-  // Partial payment notice in PDF
+  // Partial payment — 3 column table matching in-app receipt
   if(bill.isPartial){
-    doc.setFillColor(255,248,235);doc.rect(mx,y,rw,14,'F');
-    doc.setDrawColor(240,201,106);doc.setLineWidth(0.5);doc.rect(mx,y,rw,14);
-    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(122,90,16);
-    doc.text('⚠ PARTIAL PAYMENT',mx+3,y+5);
-    doc.setFont('helvetica','normal');doc.setFontSize(8);
-    const paid=bill.amountPaid||bill.amount;
-    const bal=bill.balance||0;
-    doc.setTextColor(26,127,55);doc.text('Paid: Rs.'+paid+'/-',mx+3,y+11);
-    doc.setTextColor(192,57,43);doc.text('Balance Due: Rs.'+bal+'/-',W/2,y+11,{align:'center'});
-    doc.setTextColor(15,32,64);doc.text('Total Bill: Rs.'+bill.amount+'/-',R-3,y+11,{align:'right'});
-    y+=16;
+    const paid2=bill.amountPaid||bill.amount;
+    const bal2=bill.balance||0;
+    const cw=rw/3;
+    // Header bar
+    doc.setFillColor(122,90,16);doc.rect(mx,y,rw,7,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(255,248,235);
+    doc.text('⚠  PARTIAL PAYMENT',mx+3,y+5);
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(240,201,106);
+    doc.text('Balance pending',R-3,y+5,{align:'right'});
+    y+=7;
+    // 3-column row background
+    doc.setFillColor(255,248,235);doc.rect(mx,y,rw,16,'F');
+    doc.setDrawColor(240,201,106);doc.setLineWidth(0.5);doc.rect(mx,y,rw,16);
+    // Dividers
+    doc.line(mx+cw,y,mx+cw,y+16);
+    doc.line(mx+cw*2,y,mx+cw*2,y+16);
+    // Column labels
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(122,90,16);
+    doc.text('Amount Paid',mx+cw/2,y+5,{align:'center'});
+    doc.text('Balance Due',mx+cw+cw/2,y+5,{align:'center'});
+    doc.text('Total Bill',mx+cw*2+cw/2,y+5,{align:'center'});
+    // Column values
+    doc.setFont('helvetica','bold');doc.setFontSize(10);
+    doc.setTextColor(26,127,55);
+    doc.text('Rs.'+paid2+'/-',mx+cw/2,y+13,{align:'center'});
+    doc.setTextColor(192,57,43);
+    doc.text('Rs.'+bal2+'/-',mx+cw+cw/2,y+13,{align:'center'});
+    doc.setTextColor(15,32,64);
+    doc.text('Rs.'+bill.amount+'/-',mx+cw*2+cw/2,y+13,{align:'center'});
+    y+=18;
   }
 
   // Footer
