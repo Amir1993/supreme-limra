@@ -1,5 +1,5 @@
-// Supreme Limra Society — Service Worker v5
-const CACHE = 'slimra-v5';
+// Supreme Limra Society — Service Worker v6
+const CACHE = 'slimra-v6';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

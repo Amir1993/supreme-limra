@@ -689,7 +689,7 @@ function buildReceiptPDF(bill, flat) {
     // Header bar
     doc.setFillColor(122,90,16);doc.rect(mx,y,rw,7,'F');
     doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(255,248,235);
-    doc.text('⚠  PARTIAL PAYMENT',mx+3,y+5);
+    doc.text('!! PARTIAL PAYMENT',mx+3,y+5);
     doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(240,201,106);
     doc.text('Balance pending',R-3,y+5,{align:'right'});
     y+=7;
